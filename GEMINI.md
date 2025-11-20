@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context & Guidelines
 
 > **Product Vision:** A SaaS-level Intelligent Email Decision System. Not just a client, but an AI cognitive layer converting unstructured email into structured insights and tasks.
-> **Target:** Executives (Decision View) & Managers (Task Loop).
+> **Target:** Executives (Decision View), Managers (Task Loop) & Dealmakers (Radar View).
 
 ## 1. Development Standards (The "Golden Rules")
 
