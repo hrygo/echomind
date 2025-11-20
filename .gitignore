@@ -6,6 +6,13 @@ build/
 # Dependencies
 node_modules/
 vendor/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # Environment variables
 .env
@@ -13,6 +20,7 @@ vendor/
 .env.development.local
 .env.test.local
 .env.production.local
+.env*
 
 # OS Files
 .DS_Store
@@ -44,3 +52,7 @@ next-env.d.ts
 
 # Backend Config (Secrets)
 backend/configs/config.yaml
+
+# Frontend Specific
+*.pem
+.vercel
