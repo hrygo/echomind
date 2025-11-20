@@ -16,7 +16,10 @@
 
 ### 🔄 Workflow & Process
 1.  **TDD First**: Write tests before code. (Red -> Green -> Refactor).
-2.  **Conventional Commits**: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
+2.  **Conventional Commits**: We follow [Conventional Commits](https://www.conventionalcommits.org/) for a standardized commit history. This enhances automated changelog generation, semantic versioning, and code history clarity.
+    *   `feat`: (New Feature) e.g., `feat: add user authentication`
+    *   `fix`: (Bug Fix) e.g., `fix: resolve email sync error`
+    *   `chore`: (Maintenance) e.g., `chore: update Makefile`
 3.  **Frequent Delivery**: Commit often. Release features independently.
 4.  **Semantic Versioning & Release**: 
     *   Update version numbers in `frontend/package.json`, `Makefile`, and `docs/` *before* tagging.
