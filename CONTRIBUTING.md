@@ -21,13 +21,19 @@ Thank you for your interest in contributing to EchoMind! We welcome contribution
 *   **Independent Release**: Once a feature module (and its tests) is complete, it should be considered ready for release.
 *   **Pull Requests**: Keep PRs small and focused. One feature per PR.
 
-## 3. Versioning Strategy
+## 3. Versioning & Release Strategy
 
 *   We use **Semantic Versioning (SemVer)**: `vMajor.Minor.Patch`.
-*   **Patch**: Backward-compatible bug fixes.
-*   **Minor**: Backward-compatible new features.
-*   **Major**: Breaking changes.
-*   Tag your releases using git tags (e.g., `git tag v1.0.1`).
+*   **Pre-Release Checklist**: Before creating a git tag, you MUST update the version number in the following locations:
+    1.  `frontend/package.json` (version field)
+    2.  `Makefile` (if `VERSION` variable exists)
+    3.  `docs/` (if there are specific version references)
+    4.  `backend/cmd/main.go` (if version flag is implemented)
+*   **Process**:
+    1.  Update files.
+    2.  Commit: `chore: bump version to vX.Y.Z`.
+    3.  Tag: `git tag vX.Y.Z`.
+    4.  Push: `git push origin vX.Y.Z`.
 
 ## 4. Coding Standards
 

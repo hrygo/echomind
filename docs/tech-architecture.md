@@ -1,0 +1,91 @@
+# 🏗️ 技术架构详细规范 (Technical Architecture Spec)
+
+## 1. 工程结构 (Monorepo)
+
+采用 Monorepo 模式，严格遵循 GitHub 开源最佳实践。
+
+```text
+/echomind
+├── .github/                 # [Best Practice] GitHub 自动化与协作配置
+│   └── workflows/           # GitHub Actions CI/CD (CI: Test/Lint, CD: Docker Build/Push)
+├── docs/                    # [Best Practice] 项目文档中心
+│   ├── prd.md               # 产品需求文档
+│   ├── tech-architecture.md # 技术架构文档
+│   └── ...
+├── backend/                 # Go 后端服务
+│   ├── cmd/                 # 应用程序入口
+│   │   ├── main.go          # HTTP Server
+│   │   └── worker/          # Async Task Worker
+│   ├── configs/             # 配置文件模板 (config.example.yaml)
+│   ├── internal/            # 私有业务逻辑
+│   │   ├── handler/         # HTTP Handlers (Gin)
+│   │   ├── model/           # Database Models (GORM)
+│   │   ├── service/         # Business Logic & Factory
+│   │   └── tasks/           # Asynq Task Handlers
+│   ├── pkg/                 # 公共库
+│   │   ├── ai/              # AI Providers (OpenAI, Gemini, DeepSeek)
+│   │   └── imap/            # IMAP Connector & Body Parser
+│   └── go.mod
+├── frontend/                # Next.js 前端应用
+│   ├── src/
+│   │   ├── app/             # Next.js App Router
+│   │   ├── components/      # UI 组件库
+│   │   └── hooks/           # Custom React Hooks
+│   └── package.json
+├── deploy/                  # 部署与基础设施
+│   ├── deploy.sh            # 生产部署脚本
+│   ├── docker-compose.yml   # 本地开发编排
+│   └── docker-compose.prod.yml # 生产环境编排
+├── scripts/                 # 工具脚本
+├── .gitignore               # 全局忽略文件
+├── Makefile                 # [Best Practice] 统一任务入口
+├── README.md                # 项目主页
+└── CONTRIBUTING.md          # [Best Practice] 贡献与开发规约
+```
+
+## 2. 后端技术栈 (Go Ecosystem)
+
+*   **Web Framework**: `Gin`
+*   **ORM**: `GORM` (PostgreSQL)
+*   **Config**: `Viper` (Supports YAML & Environment Variables)
+*   **Async Queue**: `Asynq` (Redis-based) - Used for background email analysis tasks.
+*   **AI Engine**: 
+    *   **Architecture**: Adapter Pattern & Factory Pattern.
+    *   **Interface**: `pkg/ai/AIProvider` (Methods: `Summarize`, `Classify`, `AnalyzeSentiment`).
+    *   **Implementations**: 
+        *   `openai`: Uses `go-openai` SDK.
+        *   `gemini`: Uses `generative-ai-go` SDK.
+        *   `deepseek`: Adapts `openai` implementation with custom BaseURL.
+    *   **Configuration**: Prompts are externalized in `config.yaml`.
+*   **Logging**: `Zap` (Structured Logging)
+
+## 3. 自动化工作流 (CI/CD)
+
+*   **CI (GitHub Actions)**:
+    *   **Backend**: Go Mod Tidy, Test (`go test ./...`), Lint.
+    *   **Frontend**: Pnpm Lint, Test (`jest`).
+*   **CD (GitHub Actions)**:
+    *   **Docker**: Multi-stage builds for Backend and Frontend.
+    *   **Registry**: Push images to GitHub Container Registry (GHCR) on `main` branch push.
+    *   **Deploy**: Shell script triggering Docker Compose update.
+
+## 4. 开发规范
+
+*   **Workflow**: TDD (Test-Driven Development).
+*   **Version Control**:
+    *   **Commits**: Frequent, Atomic, Conventional Commits (`feat:`, `fix:`, `chore:`).
+    *   **Releases**: Independent feature releases tagged with Semantic Versioning (`vX.Y.Z`).
+
+## 5. 数据层规范 (Data Layer)
+
+### PostgreSQL Schema
+*   **Naming**: snake_case.
+*   **ID**: UUID/Snowflake.
+*   **Core Entities**:
+    *   `emails`: Stores email metadata, content snippet, and AI insights (`Summary`, `Sentiment`, `Urgency`).
+    *   `contacts`: Stores sender info (`Name`, `Email`) and interaction stats (`InteractionCount`, `LastInteractedAt`).
+    *   `users` (Planned Phase 4): Auth & Tenant isolation.
+
+### Redis Keys
+*   `asynq:{queue}`: Background task queues.
+*   `echomind:cache:{key}`: General caching.

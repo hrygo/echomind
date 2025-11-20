@@ -19,6 +19,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const Version = "0.1.0"
+
 func main() {
 	// Initialize Viper for configuration
 	vip := viper.New()
@@ -38,7 +40,7 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync() // flushes buffer, if any
 	sugar := logger.Sugar()
-	sugar.Infof("Logger initialized")
+	sugar.Infof("Logger initialized. EchoMind Version: %s", Version)
 
 	// Initialize GORM database
 	dsn := vip.GetString("database.dsn")

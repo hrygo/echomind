@@ -2,7 +2,7 @@
 
 **Your external brain for email.**
 
-EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI cognitive layer on top of traditional email services. It reads, understands, classifies, and summarizes emails, transforming unstructured communication into structured insights and tasks for executives and managers.
+EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI cognitive layer on top of traditional email services. It reads, understands, classifies, and summarizes emails, transforming unstructured communication into structured insights and tasks for executives, managers, and dealmakers.
 
 ## 🚀 Features (Current Beta)
 
@@ -13,13 +13,21 @@ EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI co
 *   **Async Processing**: Robust background job processing with Redis & Asynq.
 *   **Modern UI**: Next.js 14 Dashboard with real-time insights.
 
+## 📚 Documentation
+
+*   **[Product Requirements (PRD)](docs/prd.md)**: Detailed product vision, user personas, and functional requirements.
+*   **[System Design](docs/product-design.md)**: High-level system architecture, module breakdown, and UI design.
+*   **[Technical Architecture](docs/tech-architecture.md)**: Database schema, API design, and AI pipeline implementation details.
+*   **[Roadmap](docs/product-roadmap.md)**: Development phases and future plans.
+*   **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, commit standards, and release process.
+
 ## 🛠️ Tech Stack
 
 *   **Backend**: Go (Gin, GORM, Viper, Asynq)
 *   **Frontend**: Next.js 16 (React, Tailwind CSS)
 *   **Database**: PostgreSQL
 *   **Cache/Queue**: Redis
-*   **AI Integration**: Official SDKs for OpenAI & Gemini.
+*   **AI Integration**: Official SDKs for OpenAI, Gemini, and DeepSeek (via Adapter).
 
 ## 🏁 Getting Started
 
@@ -85,6 +93,11 @@ Run backend unit and integration tests:
 make test
 ```
 
+Run frontend tests:
+```bash
+cd frontend && pnpm test
+```
+
 ## 📂 Project Structure
 
 ```text
@@ -96,5 +109,6 @@ make test
 │   └── pkg/           # Public libraries (AI providers, IMAP)
 ├── frontend/          # Next.js Web App
 ├── deploy/            # Docker Compose & DevOps
+├── docs/              # Project Documentation
 └── scripts/           # Utilities
 ```

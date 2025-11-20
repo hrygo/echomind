@@ -2,8 +2,8 @@
 
 | 项目名称 | EchoMind |
 | :--- | :--- |
-| **版本状态** | **Inception (初创)** |
-| **文档状态** | **草稿 / 规划中** |
+| **版本状态** | **v0.1.0 (MVP/Beta)** |
+| **文档状态** | **正式发布** |
 | **产品负责人** | Product Team |
 | **核心 Slogan** | **Your personal Chief of Staff for email. Turn noise into decisions.** <br> (你的专属邮件幕僚长。化噪音为决策。) |
 

@@ -7,40 +7,31 @@
 
 ### 🏗️ Architecture & Structure
 *   **Monorepo**: Root contains `.github`, `docs`, `scripts`, `backend`, `frontend`, `deploy`.
+*   **Documentation**: All architecture/product docs reside in `docs/`. Root contains meta-docs (`README`, `CONTRIBUTING`).
 *   **Backend (Go)**:
-    *   Frameworks: **Gin** (Web), **GORM** (ORM/Postgres), **Asynq** (Queue/Redis), **Viper** (Config), **Zap** (Log).
-    *   Layout: `cmd/` (entry), `internal/` (private logic), `pkg/` (public libs).
-    *   Style: **snake_case** for DB columns/JSON keys. **CamelCase** for Go structs.
+    *   Frameworks: **Gin**, **GORM**, **Asynq**, **Viper**, **Zap**.
+    *   Layout: `cmd/` (entry), `internal/` (private), `pkg/` (public).
 *   **Frontend (Next.js)**:
     *   Stack: **Next.js 16 (App Router)**, **TypeScript**, **Tailwind CSS**, **pnpm**.
-    *   Style: Functional components, Hooks-based state.
-*   **Data Layer**:
-    *   **PostgreSQL**: `snake_case` tables. IDs are UUID/Snowflake.
-    *   **Redis**: Keys prefixed with `echomind:`.
 
 ### 🔄 Workflow & Process
-1.  **TDD First**: Write the test *before* the implementation. (Red -> Green -> Refactor).
+1.  **TDD First**: Write tests before code. (Red -> Green -> Refactor).
 2.  **Conventional Commits**: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
-3.  **Frequent Delivery**: Commit often (atomic commits). Release independent feature modules immediately upon completion.
-4.  **Semantic Versioning**: Follow SemVer (Major.Minor.Patch). Tag releases (e.g., `v1.0.1`) upon module completion.
-5.  **Documentation**: Update `GEMINI.md` (Task Status) and `tech-architecture.md` (System Changes) *before* marking a feature complete.
-6.  **Safety**: Never commit secrets. Use env vars.
+3.  **Frequent Delivery**: Commit often. Release features independently.
+4.  **Semantic Versioning & Release**: 
+    *   Update version numbers in `frontend/package.json`, `Makefile`, and `docs/` *before* tagging.
+    *   Tag releases (vMajor.Minor.Patch).
+5.  **Documentation**: Keep `docs/` updated. Read `GEMINI.md` for context.
+6.  **Safety**: Secrets via Env Vars only.
 
-### 🤖 AI Agent Instructions (Self-Correction)
-*   **Context**: Always read `GEMINI.md` first to understand the current Sprint status.
-*   **Tool Use**: Prefer `run_shell_command` for file ops, `search_file_content` for code lookup.
-*   **Testing**: Always run `go test ./...` (Backend) or `pnpm test` (Frontend) after changes.
+### 🤖 AI Agent Instructions
+*   **Context**: Read `GEMINI.md` first.
+*   **Tool Use**: Use `run_shell_command` for file ops.
+*   **Testing**: Always verify with `make test` (Backend) or `pnpm test` (Frontend).
 
 ---
 
-# 📅 Current Sprint: Verification before Phase 4 (Completed)
-
-**Focus**: Ensure current codebase stability by running all tests.
-
-- [x] **Run all backend tests** (`make test`)
-- [x] **Run all frontend tests** (`cd frontend && pnpm test`)
-
-# 📅 Next Up: Phase 4 - Commercialization & Scaling
+# 📅 Current Sprint: Phase 4 - Commercialization & Scaling
 
 **Focus**: Multi-tenancy, User Authentication, and Payment Integration.
 
