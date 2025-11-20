@@ -11,21 +11,16 @@ Thank you for your interest in contributing to EchoMind! We welcome contribution
 
 ## 2. Commit & PR Guidelines
 
-*   **Conventional Commits**: We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for clear, standardized commit history. This helps with:
-    *   **Automated Changelog Generation**
-    *   **Semantic Versioning Bumping**
-    *   **Easier Codebase Navigation & History Audits**
-    
-    **Types & Examples:**
-    *   `feat`: (New Feature) `feat: add user authentication module`
-    *   `fix`: (Bug Fix) `fix: resolve email sync race condition`
-    *   `docs`: (Documentation Only) `docs: update README with new setup steps`
-    *   `refactor`: (Code Refactoring) `refactor: improve AI provider interface`
-    *   `test`: (Adding Tests) `test: add unit tests for contact service`
-    *   `chore`: (Maintenance/Build) `chore: update Makefile with deploy target`, `chore: bump dependency X`
-    *   `build`: (Build System/Dependencies) `build: add Dockerfile for backend`
-    *   `ci`: (CI Configuration) `ci: configure GitHub Actions for frontend tests`
-*   **Atomic Commits**: Commit often. Each commit should do one thing and do it well. Avoid "mega-commits" to keep history clean and revertible.
+*   **Conventional Commits**: We follow [Conventional Commits](https://www.conventionalcommits.org/).
+    *   Format: `<type>(<scope>): <subject>`
+    *   **Types**:
+        *   `feat`: New feature
+        *   `fix`: Bug fix
+        *   `docs`: Documentation changes
+        *   `refactor`: Code changes without fixing bugs or adding features
+        *   `test`: Adding missing tests
+        *   `chore`: Maintainance tasks (build, ci, deps)
+*   **Atomic Commits**: Commit often. Each commit should do one thing and do it well. Avoid "mega-commits".
 *   **Independent Release**: Once a feature module (and its tests) is complete, it should be considered ready for release, adhering to Semantic Versioning.
 *   **Pull Requests**: Keep PRs small and focused. One logical feature or bug fix per PR.
 
