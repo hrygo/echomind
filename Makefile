@@ -1,17 +1,22 @@
-.PHONY: init run-backend run-frontend docker-up run-worker test lint build clean help
+.PHONY: init run-backend run-frontend docker-up run-worker test lint build clean deploy help
+
+# Variables
+REPO_OWNER ?= your-username
+DB_PASSWORD ?= change-me-in-prod
 
 # Default target
 help:
 	@echo "EchoMind Makefile Commands:"
 	@echo "  make init         - Initialize project (install dependencies)"
-	@echo "  make docker-up    - Start Docker services (Postgres & Redis)"
-	@echo "  make run-backend  - Run the backend API server"
-	@echo "  make run-worker   - Run the backend async worker"
-	@echo "  make run-frontend - Run the frontend development server"
+	@echo "  make docker-up    - Start Local Docker services (Postgres & Redis)"
+	@echo "  make run-backend  - Run the backend API server (Local)"
+	@echo "  make run-worker   - Run the backend async worker (Local)"
+	@echo "  make run-frontend - Run the frontend development server (Local)"
 	@echo "  make test         - Run backend tests"
 	@echo "  make lint         - Run linters (if installed)"
 	@echo "  make build        - Build backend binaries"
 	@echo "  make clean        - Clean build artifacts"
+	@echo "  make deploy       - Deploy using production docker-compose (Requires REPO_OWNER & DB_PASSWORD)"
 
 init:
 	@echo "Initializing backend..."
@@ -20,7 +25,7 @@ init:
 	cd frontend && pnpm install
 
 docker-up:
-	@echo "Bringing up Docker services..."
+	@echo "Bringing up Local Docker services..."
 	cd deploy && docker-compose up -d
 
 run-backend:
@@ -53,3 +58,7 @@ build:
 clean:
 	@echo "Cleaning..."
 	rm -rf bin/
+
+deploy:
+	@echo "Deploying to Production..."
+	@cd deploy && ./deploy.sh $(REPO_OWNER) $(DB_PASSWORD)
