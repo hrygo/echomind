@@ -1,0 +1,72 @@
+services:
+  server:
+    image: ghcr.io/${REPO_OWNER}/echomind-backend:latest
+    container_name: echomind-server
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - ECHOMIND_DATABASE_DSN=host=postgres user=echomind password=${DB_PASSWORD} dbname=echomind_db port=5432 sslmode=disable
+      - ECHOMIND_REDIS_ADDR=redis:6379
+      # Inject AI Keys via .env file on server
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - echomind-net
+
+  worker:
+    image: ghcr.io/${REPO_OWNER}/echomind-backend:latest
+    container_name: echomind-worker
+    restart: always
+    command: ["/app/worker"]
+    environment:
+      - ECHOMIND_DATABASE_DSN=host=postgres user=echomind password=${DB_PASSWORD} dbname=echomind_db port=5432 sslmode=disable
+      - ECHOMIND_REDIS_ADDR=redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - echomind-net
+
+  frontend:
+    image: ghcr.io/${REPO_OWNER}/echomind-frontend:latest
+    container_name: echomind-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=https://api.yourdomain.com # Change for production
+    networks:
+      - echomind-net
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: echomind-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: echomind
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: echomind_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - echomind-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: echomind-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - echomind-net
+
+networks:
+  echomind-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
