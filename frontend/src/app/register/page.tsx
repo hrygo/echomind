@@ -52,7 +52,8 @@ export default function RegisterPage() {
       });
       // Redirect to login on success with a query param to show success message
       router.push('/login?registered=true');
-    } catch (err: AxiosError<AuthErrorResponse>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       setError(
         err.response?.data?.error || 'Registration failed. Please try again.'
       );

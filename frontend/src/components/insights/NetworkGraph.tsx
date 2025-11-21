@@ -7,6 +7,9 @@ interface Node {
   label: string;
   interactionCount: number;
   avgSentiment: number;
+  __bckgDimensions?: [number, number];
+  x?: number;
+  y?: number;
 }
 
 interface Link {
@@ -24,13 +27,15 @@ export default function NetworkGraph() {
   const [graphData, setGraphData] = useState<NetworkGraphData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fgRef = useRef();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fgRef = useRef<any>(null);
 
   useEffect(() => {
     async function fetchGraphData() {
       try {
         const response = await apiClient.get<NetworkGraphData>('/insights/network');
         setGraphData(response.data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Failed to fetch network graph:", err);
         setError(err.response?.data?.error || err.message || 'Failed to fetch network graph.');
@@ -71,7 +76,7 @@ export default function NetworkGraph() {
         nodeId="id"
         nodeLabel={nodeLabel}
         nodeAutoColorBy="label"
-        nodeCanvasObject={(node, ctx, globalScale) => {
+        nodeCanvasObject={(node: Node, ctx, globalScale) => {
           const label = nodeLabel(node as Node);
           const fontSize = 12 / globalScale;
           ctx.font = `${fontSize}px Sans-Serif`;
@@ -79,23 +84,24 @@ export default function NetworkGraph() {
           const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
 
           ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+          ctx.fillRect((node.x || 0) - bckgDimensions[0] / 2, (node.y || 0) - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillStyle = nodeColor(node as Node);
-          ctx.fillText(label, node.x, node.y);
+          ctx.fillText(label, (node.x || 0), (node.y || 0));
 
-          (node as any).__bckgDimensions = bckgDimensions;
+          node.__bckgDimensions = bckgDimensions as [number, number];
         }}
-        nodePointerAreaPaint={(node, color, ctx) => {
+        nodePointerAreaPaint={(node: Node, color, ctx) => {
           ctx.fillStyle = color;
-          const bckgDimensions = (node as any).__bckgDimensions;
-          bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+          const bckgDimensions = node.__bckgDimensions;
+          if (bckgDimensions) {
+            ctx.fillRect((node.x || 0) - bckgDimensions[0] / 2, (node.y || 0) - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+          }
         }}
         linkColor={() => 'rgba(0,0,0,0.2)'}
         linkWidth={link => link.weight * 0.5} // Example: Thicker links for stronger relationships
         enableNodeDrag={true}
-        enableZoomPan={true}
         d3AlphaDecay={0.04} // Slower decay for more stable graph after interactions
         d3VelocityDecay={0.2} // Slower velocity decay for smoother movements
       />

@@ -18,6 +18,7 @@ import (
 	"github.com/hrygo/echomind/pkg/imap"
 	"github.com/hrygo/echomind/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -60,7 +61,9 @@ func TestSyncHandler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to connect to db: %v", err)
 	}
-	db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailAccount{})
+	if err := db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailAccount{}); err != nil {
+		t.Fatalf("Failed to auto migrate database: %v", err)
+	}
 	mockDB := db
 
 	// Create a mock fetcher to satisfy the handler's dependencies
@@ -81,7 +84,7 @@ func TestSyncHandler(t *testing.T) {
 		},
 		CloseFunc: func(c *clientimap.Client) { /* do nothing */ },
 	}
-	syncService := service.NewSyncService(mockDB, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig)
+	syncService := service.NewSyncService(mockDB, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
 
 	// Create an instance of the handler with the service
 	syncHandler := handler.NewSyncHandler(syncService)

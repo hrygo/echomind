@@ -2,6 +2,7 @@ package imap
 
 import (
 	"crypto/tls"
+	"log"
 	
 	"github.com/emersion/go-imap/client"
 )
@@ -25,11 +26,13 @@ func Connect(addr, username, password string, useTLS bool) (*client.Client, erro
 		return nil, err
 	}
 
-	if err := c.Login(username, password); err != nil {
-		c.Logout()
-		return nil, err
-	}
-
+	        if err := c.Login(username, password); err != nil {
+	                // If login fails, try to logout (best effort), then return the login error.
+	                if logoutErr := c.Logout(); logoutErr != nil {
+	                        log.Printf("Error logging out from IMAP after login failure: %v", logoutErr)
+	                }
+	                return nil, err
+	        }
 	return c, nil
 }
 

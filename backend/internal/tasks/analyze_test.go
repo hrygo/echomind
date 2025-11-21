@@ -38,9 +38,10 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}
-	db.AutoMigrate(&model.Email{}, &model.Contact{})
-	return db
-}
+	        if err := db.AutoMigrate(&model.Email{}, &model.Contact{}); err != nil {
+	                                t.Fatalf("Failed to auto migrate database: %v", err)
+	                        }
+	                        return db}
 
 func TestUpdateContactStats_NewContact(t *testing.T) {
 	db := setupTestDB(t)

@@ -60,9 +60,11 @@ func main() {
 	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	logger, _ := config.Build()
-	defer logger.Sync()
-
-	// Replace global logger
+	                defer func() {
+	                        if err := logger.Sync(); err != nil {
+	                                log.Printf("Failed to sync logger: %v", err)
+	                        }
+	                }()	// Replace global logger
 	zap.ReplaceGlobals(logger)
 
 	// Database

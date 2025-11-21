@@ -1,7 +1,7 @@
 {
     "common": {
         "appName": "EchoMind",
-        "appSlogan": "智能邮件助手",
+        "appSlogan": "Your personal Chief of Staff for email. Turn noise into decisions",
         "loading": "加载中...",
         "error": "错误",
         "save": "保存更改",
@@ -12,15 +12,25 @@
         "searchPlaceholder": "搜索邮件、联系人或任务..."
     },
     "sidebar": {
+        "intelligence": "智能驾驶舱",
+        "mailbox": "邮件工作台",
+        "labels": "分类标签",
         "mainMenu": "主菜单",
-        "dashboard": "工作台",
+        "dashboard": "仪表盘",
+        "smartInbox": "重点关注",
+        "actionItems": "待办清单",
+        "network": "人脉网络",
         "inbox": "收件箱",
+        "sent": "已发送",
+        "drafts": "草稿箱",
+        "trash": "已删除",
         "tasks": "任务列表",
         "insights": "智能洞察",
         "smartFolders": "智能分类",
         "work": "工作",
         "personal": "个人",
         "newsletter": "订阅",
+        "finance": "财务",
         "notification": "通知",
         "spam": "垃圾邮件",
         "user": "用户",
@@ -42,7 +52,14 @@
         "actionItems": "待办事项 (Action Items)",
         "smartFollowUp": "智能跟进 (Follow-up)",
         "viewAll": "查看全部任务",
-        "waiting": "等待中"
+        "waiting": "等待中",
+        "aiBriefing": "AI 智能晨报",
+        "greetingMorning": "早上好",
+        "greetingAfternoon": "下午好",
+        "greetingEvening": "晚上好",
+        "executiveSummary": "今日需关注 {riskCount} 封高风险邮件，待决策事项 {decisionCount} 项。",
+        "managerSummary": "您有 {taskCount} 个待办任务，其中 {overdueCount} 个已逾期。",
+        "dealmakerSummary": "AI 捕捉到 {opportunityCount} 个新商机，建议维护 {followUpCount} 个关键关系。"
     },
     "settings": {
         "title": "设置中心",

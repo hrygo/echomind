@@ -47,7 +47,8 @@ export default function LoginPage() {
       const { token, user } = response.data;
       setAuth(token, user);
       router.push('/dashboard'); // Redirect to dashboard after login
-    } catch (err: AxiosError<AuthErrorResponse>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       setError(
         err.response?.data?.error || 'Invalid email or password. Please try again.'
       );

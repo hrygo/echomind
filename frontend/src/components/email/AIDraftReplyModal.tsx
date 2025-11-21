@@ -24,6 +24,7 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
     try {
       const response = await apiClient.post('/ai/draft', { emailContent, userPrompt });
       setDraftReply(response.data.draft);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to generate draft reply.');
     } finally {

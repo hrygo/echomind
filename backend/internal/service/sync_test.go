@@ -14,6 +14,7 @@ import (
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/pkg/imap"
 	"github.com/hrygo/echomind/pkg/utils"
+	"go.uber.org/zap"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -69,8 +70,9 @@ func TestSyncEmails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to connect to db: %v", err)
 	}
-	db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailAccount{}) // Also migrate Contact and EmailAccount models
-
+	        if err := db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailAccount{}); err != nil {
+	                t.Fatalf("Failed to auto migrate database: %v", err)
+	        }
 	// 2. Setup Mock Fetcher
 	now := time.Now()
 	mockData := []imap.EmailData{
@@ -101,7 +103,7 @@ func TestSyncEmails(t *testing.T) {
 		},
 		CloseFunc: func(c *client.Client) { /* do nothing */ },
 	}
-	syncService := service.NewSyncService(db, mockIMAPClient, fetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig)
+	syncService := service.NewSyncService(db, mockIMAPClient, fetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
 
 	// 5. Create a mock EmailAccount for the user
 	userID := uuid.New() // Generate a new UserID for the test

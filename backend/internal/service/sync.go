@@ -17,6 +17,7 @@ import (
 	clientimap "github.com/emersion/go-imap/client"
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/pkg/utils"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -75,10 +76,11 @@ type SyncService struct {
 	contactService *ContactService
 	accountService *AccountService // New dependency for account management
 	config *configs.Config // Need full config to access security.EncryptionKey
+	logger *zap.SugaredLogger // Add logger
 }
 
 // NewSyncService creates a new SyncService.
-func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, asynqClient AsynqClientInterface, contactService *ContactService, accountService *AccountService, config *configs.Config) *SyncService {
+func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, asynqClient AsynqClientInterface, contactService *ContactService, accountService *AccountService, config *configs.Config, logger *zap.SugaredLogger) *SyncService {
 	return &SyncService{
 		db:          db,
 		imapClient:  imapClient,
@@ -87,6 +89,7 @@ func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, as
 		contactService: contactService,
 		accountService: accountService,
 		config: config,
+		logger: logger,
 	}
 }
 
@@ -109,34 +112,40 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
 	}
 
 	password, err := utils.Decrypt(account.EncryptedPassword, keyBytes)
-	if err != nil {
-		log.Printf("Error decrypting password for account %s: %v", account.ID, err)
-		// Update account status to indicate decryption failure
-		s.accountService.UpdateAccountStatus(ctx, account.ID, false, "Failed to decrypt password", nil)
-		return fmt.Errorf("failed to decrypt password: %w", err)
-	}
-
+        if err != nil {
+                s.logger.Errorf("Error decrypting password for account %s: %v", account.ID, err)
+                // Update account status to indicate decryption failure
+                if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, false, "Failed to decrypt password", nil); statusErr != nil {
+                        s.logger.Errorf("Failed to update account status after decryption failure: %v", statusErr)
+                }
+                return fmt.Errorf("failed to decrypt password: %w", err)
+        }
 	// 3. Establish IMAP connection (dynamic, per-sync)
 	addr := fmt.Sprintf("%s:%d", account.ServerAddress, account.ServerPort)
 	imapClient, err := s.imapClient.DialAndLogin(addr, account.Username, password)
 	if err != nil {
 		log.Printf("Error dialing/logging into IMAP server %s for account %s: %v", addr, account.ID, err)
 		// Update account status to indicate connection failure
-		s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP connection/login failed: %v", err), nil)
+		if err := s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP connection/login failed: %v", err), nil); err != nil {
+			s.logger.Errorf("Failed to update account status after IMAP connection failure: %v", err)
+		}
 		return fmt.Errorf("failed to dial/login to IMAP server: %w", err)
 	}
 	defer s.imapClient.Close(imapClient)
 
 	// Connection successful, update account status
 	now := time.Now()
-	s.accountService.UpdateAccountStatus(ctx, account.ID, true, "", &now)
-
+	        if err := s.accountService.UpdateAccountStatus(ctx, account.ID, true, "", &now); err != nil {
+	                s.logger.Errorf("Failed to update account status after successful sync: %v", err)
+	        }
 	// 4. Fetch emails using the dynamically created client
 	emails, err := s.fetcher.FetchEmails(imapClient, "INBOX", 30)
 	if err != nil {
 		log.Printf("Error fetching emails for account %s: %v", account.ID, err)
 		// Optionally update account status with fetch error, keep connected true as login was successful
-		s.accountService.UpdateAccountStatus(ctx, account.ID, true, fmt.Sprintf("Failed to fetch emails: %v", err), nil)
+		if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, true, fmt.Sprintf("Failed to fetch emails: %v", err), nil); statusErr != nil {
+			s.logger.Errorf("Failed to update account status after email fetch failure: %v", statusErr)
+		}
 		return fmt.Errorf("failed to fetch emails: %w", err)
 	}
 

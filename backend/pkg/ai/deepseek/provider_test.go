@@ -29,8 +29,9 @@ func TestDeepSeekProvider_Summarize_RealRequestMock(t *testing.T) {
 				},
 			},
 		}
-		json.NewEncoder(w).Encode(resp)
-	}))
+		                if err := json.NewEncoder(w).Encode(resp); err != nil {
+		                        t.Errorf("Error encoding JSON: %v", err)
+		                }	}))
 	defer ts.Close()
 
 	// 2. Provider with Mock BaseURL and Prompts

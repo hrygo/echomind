@@ -26,7 +26,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const savedLang = localStorage.getItem('app-language') as Language;
         if (savedLang && (savedLang === 'en' || savedLang === 'zh')) {
-            setLanguage(savedLang);
+            setTimeout(() => setLanguage(savedLang), 0);
         }
     }, []);
 
@@ -37,6 +37,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
     const t = (key: string): string => {
         const keys = key.split('.');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let value: any = dictionaries[language];
 
         for (const k of keys) {

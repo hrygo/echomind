@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Bell, User, Settings, LogOut, Globe } from "lucide-react";
+import { Search, Bell, Settings, LogOut, Globe } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function Header() {

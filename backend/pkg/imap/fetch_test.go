@@ -25,8 +25,11 @@ go func() {
 	if err != nil {
 		t.Fatalf("Connect failed: %v", err)
 	}
-	defer c.Logout()
-
+	        defer func() {
+	                if err := c.Logout(); err != nil {
+	                        t.Errorf("Error logging out from IMAP: %v", err)
+	                }
+	        }()
 	// 3. Call FetchEmails
 	emails, err := FetchEmails(c, "INBOX", 10)
 	if err != nil {

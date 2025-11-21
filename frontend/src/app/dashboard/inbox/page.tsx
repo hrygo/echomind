@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import apiClient from "@/lib/api";
 import { Button } from "@/components/ui/Button"; // Assuming a global Button component with good styling
-import { SyncIcon } from '@/components/ui/Icons'; // Assuming a Sync icon component
+
+
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Email {
   ID: string;
@@ -26,33 +28,56 @@ export default function DashboardPage() {
   const [syncLoading, setSyncLoading] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const categoryFilter = searchParams.get('category');
+  const folderFilter = searchParams.get('folder');
+  const smartFilter = searchParams.get('filter'); // 'smart' for Smart Inbox
 
-  useEffect(() => {
-    async function fetchEmails() {
-      try {
-        setLoading(true);
-        setError(null);
-        const url = categoryFilter ? `/emails?category=${categoryFilter}` : "/emails";
-        const response = await apiClient.get<Email[]>(url);
-        setEmails(response.data);
-      } catch (err: unknown) {
-        console.error("Error fetching emails:", err);
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Failed to load emails.");
-        }
+  const getTitle = () => {
+    if (smartFilter === 'smart') return t('sidebar.smartInbox');
+    if (categoryFilter === 'Work') return t('sidebar.work');
+    if (categoryFilter === 'Personal') return t('sidebar.personal');
+    if (categoryFilter === 'Newsletter') return t('sidebar.newsletter');
+    if (categoryFilter === 'Notification') return t('sidebar.notification');
+    if (categoryFilter === 'Spam') return t('sidebar.spam');
+    if (categoryFilter === 'Finance') return t('sidebar.finance');
+    if (folderFilter === 'sent') return t('sidebar.sent');
+    if (folderFilter === 'drafts') return t('sidebar.drafts');
+    if (folderFilter === 'trash') return t('sidebar.trash');
+    return t('sidebar.inbox');
+  };
+
+  const fetchEmails = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      let url = "/emails";
+      if (categoryFilter) {
+        url += `?category=${categoryFilter}`;
+      } else if (folderFilter) {
+        url += `?folder=${folderFilter}`;
+      } else if (smartFilter === 'smart') {
+        // For smart inbox, we might want a different API or a filter for existing emails
+        url += `?filter=smart`;
       }
-      // No finally here, as setLoading(false) should happen after all other fetches might complete
-      // For initial load, it's fine, but for re-fetches, it might flicker. Let's keep it in finally for simplicity.
-      finally {
-        setLoading(false);
+      const response = await apiClient.get<Email[]>(url);
+      setEmails(response.data);
+    } catch (err: unknown) {
+      console.error("Error fetching emails:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to load emails.");
       }
     }
+    finally {
+      setLoading(false);
+    }
+  }, [categoryFilter, folderFilter, smartFilter]);
 
+  useEffect(() => {
     fetchEmails();
-  }, [categoryFilter]);
+  }, [fetchEmails]);
 
   const handleSync = async () => {
     if (syncLoading) return;
@@ -62,6 +87,7 @@ export default function DashboardPage() {
       await apiClient.post<{ message: string }>("/sync");
       alert("同步任务已启动");
       fetchEmails();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Sync error:", err);
       if (err.response && err.response.status === 400) {
@@ -99,7 +125,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-[calc(100vh-theme(spacing.20)-theme(spacing.16))] flex flex-col">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">收件箱</h1>
+        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{getTitle()}</h1>
         <Button
           onClick={handleSync}
           disabled={syncLoading}

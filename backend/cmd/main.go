@@ -45,8 +45,12 @@ func main() {
 
 	// Initialize Zap logger
 	logger, _ := zap.NewProduction()
-	defer logger.Sync() // flushes buffer, if any
 	sugar := logger.Sugar()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			sugar.Errorf("Failed to sync logger: %v", err)
+		}
+	}() // flushes buffer, if any
 	sugar.Infof("Logger initialized. EchoMind Version: %s", Version)
 
 	// Initialize GORM database
@@ -98,7 +102,7 @@ func main() {
 	accountService := service.NewAccountService(db, &appConfig.Security)
 	insightService := service.NewInsightService(db)
 	aiDraftService := service.NewAIDraftService(aiProvider)
-	syncService := service.NewSyncService(db, &service.DefaultIMAPClient{}, defaultFetcher, asynqClient, contactService, accountService, &appConfig)
+	syncService := service.NewSyncService(db, &service.DefaultIMAPClient{}, defaultFetcher, asynqClient, contactService, accountService, &appConfig, sugar)
 	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService)

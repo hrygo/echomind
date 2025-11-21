@@ -1,7 +1,7 @@
 {
     "common": {
         "appName": "EchoMind",
-        "appSlogan": "AI Email Assistant",
+        "appSlogan": "Your personal Chief of Staff for email. Turn noise into decisions",
         "loading": "Loading...",
         "error": "Error",
         "save": "Save Changes",
@@ -12,15 +12,25 @@
         "searchPlaceholder": "Search emails, contacts, or tasks..."
     },
     "sidebar": {
+        "intelligence": "Intelligence",
+        "mailbox": "Mailbox",
+        "labels": "Labels",
         "mainMenu": "Main Menu",
         "dashboard": "Dashboard",
+        "smartInbox": "Smart Inbox",
+        "actionItems": "Action Items",
+        "network": "Network",
         "inbox": "Inbox",
+        "sent": "Sent",
+        "drafts": "Drafts",
+        "trash": "Trash",
         "tasks": "Tasks",
         "insights": "Insights",
         "smartFolders": "Smart Folders",
         "work": "Work",
         "personal": "Personal",
         "newsletter": "Newsletter",
+        "finance": "Finance",
         "notification": "Notification",
         "spam": "Spam",
         "user": "User",
@@ -42,7 +52,14 @@
         "actionItems": "Action Items",
         "smartFollowUp": "Smart Follow-up",
         "viewAll": "View All",
-        "waiting": "Waiting"
+        "waiting": "Waiting",
+        "aiBriefing": "AI Morning Briefing",
+        "greetingMorning": "Good morning",
+        "greetingAfternoon": "Good afternoon",
+        "greetingEvening": "Good evening",
+        "executiveSummary": "You have {riskCount} high-risk emails and {decisionCount} pending decisions today.",
+        "managerSummary": "You have {taskCount} pending tasks. {overdueCount} are overdue.",
+        "dealmakerSummary": "Detected {opportunityCount} new opportunities and {followUpCount} relationships to maintain."
     },
     "settings": {
         "title": "Settings Center",

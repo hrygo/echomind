@@ -4,58 +4,42 @@ import { useState } from "react";
 import { ExecutiveView } from "@/components/dashboard/ExecutiveView";
 import { ManagerView } from "@/components/dashboard/ManagerView";
 import { DealmakerView } from "@/components/dashboard/DealmakerView";
+import { AIBriefingHeader } from "@/components/dashboard/AIBriefingHeader";
 import { LayoutDashboard, Briefcase, Radar } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 type ViewType = "executive" | "manager" | "dealmaker";
 
 export default function DashboardHomePage() {
     const [currentView, setCurrentView] = useState<ViewType>("executive");
+    const { t } = useLanguage();
 
     return (
-        <div className="min-h-[calc(100vh-theme(spacing.20)-theme(spacing.16))] flex flex-col space-y-6">
-            {/* Header & View Switcher */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">工作台</h1>
-                    <p className="text-slate-500 text-sm mt-1">
-                        {currentView === "executive" && "Morning Report - 全局视野，辅助决策"}
-                        {currentView === "manager" && "Control Console - 任务闭环，高效执行"}
-                        {currentView === "dealmaker" && "Radar - 洞察意图，激活关系"}
-                    </p>
-                </div>
+        <div className="min-h-[calc(100vh-theme(spacing.20)-theme(spacing.16))] flex flex-col">
+            
+            {/* AI Header */}
+            <AIBriefingHeader currentView={currentView} />
 
-                <div className="bg-slate-100 p-1 rounded-xl flex items-center self-start md:self-auto">
-                    <button
-                        onClick={() => setCurrentView("executive")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentView === "executive"
-                                ? "bg-white text-blue-600 shadow-sm"
-                                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                            }`}
-                    >
-                        <LayoutDashboard className="w-4 h-4" />
-                        高管视图
-                    </button>
-                    <button
-                        onClick={() => setCurrentView("manager")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentView === "manager"
-                                ? "bg-white text-blue-600 shadow-sm"
-                                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                            }`}
-                    >
-                        <Briefcase className="w-4 h-4" />
-                        管理者视图
-                    </button>
-                    <button
-                        onClick={() => setCurrentView("dealmaker")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentView === "dealmaker"
-                                ? "bg-white text-blue-600 shadow-sm"
-                                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                            }`}
-                    >
-                        <Radar className="w-4 h-4" />
-                        销售视图
-                    </button>
-                </div>
+            {/* View Switcher Tabs */}
+            <div className="flex items-center gap-1 mb-8 bg-slate-100 p-1.5 rounded-xl w-fit border border-slate-200/50">
+                <ViewTab 
+                    active={currentView === "executive"} 
+                    onClick={() => setCurrentView("executive")}
+                    icon={LayoutDashboard}
+                    label={t('dashboard.executiveView')}
+                />
+                <ViewTab 
+                    active={currentView === "manager"} 
+                    onClick={() => setCurrentView("manager")}
+                    icon={Briefcase}
+                    label={t('dashboard.managerView')}
+                />
+                <ViewTab 
+                    active={currentView === "dealmaker"} 
+                    onClick={() => setCurrentView("dealmaker")}
+                    icon={Radar}
+                    label={t('dashboard.dealmakerView')}
+                />
             </div>
 
             {/* View Content */}
@@ -65,5 +49,21 @@ export default function DashboardHomePage() {
                 {currentView === "dealmaker" && <DealmakerView />}
             </div>
         </div>
+    );
+}
+
+function ViewTab({ active, onClick, icon: Icon, label }: { active: boolean, onClick: () => void, icon: React.ElementType, label: string }) {
+    return (
+        <button
+            onClick={onClick}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                active
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+            }`}
+        >
+            <Icon className={`w-4 h-4 ${active ? "text-blue-600" : "text-slate-400"}`} />
+            {label}
+        </button>
     );
 }
