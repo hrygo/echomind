@@ -1,8 +1,8 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: AI-powered Email Decision System. "External Brain for Executive Communication."
-> **Stage**: v0.5.1 (Stable/Beta).
-> **Active Sprint**: Phase 5.1 - Dashboard UX Optimization.
+> **Stage**: v0.6.0 (Alpha).
+> **Active Sprint**: Phase 5.2 - RAG & Semantic Search.
 
 ## 1. The Golden Rules (Non-Negotiable)
 
@@ -49,12 +49,13 @@
 *   **Optimization**: Spam filtering to reduce AI usage.
 *   **UI**: Dashboard, Insights Graph, Account Settings.
 
-### 🚧 In Progress (Phase 5: v0.6.0 - v0.7.0)
-*   **Teams**: Organization, Shared Labels, Comments.
-*   **Optimization**: Search, Caching, Reliability.
-*   **Infrastructure**: 优化重构日志框架 (Logging Framework Refactoring).
+### 🚧 In Progress (Phase 5.2: v0.6.0) - [Plan: docs/archive/v0.6.0_rag/weekly-plan.md]
+*   **Planning**: ✅ Completed (Design & Spec).
+*   **Infrastructure**: Docker (pgvector), Migration (Active Day 1).
+*   **RAG Core**: Embedding Pipeline, Vector DB.
+*   **Search**: Natural Language Search API.
 
 ### 🔮 Future Roadmap (6-Month Plan)
-*   **Phase 6 (Feb-Mar)**: AI-First Evolution (RAG, Multi-modal, Proactive Agents).
-*   **Phase 7 (Apr-May)**: Cross-Platform (Desktop, WeChat Voice AI).
-*   **Phase 8 (Jun+)**: Commercialization (Stripe, SSO).
+*   **Phase 6 (Jan-Feb)**: Team Collaboration (Shared Labels, Organization).
+*   **Phase 7 (Mar-Apr)**: Cross-Platform (Desktop, WeChat Voice AI).
+*   **Phase 8 (May+)**: Commercialization (Stripe, SSO).
