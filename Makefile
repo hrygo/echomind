@@ -1,7 +1,7 @@
 .PHONY: init run-backend run-frontend docker-up run-worker test lint build clean deploy help
 
 # Version
-VERSION := 0.2.0
+VERSION := 0.2.1
 
 # Variables
 REPO_OWNER ?= your-username
@@ -19,7 +19,21 @@ help:
 	@echo "  make lint         - Run linters (if installed)"
 	@echo "  make build        - Build backend binaries"
 	@echo "  make clean        - Clean build artifacts"
+	@echo "  make dev          - Start all services (Infrastructure, Backend, Worker, Frontend)"
+	@echo "  make stop         - Stop all services"
 	@echo "  make deploy       - Deploy using production docker-compose (Requires REPO_OWNER & DB_PASSWORD)"
+
+dev:
+	@echo "Starting development environment..."
+	@./scripts/dev.sh
+
+stop:
+	@echo "Stopping development environment..."
+	@pkill -f "go run ./cmd/main.go" || true
+	@pkill -f "go run ./cmd/worker/main.go" || true
+	@pkill -f "next dev" || true
+	@cd deploy && docker-compose down
+	@echo "All services stopped."
 
 init:
 	@echo "Initializing backend..."
