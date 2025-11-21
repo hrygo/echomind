@@ -47,7 +47,7 @@ docker-up:
 
 run-backend:
 	@echo "Running backend server..."
-	cd backend && go run ./cmd/main.go
+	./bin/server
 
 run-worker:
 	@echo "Running worker..."
