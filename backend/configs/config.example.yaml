@@ -7,6 +7,9 @@ server:
 database:
   dsn: "host=localhost user=YOUR_DB_USER password=YOUR_DB_PASSWORD dbname=echomind_db port=5432 sslmode=disable"
 
+security:
+  encryption_key: "YOUR_32_BYTE_HEX_AES_KEY" # IMPORTANT: Change this to a random 32-byte (64-char hex) string in production!
+
 redis:
   addr: "localhost:6380"
   password: "YOUR_REDIS_PASSWORD"
