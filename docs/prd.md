@@ -51,7 +51,7 @@ EchoMind 是一款 **SaaS 级企业智能邮件决策系统**。
     *   支持通过配置切换底层大模型（如 DeepSeek, OpenAI, Anthropic, Local LLMs）。
     *   根据任务复杂度自动路由（例如：简单分类用小模型，深度摘要用大模型）。
 
-### 2.3 用户界面：双视图模式
+### 2.3 用户界面：角色化工作台 (Role-Based Workspaces)
 
 #### A. 高管视图 (Executive View) - "晨报模式"
 *   **每日决策日报 (Daily Digest)**：

@@ -31,27 +31,26 @@
 
 ---
 
-# 📅 Current Sprint: Phase 4 - Multi-tenancy & Authentication Foundation
+# 📅 Current Sprint: Phase 2 - Intelligent Analysis & Insights (v0.3.0)
 
-**Focus**: Multi-tenancy, User Authentication.
+**Focus**: AI Classification, Action Item Extraction, Smart Dashboard.
 
-- [x] **Backend: User System**:
-    - [x] Model: `User` (Email, PasswordHash).
-    - [x] Auth: JWT-based authentication (`internal/middleware/auth.go`, `pkg/utils/jwt.go`).
-    - [x] Handlers: Register/Login endpoints (`/api/v1/auth/*`).
-- [x] **Backend: Multi-tenancy (Data Isolation)**:
-    - [x] Update: `Email` and `Contact` models include `UserID` (UUID).
-    - [x] Service Refactor: `EmailService`, `ContactService`, `SyncService` now require `userID`.
-    - [x] Sync Worker: `EmailAnalyzeTask` payload includes `userID`.
-- [x] **Frontend: Auth Integration**:
-    - [x] Pages: Login (`/login`) & Register (`/register`).
-    - [x] State: Global Auth Store (Zustand) for Token management.
-    - [x] Guards: Protected Route wrappers.
+- [ ] **Backend: AI Analysis Engine**:
+    - [ ] **Refine Summary**: Update `Summarize` prompt to return structured JSON (Category, Sentiment, Action Items).
+    - [ ] **Model Update**: Add `Category`, `ActionItems` (JSONB) to `Email` model.
+    - [ ] **Classifier**: Implement logic to auto-tag emails (Work, Personal, Newsletter).
+- [ ] **Frontend: Smart Dashboard**:
+    - [ ] **Filters**: Add Sidebar/Tabs for `Category` filtering.
+    - [ ] **Action Items**: Display extracted tasks in Email Detail view.
+    - [ ] **Visuals**: Add badges for `Sentiment` and `Urgency`.
 
 ---
 
-# 🚧 Backlog: Commercialization & Scaling
+# 🚧 Backlog: Advanced Features & Commercialization
 
-- [ ] **Commercialization**:
+- [ ] **Phase 3: Deep Integration**:
+    - [ ] Relationship Graph.
+    - [ ] Calendar Integration.
+- [ ] **Phase 4: Commercialization**:
     - [ ] Stripe Integration.
     - [ ] Usage Limits.
