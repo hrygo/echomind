@@ -1,36 +1,62 @@
 package service
 
 import (
+	"context"
 	"log"
+	"strings"
 
-	"echomind.com/backend/internal/model"
-	"echomind.com/backend/internal/tasks"
-	"echomind.com/backend/pkg/imap"
-	"github.com/emersion/go-imap/client"
+	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/model"
+	"github.com/hrygo/echomind/internal/tasks"
+	"github.com/hrygo/echomind/pkg/imap"
+	clientimap "github.com/emersion/go-imap/client"
 	"github.com/hibiken/asynq"
 	"gorm.io/gorm"
 )
 
 type EmailFetcher interface {
-	FetchEmails(c *client.Client, mailbox string, limit int) ([]imap.EmailData, error)
+	FetchEmails(c *clientimap.Client, mailbox string, limit int) ([]imap.EmailData, error)
 }
 
 type DefaultFetcher struct{}
 
-func (d *DefaultFetcher) FetchEmails(c *client.Client, mailbox string, limit int) ([]imap.EmailData, error) {
+func (d *DefaultFetcher) FetchEmails(c *clientimap.Client, mailbox string, limit int) ([]imap.EmailData, error) {
 	return imap.FetchEmails(c, mailbox, limit)
 }
 
-// SyncEmails fetches emails using the provided fetcher, saves them, and enqueues analysis tasks.
-func SyncEmails(db *gorm.DB, c *client.Client, fetcher EmailFetcher, asynqClient *asynq.Client) error {
+// SyncService handles the business logic for synchronizing emails.
+type SyncService struct {
+	db          *gorm.DB
+	imapClient  *clientimap.Client
+	fetcher     EmailFetcher
+	asynqClient *asynq.Client
+	contactService *ContactService // New dependency for contact updates
+}
+
+// NewSyncService creates a new SyncService.
+func NewSyncService(db *gorm.DB, imapClient *clientimap.Client, fetcher EmailFetcher, asynqClient *asynq.Client, contactService *ContactService) *SyncService {
+	return &SyncService{
+		db:          db,
+		imapClient:  imapClient,
+		fetcher:     fetcher,
+		asynqClient: asynqClient,
+		contactService: contactService,
+	}
+}
+
+// SyncEmails fetches emails for a specific user, saves them, and enqueues analysis tasks.
+func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
 	// Fetch latest 30 emails
-	emails, err := fetcher.FetchEmails(c, "INBOX", 30)
+	// In a real multi-tenant scenario, the IMAP client needs to be user-specific.
+	// For now, we use a placeholder client. This will be addressed in future phases.
+	emails, err := s.fetcher.FetchEmails(s.imapClient, "INBOX", 30)
 	if err != nil {
 		return err
 	}
 
 	for _, h := range emails {
 		email := model.Email{
+			UserID:    userID, // Set UserID
 			MessageID: h.MessageID,
 			Subject:   h.Subject,
 			Sender:    h.Sender,
@@ -40,18 +66,12 @@ func SyncEmails(db *gorm.DB, c *client.Client, fetcher EmailFetcher, asynqClient
 			BodyHTML:  h.BodyHTML,
 		}
 
-		// Upsert: On Conflict Do Nothing. 
-		// We need to get the ID if it exists or is created to enqueue task.
-		// GORM's OnConflict doesn't easily return ID if existing.
-		// Strategy: Try Create. If conflict, First search by MessageID.
-		
 		var savedEmail model.Email
 		
-		// Check if exists
-		result := db.Where("message_id = ?", email.MessageID).First(&savedEmail)
+		// Check if email with this MessageID and UserID already exists
+		result := s.db.WithContext(ctx).Where("user_id = ? AND message_id = ?", userID, email.MessageID).First(&savedEmail)
 		if result.Error == nil {
-			// Exists. Skip if already summarized? 
-			// For MVP, we might want to re-analyze or skip. Let's skip if Summary exists.
+			// Exists. Skip if already summarized.
 			if savedEmail.Summary != "" {
 				continue
 			}
@@ -59,29 +79,54 @@ func SyncEmails(db *gorm.DB, c *client.Client, fetcher EmailFetcher, asynqClient
 			email.ID = savedEmail.ID
 		} else if result.Error == gorm.ErrRecordNotFound {
 			// Create new
-			if err := db.Create(&email).Error; err != nil {
-				log.Printf("Failed to create email: %v", err)
+			if err := s.db.WithContext(ctx).Create(&email).Error; err != nil {
+				log.Printf("Failed to create email for user %s: %v", userID, err)
 				continue
 			}
 		} else {
-			log.Printf("DB error: %v", result.Error)
+			log.Printf("DB error for user %s: %v", userID, result.Error)
 			continue
 		}
 		
 		// Enqueue Analysis Task
-		if asynqClient != nil {
-			task, err := tasks.NewEmailAnalyzeTask(email.ID)
+		if s.asynqClient != nil {
+			task, err := tasks.NewEmailAnalyzeTask(email.ID, userID) // Pass UserID to task
 			if err != nil {
-				log.Printf("Failed to create task for email %d: %v", email.ID, err)
+				log.Printf("Failed to create task for email %s (user %s): %v", email.ID, userID, err)
 				continue
 			}
-			if _, err := asynqClient.Enqueue(task); err != nil {
-				log.Printf("Failed to enqueue task for email %d: %v", email.ID, err)
+			if _, err := s.asynqClient.Enqueue(task); err != nil {
+				log.Printf("Failed to enqueue task for email %s (user %s): %v", email.ID, userID, err)
 			} else {
-                log.Printf("Enqueued analysis task for email %d", email.ID)
+                log.Printf("Enqueued analysis task for email %s (user %s)", email.ID, userID)
+            }
+		}
+
+		// Update Contact Info (for this user)
+		if s.contactService != nil && email.Sender != "" { // Ensure sender is not empty
+            // Extract name from sender string if needed, or pass as is
+			senderEmail, senderName := parseSender(email.Sender) // Assuming parseSender exists or create a simple one
+            if senderEmail != "" {
+                if err := s.contactService.UpdateContactFromEmail(ctx, userID, senderEmail, senderName, email.Date); err != nil {
+                    log.Printf("Failed to update contact for user %s, email %s: %v", userID, senderEmail, err)
+                }
             }
 		}
 	}
 
 	return nil
+}
+
+// Helper to parse sender string, e.g., "Name <email@example.com>" or "email@example.com"
+func parseSender(sender string) (email, name string) {
+	if idx := strings.LastIndex(sender, "<"); idx != -1 {
+		if endIdx := strings.LastIndex(sender, ">"); endIdx != -1 && endIdx > idx {
+			email = sender[idx+1 : endIdx]
+			name = strings.TrimSpace(sender[:idx])
+			return
+		}
+	}
+	// Fallback if format is just "email@example.com"
+	email = sender
+	return
 }

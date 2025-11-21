@@ -6,9 +6,11 @@ import (
     "strings"
 	"time"
 
-	"echomind.com/backend/internal/handler"
-	"echomind.com/backend/internal/model"
-	"echomind.com/backend/internal/service"
+	"github.com/hrygo/echomind/configs"
+	"github.com/hrygo/echomind/internal/handler"
+	"github.com/hrygo/echomind/internal/middleware"
+	"github.com/hrygo/echomind/internal/model"
+	"github.com/hrygo/echomind/internal/service"
 	clientimap "github.com/emersion/go-imap/client"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -36,6 +38,12 @@ func main() {
 		log.Fatalf("Error reading config file, %s", err)
 	}
 
+    // Load entire config into struct
+    var appConfig configs.Config
+    if err := vip.Unmarshal(&appConfig); err != nil {
+        log.Fatalf("Unable to decode into struct, %v", err)
+    }
+
 	// Initialize Zap logger
 	logger, _ := zap.NewProduction()
 	defer logger.Sync() // flushes buffer, if any
@@ -52,8 +60,8 @@ func main() {
 		sugar.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// AutoMigrate the Email model
-	if err := db.AutoMigrate(&model.Email{}); err != nil {
+	// AutoMigrate models
+	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}); err != nil {
 		sugar.Fatalf("Failed to auto migrate database: %v", err)
 	}
 	sugar.Infof("Database migration completed")
@@ -80,9 +88,16 @@ func main() {
 	imapClient := &clientimap.Client{}
 	defaultFetcher := &service.DefaultFetcher{}
 
+	// Initialize Services
+	userService := service.NewUserService(db, appConfig.Server.JWT)
+    emailService := service.NewEmailService(db)
+    contactService := service.NewContactService(db) // New ContactService
+    syncService := service.NewSyncService(db, imapClient, defaultFetcher, asynqClient, contactService) // New SyncService
+
 	// Initialize Handlers
-	syncHandler := handler.NewSyncHandler(db, imapClient, defaultFetcher, asynqClient)
-	emailHandler := handler.NewEmailHandler(db)
+	syncHandler := handler.NewSyncHandler(syncService) // Pass syncService
+	emailHandler := handler.NewEmailHandler(emailService)
+	authHandler := handler.NewAuthHandler(userService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -90,9 +105,17 @@ func main() {
 		api.GET("/ping", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "pong"})
 		})
-		api.POST("/sync", syncHandler.SyncEmails)
-		api.GET("/emails", emailHandler.ListEmails)
-		api.GET("/emails/:id", emailHandler.GetEmail)
+		// Auth Routes
+		api.POST("/auth/register", authHandler.Register)
+		api.POST("/auth/login", authHandler.Login)
+
+		// Protected routes (require JWT authentication)
+		protected := api.Group("/").Use(middleware.AuthMiddleware(appConfig.Server.JWT))
+		{
+			protected.POST("/sync", syncHandler.SyncEmails)
+			protected.GET("/emails", emailHandler.ListEmails)
+			protected.GET("/emails/:id", emailHandler.GetEmail)
+		}
 	}
 
 	port := vip.GetString("server.port")

@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"echomind.com/backend/internal/service"
-	"echomind.com/backend/pkg/ai"
+	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/pkg/ai"
 )
 
 type MockAIProvider struct{}

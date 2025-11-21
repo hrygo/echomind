@@ -6,10 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"echomind.com/backend/internal/handler"
-	"echomind.com/backend/pkg/imap"
 	clientimap "github.com/emersion/go-imap/client"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/handler"
+	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/pkg/imap"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -25,8 +27,8 @@ func (m *MockFetcher) FetchEmails(c *clientimap.Client, mailbox string, limit in
 }
 
 func TestSyncHandler(t *testing.T) {
+	// Setup Gin in test mode
 	gin.SetMode(gin.TestMode)
-	r := gin.Default()
 
 	// Mock DB and Client (not directly used by handler, but passed to service)
 	mockDB := &gorm.DB{}
@@ -35,20 +37,33 @@ func TestSyncHandler(t *testing.T) {
 	// Create a mock fetcher to satisfy the handler's dependencies
 	mockFetcher := &MockFetcher{}
 
-	// Create an instance of the handler with mocks (passing nil for asynq client)
-	syncHandler := handler.NewSyncHandler(mockDB, mockIMAPClient, mockFetcher, nil)
+	// Create mock contact service
+	mockContactService := service.NewContactService(mockDB)
 
-	// Register the handler route
-	r.POST("/api/v1/sync", syncHandler.SyncEmails)
+	// Create sync service with all dependencies
+	syncService := service.NewSyncService(mockDB, mockIMAPClient, mockFetcher, nil, mockContactService)
+
+	// Create an instance of the handler with the service
+	syncHandler := handler.NewSyncHandler(syncService)
+
+	// Create a Gin context and recorder
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
 
 	// Create a test request
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/sync", nil)
-	r.ServeHTTP(w, req)
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/sync", nil)
+	c.Request = req
+
+	// Set a mock UserID in the context to simulate authentication
+	userID := uuid.New()
+	c.Set("userID", userID)
+
+	// Call the handler directly
+	syncHandler.SyncEmails(c)
 
 	// Assert the response
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	expectedBody := gin.H{"message": "Sync initiated successfully"}
 	jsonBody, _ := json.Marshal(expectedBody)
 	assert.Equal(t, string(jsonBody), w.Body.String())

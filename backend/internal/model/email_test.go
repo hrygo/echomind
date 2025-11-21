@@ -4,7 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"echomind.com/backend/internal/model"
+	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -24,6 +25,8 @@ func TestEmailModel(t *testing.T) {
 	// 2. Test Create
 	now := time.Now()
 	email := model.Email{
+		ID:        uuid.New(),
+		UserID:    uuid.New(),
 		MessageID: "<123@example.com>",
 		Subject:   "Test Subject",
 		Sender:    "sender@example.com",

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strings"
 
-	"echomind.com/backend/pkg/ai"
+	"github.com/hrygo/echomind/pkg/ai"
 	openai "github.com/sashabaranov/go-openai"
 )
 

@@ -1,5 +1,8 @@
 server:
   port: 8080
+  jwt:
+    secret: "super-secret-jwt-key-replace-me-in-production"
+    expiration_hours: 72
 
 database:
   dsn: "host=localhost user=user password=password dbname=echomind_db port=5432 sslmode=disable"

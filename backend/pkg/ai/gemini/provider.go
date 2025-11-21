@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"echomind.com/backend/pkg/ai"
+	"github.com/hrygo/echomind/pkg/ai"
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
 )

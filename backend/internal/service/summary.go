@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"echomind.com/backend/pkg/ai"
-	"echomind.com/backend/pkg/ai/deepseek"
-	"echomind.com/backend/pkg/ai/gemini"
-	"echomind.com/backend/pkg/ai/openai"
+	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/ai/deepseek"
+	"github.com/hrygo/echomind/pkg/ai/gemini"
+	"github.com/hrygo/echomind/pkg/ai/openai"
 	"github.com/spf13/viper"
 )
 

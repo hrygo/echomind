@@ -5,8 +5,8 @@ import (
 	"log"
     "strings"
 
-	"echomind.com/backend/internal/service"
-	"echomind.com/backend/internal/tasks"
+	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/internal/tasks"
 	"github.com/hibiken/asynq"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

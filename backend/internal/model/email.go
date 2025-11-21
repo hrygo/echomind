@@ -3,12 +3,18 @@ package model
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 // Email represents an email message stored in the database.
 type Email struct {
-	gorm.Model
+	ID        uuid.UUID `gorm:"type:uuid;primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	UserID    uuid.UUID `gorm:"type:uuid;not null"`
 	MessageID string    `gorm:"uniqueIndex;not null"`
 	Subject   string
 	Sender    string

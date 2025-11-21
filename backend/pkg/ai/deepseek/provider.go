@@ -1,7 +1,7 @@
 package deepseek
 
 import (
-	"echomind.com/backend/pkg/ai/openai"
+	"github.com/hrygo/echomind/pkg/ai/openai"
 )
 
 // DeepSeek is OpenAI Compatible, so we can reuse the OpenAI provider with a custom BaseURL.
