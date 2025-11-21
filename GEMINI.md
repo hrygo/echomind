@@ -31,6 +31,26 @@
 
 ---
 
+# 🛠️ Debugging & Local Development Guidelines
+
+## 1. Service Startup & Management
+When working on features or debugging locally, always use the provided `Makefile` commands to manage services. This ensures consistent setup, proper background execution, and centralized logging.
+
+*   **Start All Services**: `make dev`
+*   **Start Individual Service (Backend)**: `make run-backend`
+*   **Start Individual Service (Worker)**: `make run-worker`
+*   **Start Individual Service (Frontend)**: `make run-frontend`
+*   **Stop All Services**: `make stop`
+
+## 2. Service Status & Logging
+After starting services, always verify their status and check logs to confirm correct operation or troubleshoot issues.
+
+*   **Check Service Status**: `make status` (shows if services are running and last few log entries)
+*   **Tail All Logs**: `make tail-logs` (stream real-time logs from all services)
+*   **Specific Log**: For detailed debugging of a single service, `tail -f logs/backend.log` (or `worker.log`, `frontend.log`).
+
+---
+
 # 📅 Current Sprint: Phase 4 - Commercialization (v0.5.0)
 
 **Focus**: Advanced Features & Commercialization
