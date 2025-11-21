@@ -27,8 +27,25 @@ export default function NetworkGraph() {
   const [graphData, setGraphData] = useState<NetworkGraphData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setDimensions({ width, height });
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     async function fetchGraphData() {
@@ -69,9 +86,11 @@ export default function NetworkGraph() {
   const nodeLabel = (node: Node) => `${node.label} (Interactions: ${node.interactionCount}, Sentiment: ${node.avgSentiment.toFixed(2)})`;
 
   return (
-    <div className="w-full h-[600px] bg-gray-50 rounded-lg shadow-md">
+    <div ref={containerRef} className="w-full h-[600px] bg-gray-50 rounded-lg shadow-md overflow-hidden">
       <ForceGraph2D
         ref={fgRef}
+        width={dimensions.width}
+        height={dimensions.height}
         graphData={graphData}
         nodeId="id"
         nodeLabel={nodeLabel}
@@ -79,7 +98,7 @@ export default function NetworkGraph() {
         nodeCanvasObject={(node: Node, ctx, globalScale) => {
           const label = nodeLabel(node as Node);
           const fontSize = 12 / globalScale;
-          ctx.font = `${fontSize}px Sans-Serif`;
+          ctx.font = `${fontSize}px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
           const textWidth = ctx.measureText(label).width;
           const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/service"
 )
 
@@ -18,15 +18,9 @@ func NewInsightHandler(insightService service.InsightService) *InsightHandler {
 
 // GetNetworkGraph handles the GET /insights/network API request.
 func (h *InsightHandler) GetNetworkGraph(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
+	uuidUserID, ok := middleware.GetUserIDFromContext(c)
+	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in context"})
-		return
-	}
-
-	uuidUserID, err := uuid.Parse(userID.(string))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID format"})
 		return
 	}
 
