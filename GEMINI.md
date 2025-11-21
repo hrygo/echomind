@@ -61,21 +61,25 @@ When working on features or debugging locally, **always use the provided `Makefi
 *   **`backend/configs/config.yaml`**: **Ignored by Git**. Copy from example and fill in your local secrets (API Keys, DB Creds).
 *   **Environment Variables**: The application supports overriding config via env vars (e.g., `ECHOMIND_DATABASE_DSN`).
 
-## 2. Troubleshooting & Common Issues
-*   **"invalid input syntax for type bigint" (SQL Error)**: This occurs when the `emails` table schema is outdated (e.g., `id` column is `bigint` instead of `uuid`).
-    *   **Fix**: Drop the table manually (`docker-compose exec db psql -U user -d echomind_db -c "DROP TABLE emails;"`) and restart the backend to trigger auto-migration.
-*   **"crypto/aes: invalid key size 64"**: Ensure `security.encryption_key` in `config.yaml` is a 64-character hex string, which decodes to 32 bytes. The backend must decode this hex string before use.
-*   **Backend Log Empty**: If `logs/backend.log` is empty, the service likely crashed on startup (e.g., panic). Try running `./bin/server` directly in the terminal to see immediate output.
-
 ---
 
-# 📅 Current Sprint: Phase 4 - Commercialization (v0.5.0)
+# 📅 Current Sprint: Phase 4 - Deep Insight & Relationship Intelligence (v0.5.0)
 
-**Focus**: Advanced Features & Commercialization
+**Focus**: Contact Analytics, Relationship Graph, AI Smart Reply.
+**Status**: Design Ready.
 
-- [ ] **Phase 4: Commercialization**:
-    - [ ] Stripe Integration.
-    - [ ] Usage Limits.
+*Refer to `docs/tech-design-phase4.md` for architecture and implementation details.*
+
+- [ ] **Backend: Contact Intelligence**:
+    - [ ] **Model**: Update `Contact` with `InteractionCount`, `AvgSentiment`.
+    - [ ] **Pipeline**: Update `AnalyzeTask` to aggregate contact stats.
+    - [ ] **Migration**: Backfill stats for existing data.
+- [ ] **Backend: Insight API**:
+    - [ ] **API**: `GET /insights/network` (Nodes/Links).
+    - [ ] **API**: `POST /ai/draft` (Generate reply).
+- [ ] **Frontend: Visuals**:
+    - [ ] **Graph**: Implement Relationship Network visualization.
+    - [ ] **Smart Reply**: Add AI Draft button in Email Detail.
 
 ---
 
@@ -105,11 +109,11 @@ When working on features or debugging locally, **always use the provided `Makefi
 
 ---
 
-# 🚧 Backlog: Advanced Features
+# 🚧 Backlog: Future
 
-- [ ] **Phase 3: Deep Integration**:
-    - [ ] Relationship Graph.
-    - [ ] Calendar Integration.
-- [ ] **Phase 4: Commercialization**:
+- [ ] **Phase 5: Commercialization**:
     - [ ] Stripe Integration.
     - [ ] Usage Limits.
+    - [ ] Team Collaboration.
+- [ ] **Phase 6: Mobile & Desktop Native**:
+    - [ ] Flutter / Electron App.
