@@ -1,7 +1,7 @@
 .PHONY: init install run-backend run-worker run-frontend docker-up stop restart dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage
 
 # Version
-VERSION := 0.5.0
+VERSION := 0.5.1
 
 # Variables
 REPO_OWNER ?= your-username
@@ -188,7 +188,7 @@ build:
 
 clean:
 	@echo "Cleaning..."
-rm -rf bin/ $(LOG_DIR)/
+	rm -rf bin/ $(LOG_DIR)/
 	rm -f backend/coverage.out
 
 deploy:
