@@ -32,7 +32,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.RegisterUser(c.Request.Context(), req.Email, req.Password, req.Name)
+	token, user, err := h.userService.RegisterUser(c.Request.Context(), req.Email, req.Password, req.Name)
 	if err != nil {
 		if err == service.ErrUserAlreadyExists {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
@@ -46,6 +46,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		"message": "User registered successfully",
 		"user_id": user.ID,
 		"email":   user.Email,
+		"token":   token, // Return token on registration
 	})
 }
 
@@ -74,10 +75,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
-		"user": gin.H{
-			"id":    user.ID,
-			"email": user.Email,
-			"name":  user.Name,
-		},
+		"user_id": user.ID,
+		"email":   user.Email,
+		"name":    user.Name,
 	})
 }
