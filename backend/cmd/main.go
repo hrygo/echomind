@@ -88,13 +88,13 @@ func main() {
 	imapClient := &clientimap.Client{}
 	defaultFetcher := &service.DefaultFetcher{}
 
-	// Initialize Services
-	userService := service.NewUserService(db, appConfig.Server.JWT)
-    emailService := service.NewEmailService(db)
-    contactService := service.NewContactService(db) // New ContactService
-    syncService := service.NewSyncService(db, imapClient, defaultFetcher, asynqClient, contactService) // New SyncService
-
-	// Initialize Handlers
+	    // Initialize Services
+		userService := service.NewUserService(db, appConfig.Server.JWT)
+	    emailService := service.NewEmailService(db)
+	    contactService := service.NewContactService(db) // New ContactService
+	    accountService := service.NewAccountService(db, &appConfig.Security) // Initialize AccountService
+	    syncService := service.NewSyncService(db, defaultFetcher, asynqClient, contactService, accountService, &appConfig) // Pass accountService and appConfig
+		// Initialize Handlers
 	syncHandler := handler.NewSyncHandler(syncService) // Pass syncService
 	emailHandler := handler.NewEmailHandler(emailService)
 	authHandler := handler.NewAuthHandler(userService)

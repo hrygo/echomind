@@ -5,11 +5,16 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`	
 	Redis    RedisConfig    `mapstructure:"redis"`
 	AI       AIConfig       `mapstructure:"ai"`
+	Security SecurityConfig `mapstructure:"security"` // New security config
 }
 
 type ServerConfig struct {
 	Port string `mapstructure:"port"`
 	JWT  JWTConfig `mapstructure:"jwt"`
+}
+
+type SecurityConfig struct {
+	EncryptionKey string `mapstructure:"encryption_key"`
 }
 
 type JWTConfig struct {
