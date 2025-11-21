@@ -47,41 +47,34 @@ cd echomind
 make init
 ```
 
-### 3. API Key Configuration
+### 3. Configuration
 
-**Recommended Method (Local Development):**
+**Local Development (Secure):**
 
-1.  **Create your local config file**: Copy the example configuration and rename it:
+1.  **Create Config File**: Copy the example configuration. This file is git-ignored to prevent secret leaks.
     ```bash
     cp backend/configs/config.example.yaml backend/configs/config.yaml
     ```
-2.  **Edit `backend/configs/config.yaml`**: Open this newly created file and replace `YOUR_DEEPSEEK_KEY` (or others) with your actual API keys.
+2.  **Update Credentials**: Edit `backend/configs/config.yaml` and replace the placeholders with your actual values:
+    *   `server.jwt.secret`: Set a secure random string.
+    *   `database`: Update `user` and `password` if you changed them in `docker-compose.yml`.
+    *   `ai`: Add your API keys (e.g., `YOUR_DEEPSEEK_KEY`).
 
-    *Note: `backend/configs/config.yaml` is ignored by Git.*
+**Production / CI/CD:**
 
-**Environment Variables (CI/CD):**
-Override any config using `ECHOMIND_` prefix (e.g., `ECHOMIND_AI_DEEPSEEK_API_KEY`).
+*   **Environment Variables**: The application supports overriding any config via environment variables with the `ECHOMIND_` prefix (e.g., `ECHOMIND_SERVER_JWT_SECRET`, `ECHOMIND_AI_DEEPSEEK_API_KEY`).
+*   **Docker Compose**: The `deploy/docker-compose.prod.yml` is configured to use environment variables for sensitive data.
 
 ### 4. Run the App
-
-**Step 1: Start Infrastructure (DB & Redis)**
+**One-Click Start:**
 ```bash
-make docker-up
+make dev
 ```
+This will start the database, redis, backend server, worker, and frontend in a single terminal. Press `Ctrl+C` to stop.
 
-**Step 2: Run Backend Server**
+**Stop All Services:**
 ```bash
-make run-backend
-```
-
-**Step 3: Run AI Worker** (In a new terminal)
-```bash
-make run-worker
-```
-
-**Step 4: Run Frontend** (In a new terminal)
-```bash
-make run-frontend
+make stop
 ```
 
 Open `http://localhost:3000` to view the dashboard.

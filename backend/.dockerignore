@@ -1,0 +1,19 @@
+# Ignore git files
+.git
+.gitignore
+
+# Ignore config with secrets
+configs/config.yaml
+
+# Ignore build artifacts
+bin/
+server
+worker
+
+# Ignore tests
+*_test.go
+
+# Ignore docs and other non-runtime files
+docs/
+README.md
+Makefile

@@ -1,15 +1,15 @@
 server:
   port: 8080
   jwt:
-    secret: "super-secret-jwt-key-replace-me-in-production"
+    secret: "YOUR_JWT_SECRET"
     expiration_hours: 72
 
 database:
-  dsn: "host=localhost user=user password=password dbname=echomind_db port=5432 sslmode=disable"
+  dsn: "host=localhost user=YOUR_DB_USER password=YOUR_DB_PASSWORD dbname=echomind_db port=5432 sslmode=disable"
 
 redis:
   addr: "localhost:6380"
-  password: ""
+  password: "YOUR_REDIS_PASSWORD"
   db: 0
 
 ai:
