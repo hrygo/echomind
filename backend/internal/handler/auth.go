@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/hrygo/echomind/internal/service"
+	"gorm.io/gorm"
 )
 
 type AuthHandler struct {
@@ -74,7 +75,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token":   token,
 		"user_id": user.ID,
 		"email":   user.Email,
 		"name":    user.Name,
