@@ -29,28 +29,29 @@
     *   [ ] **Dynamic Widgets**: 根据意图自动渲染组件 (如：日历、关系图谱、审批卡片)。
     *   [ ] **Context Manager**: 左侧栏管理 "关注点" (Contexts) 而非文件夹。
 
-## 🗓️ Phase 7: 团队协作 (Team Collaboration)
+## 🗓️ Phase 7: WeChat Connect (Conversational OS)
 **时间**: 2026.02 - 2026.03 (Month 3-4)
 **版本**: v0.8.0
+**目标**: 将微信打造为 EchoMind 的移动端交互系统 (Conversational UI)。
+
+*   **Conversational Core**
+    *   [ ] **Voice Commander**: 微信语音 -> Whisper 转录 -> 意图执行 (回复邮件/查询)。
+    *   [ ] **One-Touch Decision**: 推送 "审批/决策" 卡片，微信内直接点击 [批准]/[驳回]。
+    *   [ ] **Thought Catcher**: 随时语音记录灵感/待办，自动同步到 Dashboard。
+*   **Intelligent Features**
+    *   [ ] **Calendar Gatekeeper**: "下周二下午有空吗？" -> 自动检测冲突并生成建议回复。
+    *   [ ] **RAG Search**: 微信内自然语言查信 ("查一下上次的项目预算")。
+    *   [ ] **Morning Briefing**: 每日晨报推送 (今日待办 + 关键邮件)。
+
+## 🗓️ Phase 8: 团队协作 (Team Collaboration)
+**时间**: 2026.03 - 2026.04 (Month 5-6)
+**版本**: v0.9.0
 **目标**: 完成多用户协作基础，商业化前置准备。
 
 *   **团队协作 (Team Collaboration)**
     *   [ ] **组织架构 (Organization)**: 支持多用户归属同一组织，管理员权限。
     *   [ ] **共享标签/分类 (Shared Labels)**: 团队统一的邮件分类标准。
     *   [ ] **协作批注 (Comments)**: 团队成员在邮件内部进行讨论，不发送给外部。
-
-## 🗓️ Phase 8: 多端体验 (Cross-Platform)
-**时间**: 2026.03 - 2026.04 (Month 5-6)
-**版本**: v0.9.0
-**目标**: 覆盖桌面端与移动端，提供原生体验。
-
-*   **桌面端 (Desktop)**
-    *   [ ] **Electron/Flutter App**: 封装 Web 端，支持离线访问与系统通知。
-    *   [ ] **快捷键增强**: 类似 Superhuman 的全键盘操作支持。
-*   **移动端 (Mobile - WeChat First)**
-    *   [ ] **微信公众号集成**: 唯一移动端入口，轻量级交互。
-    *   [ ] **语音指令 (Voice AI)**: 发送语音 "帮我查一下未读的紧急邮件"，AI 自动回复摘要。
-    *   [ ] **模板消息推送**: 实时推送高优先级邮件通知。
 
 ## 🗓️ Phase 9: 商业化 (Commercialization) - 🚀 Launch
 **时间**: 2026.05+ (Month 7+)
@@ -61,3 +62,4 @@
     *   [ ] **Stripe 集成**: 订阅支付。
     *   [ ] **多级套餐**: Free, Pro, Team。
     *   [ ] **企业级特性**: SSO, Audit Logs.
+    *   [ ] **桌面端 App (Electron)**: (Post-v1.0) 封装 Web 端提供离线能力。
