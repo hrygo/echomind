@@ -33,21 +33,33 @@
 
 # 🛠️ Debugging & Local Development Guidelines
 
-## 1. Service Startup & Management
-When working on features or debugging locally, always use the provided `Makefile` commands to manage services. This ensures consistent setup, proper background execution, and centralized logging.
+## 1. Service Startup & Management (Makefile)
+When working on features or debugging locally, **always use the provided `Makefile` commands**. This ensures consistent setup, environment variable loading, and centralized log management.
 
-*   **Start All Services**: `make dev`
-*   **Start Individual Service (Backend)**: `make run-backend`
-*   **Start Individual Service (Worker)**: `make run-worker`
-*   **Start Individual Service (Frontend)**: `make run-frontend`
-*   **Stop All Services**: `make stop`
+### 🚀 Quick Start
+*   **`make install`**: Install dependencies (Backend & Frontend).
+*   **`make dev`**: Start ALL services in background (Postgres, Redis, Backend, Worker, Frontend).
+*   **`make restart`**: Restart all services (useful after config changes).
+*   **`make stop`**: Stop all services.
 
-## 2. Service Status & Logging
-After starting services, always verify their status and check logs to confirm correct operation or troubleshoot issues.
+### 🔍 Debugging & Logs
+*   **`make status`**: Check if services are running (PIDs) and view the last few log lines.
+*   **`make tail-logs`**: Stream logs from ALL services in real-time.
+*   **`make logs-backend`**: Stream Backend API logs only.
+*   **`make logs-worker`**: Stream Worker logs only.
+*   **`make logs-frontend`**: Stream Frontend logs only.
 
-*   **Check Service Status**: `make status` (shows if services are running and last few log entries)
-*   **Tail All Logs**: `make tail-logs` (stream real-time logs from all services)
-*   **Specific Log**: For detailed debugging of a single service, `tail -f logs/backend.log` (or `worker.log`, `frontend.log`).
+## 2. Development Workflow
+1.  **Feature Branch**: Create a branch for your task (e.g., `feat/stripe-integration`).
+2.  **Local Dev**: Use `make dev` to run the stack.
+3.  **Iterate**: Edit code -> `make restart` (if Backend/Worker code changed) -> Verify.
+4.  **Test**: Run `make test` (Backend) and `pnpm test` (Frontend) before committing.
+5.  **Commit**: Follow Conventional Commits (e.g., `feat: add stripe webhook handler`).
+
+## 3. Configuration Management
+*   **`backend/configs/config.example.yaml`**: Template for configuration.
+*   **`backend/configs/config.yaml`**: **Ignored by Git**. Copy from example and fill in your local secrets (API Keys, DB Creds).
+*   **Environment Variables**: The application supports overriding config via env vars (e.g., `ECHOMIND_DATABASE_DSN`).
 
 ---
 
