@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import apiClient from "@/lib/api";
 
 interface EmailDetail {
-  ID: number;
+  ID: string; // Changed from number to string (UUID)
   Subject: string;
   Sender: string;
   Date: string;
@@ -20,20 +21,19 @@ export default function EmailDetailPage() {
   const { id } = params;
   const [email, setEmail] = useState<EmailDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
     async function fetchEmail() {
       try {
-        const res = await fetch(`http://localhost:8080/api/v1/emails/${id}`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch email");
-        }
-        const data = await res.json();
-        setEmail(data);
-      } catch (error) {
-        console.error("Error fetching email:", error);
+        // Ensure `id` is treated as a string for UUID
+        const response = await apiClient.get<EmailDetail>(`/emails/${id}`);
+        setEmail(response.data);
+      } catch (err: any) {
+        console.error("Error fetching email:", err);
+        setError(err.message || "Failed to load email.");
       } finally {
         setLoading(false);
       }
@@ -43,6 +43,7 @@ export default function EmailDetailPage() {
   }, [id]);
 
   if (loading) return <div className="p-8">Loading...</div>;
+  if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
   if (!email) return <div className="p-8">Email not found</div>;
 
   return (
@@ -61,18 +62,18 @@ export default function EmailDetailPage() {
             <div className="flex gap-2">
               {/* Sentiment Badge */}
               {email.Sentiment && (
-                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded border 
-                   ${email.Sentiment === 'Positive' ? 'bg-green-100 text-green-800 border-green-200' : 
-                     email.Sentiment === 'Negative' ? 'bg-red-100 text-red-800 border-red-200' : 
-                     'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                <span className={`text-xs font-medium px-2.5 py-0.5 rounded border 
+                   ${email.Sentiment === 'Positive' ? 'bg-green-100 text-green-800 border-green-200' :
+                    email.Sentiment === 'Negative' ? 'bg-red-100 text-red-800 border-red-200' :
+                      'bg-gray-100 text-gray-800 border-gray-200'}`}>
                   {email.Sentiment}
                 </span>
               )}
-               {/* Urgency Badge */}
-               {email.Urgency && (
-                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded border 
-                   ${email.Urgency === 'High' ? 'bg-orange-100 text-orange-800 border-orange-200' : 
-                     'bg-blue-100 text-blue-800 border-blue-200'}`}>
+              {/* Urgency Badge */}
+              {email.Urgency && (
+                <span className={`text-xs font-medium px-2.5 py-0.5 rounded border 
+                   ${email.Urgency === 'High' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                    'bg-blue-100 text-blue-800 border-blue-200'}`}>
                   {email.Urgency} Urgency
                 </span>
               )}
