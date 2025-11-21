@@ -1,7 +1,7 @@
 .PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status tail-logs logs restart logs-backend logs-worker logs-frontend
 
 # Version
-VERSION := 0.3.0
+VERSION := 0.4.0
 
 # Variables
 REPO_OWNER ?= your-username
