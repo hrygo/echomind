@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v0.5.1] - 2025-11-22
+## [v0.5.2] - 2025-11-22
 
 ### Added
 - **AI Morning Briefing**: A dynamic header in the dashboard that greets the user and provides a high-level summary of risks and tasks.

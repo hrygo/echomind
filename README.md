@@ -4,7 +4,7 @@
 
 EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI cognitive layer on top of traditional email services. It reads, understands, classifies, and summarizes emails, transforming unstructured communication into structured insights and tasks for executives, managers, and dealmakers.
 
-## 🚀 Features (Current Beta v0.5.1)
+## 🚀 Features (Current Beta v0.5.2)
 
 *   **AI Command Center**:
     *   **AI Morning Briefing**: Personalized daily summary of risks and tasks.
