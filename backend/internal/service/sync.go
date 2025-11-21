@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -17,6 +18,8 @@ import (
 	"github.com/hrygo/echomind/pkg/utils"
 	"gorm.io/gorm"
 )
+
+var ErrAccountNotConfigured = errors.New("email account not configured")
 
 type EmailFetcher interface {
 	FetchEmails(c *clientimap.Client, mailbox string, limit int) ([]imap.EmailData, error)
@@ -55,6 +58,9 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
 	// 1. Get user's email account configuration
 	account, err := s.accountService.GetAccountByUserID(ctx, userID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(err.Error(), "record not found") {
+			return ErrAccountNotConfigured
+		}
 		log.Printf("Error fetching email account for user %s: %v", userID, err)
 		return fmt.Errorf("failed to retrieve email account: %w", err)
 	}

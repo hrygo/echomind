@@ -96,8 +96,8 @@ func (s *AccountService) UpdateAccountStatus(ctx context.Context, accountID uuid
 }
 
 // testIMAPConnection attempts to establish a basic IMAP connection and login.
-func (s *AccountService) testIMAPConnection(server, port string, username, password string) error {
-	addr := fmt.Sprintf("%s:%s", server, port)
+func (s *AccountService) testIMAPConnection(server string, port int, username, password string) error {
+	addr := fmt.Sprintf("%s:%d", server, port)
 	client, err := clientimap.DialTLS(addr, nil)
 	if err != nil {
 		return fmt.Errorf("dial IMAP server %s failed: %w", addr, err)

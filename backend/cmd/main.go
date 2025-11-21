@@ -25,7 +25,7 @@ const Version = "0.1.0"
 func main() {
 	// Initialize Viper for configuration
 	vip := viper.New()
-	vip.SetConfigFile("configs/config.yaml") // Use the new config path
+	vip.SetConfigFile("backend/configs/config.yaml") // Use the new config path
 	vip.AddConfigPath(".")
     
     // Enable Environment Variable Overrides
@@ -111,8 +111,8 @@ func main() {
 		// Protected routes (require JWT authentication)
 		protected := api.Group("/").Use(middleware.AuthMiddleware(appConfig.Server.JWT))
 		{
-			protected.POST("/settings/account", accountHandler.ConnectAndSaveAccount) // New account route
-			protected.GET("/settings/account", accountHandler.GetAccountStatus)      // New account status route
+			protected.POST("/settings/account", accountHandler.ConnectAndSaveAccount)
+			protected.GET("/settings/account", accountHandler.GetAccountStatus)
 			protected.POST("/sync", syncHandler.SyncEmails)
 			protected.GET("/emails", emailHandler.ListEmails)
 			protected.GET("/emails/:id", emailHandler.GetEmail)

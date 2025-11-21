@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/hrygo/echomind/internal/middleware"
@@ -30,6 +31,10 @@ func (h *SyncHandler) SyncEmails(c *gin.Context) {
 
 	err := h.syncService.SyncEmails(c.Request.Context(), userID)
 	if err != nil {
+		if errors.Is(err, service.ErrAccountNotConfigured) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Please configure your email account in Settings first."})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
