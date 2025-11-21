@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status view-logs logs restart view-logs-backend view-logs-worker view-logs-frontend
+.PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status logs restart logs-backend logs-worker logs-frontend
 
 # Version
 VERSION := 0.4.0
@@ -35,10 +35,10 @@ help:
 	@echo "    make test          - Run backend tests"
 	@echo "    make lint          - Run linters"
 	@echo "    make status        - Check status of running services and recent logs"
-	@echo "    make view-logs     - View last 500 lines of all logs"
-	@echo "    make view-logs-backend  - View last 500 lines of backend logs only"
-	@echo "    make view-logs-worker   - View last 500 lines of worker logs only"
-	@echo "    make view-logs-frontend - View last 500 lines of frontend logs only"
+	@echo "    make logs          - View last 500 lines of all logs"
+	@echo "    make logs-backend  - View last 500 lines of backend logs only"
+	@echo "    make logs-worker   - View last 500 lines of worker logs only"
+	@echo "    make logs-frontend - View last 500 lines of frontend logs only"
 	@echo ""
 	@echo "  Deployment:"
 	@echo "    make deploy        - Deploy to production"
@@ -61,7 +61,7 @@ dev: docker-up run-backend run-worker run-frontend
 	@echo "🚀 All services started!"
 	@echo "Backend:  http://localhost:8080"
 	@echo "Frontend: http://localhost:3000"
-	@echo "Check status with 'make status' or logs with 'make view-logs'."
+	@echo "Check status with 'make status' or logs with 'make logs'."
 	@echo "----------------------------------------------------------------"
 
 restart: stop dev
@@ -118,19 +118,19 @@ status:
 	@echo "[Worker]:" && tail -n 10 $(WORKER_LOG) 2>/dev/null || echo "  No logs."
 	@echo "[Frontend]:" && tail -n 10 $(FRONTEND_LOG) 2>/dev/null || echo "  No logs."
 
-view-logs:
+logs:
 	@echo "Viewing last 500 lines of all logs..."
 	@tail -n 500 $(BACKEND_LOG) $(WORKER_LOG) $(FRONTEND_LOG) 2>/dev/null || echo "  No logs yet or log files not found."
 
-view-logs-backend:
+logs-backend:
 	@echo "Viewing last 500 lines of backend logs..."
 	@tail -n 500 $(BACKEND_LOG)
 
-view-logs-worker:
+logs-worker:
 	@echo "Viewing last 500 lines of worker logs..."
 	@tail -n 500 $(WORKER_LOG)
 
-view-logs-frontend:
+logs-frontend:
 	@echo "Viewing last 500 lines of frontend logs..."
 	@tail -n 500 $(FRONTEND_LOG)
 
