@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/hrygo/echomind/internal/service"
-	"gorm.io/gorm"
 )
 
 type AuthHandler struct {
@@ -33,13 +32,21 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token, user, err := h.userService.RegisterUser(c.Request.Context(), req.Email, req.Password, req.Name)
+	user, err := h.userService.RegisterUser(c.Request.Context(), req.Email, req.Password, req.Name)
 	if err != nil {
 		if err == service.ErrUserAlreadyExists {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
+		return
+	}
+
+	// Automatically log in the user after successful registration to get a token
+	token, _, err := h.userService.LoginUser(c.Request.Context(), req.Email, req.Password)
+	if err != nil {
+		// Log this error, but registration was successful
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User registered, but failed to generate login token"})
 		return
 	}
 
