@@ -60,5 +60,6 @@ type GeminiConfig struct {
 type PromptConfig struct {
 	Summary   string `mapstructure:"summary"`
 	Classify  string `mapstructure:"classify"`
-	Sentiment string `mapstructure:"sentiment"`
+	Sentiment  string `mapstructure:"sentiment"`
+	DraftReply string `mapstructure:"draft_reply"`
 }

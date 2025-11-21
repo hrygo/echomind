@@ -99,6 +99,17 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 	}, nil
 }
 
+
+func (p *Provider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
+	systemPrompt := p.prompts["draft_reply"]
+	if systemPrompt == "" {
+		return "", errors.New("draft_reply prompt not configured")
+	}
+
+	fullPrompt := fmt.Sprintf("%s\n\nOriginal Email:\n%s\n\nUser Prompt:\n%s", systemPrompt, emailContent, userPrompt)
+	return p.generateContent(ctx, fullPrompt, "")
+}
+
 func (p *Provider) generateContent(ctx context.Context, systemPrompt, userContent string) (string, error) {
 	model := p.client.GenerativeModel(p.model)
 	model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))

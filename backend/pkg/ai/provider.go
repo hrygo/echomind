@@ -11,7 +11,11 @@ type AIProvider interface {
 	Classify(ctx context.Context, text string) (string, error)
 
 	// AnalyzeSentiment determines the sentiment and urgency of the text.
+	// AnalyzeSentiment determines the sentiment and urgency of the text.
 	AnalyzeSentiment(ctx context.Context, text string) (SentimentResult, error)
+
+	// GenerateDraftReply generates a draft email reply based on the original email content and a user prompt.
+	GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error)
 }
 
 type AnalysisResult struct {

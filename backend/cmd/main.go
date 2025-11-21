@@ -3,45 +3,45 @@ package main
 import (
 	"fmt"
 	"log"
-    "strings"
+	"strings"
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/internal/handler"
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/hibiken/asynq"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-const Version = "0.1.0"
+const Version = "0.5.0"
 
 func main() {
 	// Initialize Viper for configuration
 	vip := viper.New()
-	vip.SetConfigFile("backend/configs/config.yaml") // Use the new config path
+	vip.SetConfigFile("configs/config.yaml") // Do not modify the configuration file path; the current configuration is absolutely correct. If any anomalies are found, it must be due to incorrect execution method!!
 	vip.AddConfigPath(".")
-    
-    // Enable Environment Variable Overrides
-    vip.AutomaticEnv()
-    vip.SetEnvPrefix("ECHOMIND") // e.g., ECHOMIND_AI_DEEPSEEK_API_KEY will override ai.deepseek.api_key
-    vip.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// Enable Environment Variable Overrides
+	vip.AutomaticEnv()
+	vip.SetEnvPrefix("ECHOMIND") // e.g., ECHOMIND_AI_DEEPSEEK_API_KEY will override ai.deepseek.api_key
+	vip.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if err := vip.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
 	}
 
-    // Load entire config into struct
-    var appConfig configs.Config
-    if err := vip.Unmarshal(&appConfig); err != nil {
-        log.Fatalf("Unable to decode into struct, %v", err)
-    }
+	// Load entire config into struct
+	var appConfig configs.Config
+	if err := vip.Unmarshal(&appConfig); err != nil {
+		log.Fatalf("Unable to decode into struct, %v", err)
+	}
 
 	// Initialize Zap logger
 	logger, _ := zap.NewProduction()
@@ -72,7 +72,7 @@ func main() {
 
 	// Initialize Gin router
 	r := gin.Default()
-	
+
 	// Enable CORS for frontend development
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
@@ -86,17 +86,26 @@ func main() {
 	// Dependencies for handlers
 	defaultFetcher := &service.DefaultFetcher{}
 
-	    // Initialize Services
-		userService := service.NewUserService(db, appConfig.Server.JWT)
-	    emailService := service.NewEmailService(db)
-	    contactService := service.NewContactService(db) // New ContactService
-	    accountService := service.NewAccountService(db, &appConfig.Security) // Initialize AccountService
-	    syncService := service.NewSyncService(db, defaultFetcher, asynqClient, contactService, accountService, &appConfig) // Pass accountService and appConfig
-		// Initialize Handlers
+	// Initialize Services
+	aiProvider, err := service.NewAIProvider(&appConfig.AI)
+	if err != nil {
+		sugar.Fatalf("Failed to create AI provider: %v", err)
+	}
+
+	userService := service.NewUserService(db, appConfig.Server.JWT)
+	emailService := service.NewEmailService(db)
+	contactService := service.NewContactService(db)
+	accountService := service.NewAccountService(db, &appConfig.Security)
+	insightService := service.NewInsightService(db)
+	aiDraftService := service.NewAIDraftService(aiProvider)
+	syncService := service.NewSyncService(db, &service.DefaultIMAPClient{}, defaultFetcher, asynqClient, contactService, accountService, &appConfig)
+	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
-	syncHandler := handler.NewSyncHandler(syncService) // Pass syncService
+	syncHandler := handler.NewSyncHandler(syncService)
 	emailHandler := handler.NewEmailHandler(emailService)
 	authHandler := handler.NewAuthHandler(userService)
+	insightHandler := handler.NewInsightHandler(insightService)
+	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -116,6 +125,8 @@ func main() {
 			protected.POST("/sync", syncHandler.SyncEmails)
 			protected.GET("/emails", emailHandler.ListEmails)
 			protected.GET("/emails/:id", emailHandler.GetEmail)
+			protected.GET("/insights/network", insightHandler.GetNetworkGraph)
+			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
 		}
 	}
 

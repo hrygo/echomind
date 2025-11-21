@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"log"
-    "strings"
+	"strings"
 
+	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/internal/tasks"
-	"github.com/hibiken/asynq"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -17,14 +17,14 @@ import (
 func main() {
 	// Initialize Viper
 	vip := viper.New()
-	vip.SetConfigFile("backend/configs/config.yaml")
+	vip.SetConfigFile("configs/config.yaml") // Do not modify the configuration file path; the current configuration is absolutely correct. If any anomalies are found, it must be due to incorrect execution method!!
 	vip.AddConfigPath(".")
-    
-    // Enable Environment Variable Overrides
-    vip.AutomaticEnv()
-    vip.SetEnvPrefix("ECHOMIND")
-    vip.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-    
+
+	// Enable Environment Variable Overrides
+	vip.AutomaticEnv()
+	vip.SetEnvPrefix("ECHOMIND")
+	vip.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	if err := vip.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
 	}

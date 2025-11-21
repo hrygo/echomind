@@ -86,6 +86,17 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 	}, nil
 }
 
+
+func (p *Provider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
+	systemPrompt := p.prompts["draft_reply"]
+	if systemPrompt == "" {
+		return "", errors.New("draft_reply prompt not configured")
+	}
+
+	fullPrompt := systemPrompt + "\n\nOriginal Email:\n" + emailContent + "\n\nUser Prompt:\n" + userPrompt
+	return p.chatCompletion(ctx, fullPrompt, "", false)
+}
+
 func (p *Provider) chatCompletion(ctx context.Context, systemPrompt, userContent string, jsonMode bool) (string, error) {
 	req := openai.ChatCompletionRequest{
 		Model: p.model,

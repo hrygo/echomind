@@ -2,14 +2,18 @@ package service_test
 
 import (
 	"context"
+	"encoding/hex"
 	"testing"
 	"time"
 
+	"github.com/emersion/go-imap/client"
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
+	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/pkg/imap"
-	"github.com/emersion/go-imap/client"
+	"github.com/hrygo/echomind/pkg/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -24,13 +28,48 @@ func (m *MockFetcher) FetchEmails(c *client.Client, mailbox string, limit int) (
 	return m.Results, m.Err
 }
 
+// MockIMAPClient implements service.IMAPClient
+type MockIMAPClient struct {
+	DialAndLoginFunc func(addr, username, password string) (*client.Client, error)
+	CloseFunc        func(c *client.Client)
+}
+
+func (m *MockIMAPClient) DialAndLogin(addr, username, password string) (*client.Client, error) {
+	if m.DialAndLoginFunc != nil {
+		return m.DialAndLoginFunc(addr, username, password)
+	}
+	return &client.Client{}, nil // Return a dummy client
+}
+
+func (m *MockIMAPClient) Close(c *client.Client) {
+	if m.CloseFunc != nil {
+		m.CloseFunc(c)
+	}
+}
+
+// MockAsynqClient implements asynqClientInterface for testing.
+type MockAsynqClient struct{
+	EnqueueFunc func(task *asynq.Task, opts ...asynq.Option) (*asynq.TaskInfo, error)
+}
+
+func (m *MockAsynqClient) Enqueue(task *asynq.Task, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	if m.EnqueueFunc != nil {
+		return m.EnqueueFunc(task, opts...)
+	}
+	return &asynq.TaskInfo{}, nil
+}
+
+func (m *MockAsynqClient) Close() error {
+	return nil
+}
+
 func TestSyncEmails(t *testing.T) {
 	// 1. Setup DB
 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("Failed to connect to db: %v", err)
 	}
-	db.AutoMigrate(&model.Email{}, &model.Contact{}) // Also migrate Contact model
+	db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailAccount{}) // Also migrate Contact and EmailAccount models
 
 	// 2. Setup Mock Fetcher
 	now := time.Now()
@@ -51,10 +90,43 @@ func TestSyncEmails(t *testing.T) {
 
 	// 4. Setup SyncService (SUT)
 	// We pass nil for client and asynq client for this unit test
-	syncService := service.NewSyncService(db, nil, fetcher, nil, mockContactService)
+	mockAsynqClient := &MockAsynqClient{} // Use MockAsynqClient
+	mockConfig := &configs.Config{Security: configs.SecurityConfig{EncryptionKey: "d2f4e23a4b5016b994844b91c48a92c1439bbf17b91a37e4a49ab39c3dbee75f"}}
+	mockAccountService := service.NewAccountService(db, &mockConfig.Security)
 
-	// 5. Run Sync
+	// Create a mock IMAP client that does nothing but return a dummy client
+	mockIMAPClient := &MockIMAPClient{
+		DialAndLoginFunc: func(addr, username, password string) (*client.Client, error) {
+			return &client.Client{}, nil // Simulate successful connection and login
+		},
+		CloseFunc: func(c *client.Client) { /* do nothing */ },
+	}
+	syncService := service.NewSyncService(db, mockIMAPClient, fetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig)
+
+	// 5. Create a mock EmailAccount for the user
 	userID := uuid.New() // Generate a new UserID for the test
+
+	encryptionKeyBytes, err := hex.DecodeString(mockConfig.Security.EncryptionKey)
+	if err != nil {
+		t.Fatalf("Failed to decode encryption key: %v", err)
+	}
+	encryptedPassword, err := utils.Encrypt("testpassword", encryptionKeyBytes)
+	if err != nil {
+		t.Fatalf("Failed to encrypt password: %v", err)
+	}
+
+	mockAccount := model.EmailAccount{
+		ID:                uuid.New(),
+		UserID:            userID,
+		Email:             "test@example.com",
+		ServerAddress:     "imap.test.com",
+		ServerPort:        993,
+		Username:          "test@example.com",
+		EncryptedPassword: encryptedPassword, // Use the actually encrypted password
+		IsConnected:       true,
+	}
+	db.Create(&mockAccount)
+
 	ctx := context.Background()
 	err = syncService.SyncEmails(ctx, userID)
 	if err != nil {

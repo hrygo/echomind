@@ -28,6 +28,10 @@ func (m *MockAIProvider) AnalyzeSentiment(ctx context.Context, text string) (ai.
 	return ai.SentimentResult{Sentiment: "Neutral", Urgency: "Low"}, nil
 }
 
+func (m *MockAIProvider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
+	return "Mock Draft Reply", nil
+}
+
 func TestSummaryService_GenerateSummary(t *testing.T) {
 	var mockProvider ai.AIProvider = &MockAIProvider{}
 	svc := service.NewSummaryService(mockProvider)

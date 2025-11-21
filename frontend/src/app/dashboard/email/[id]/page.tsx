@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import apiClient from "@/lib/api";
+import { Button } from "@/components/ui/Button";
+import AIDraftReplyModal from "@/components/email/AIDraftReplyModal";
 
 interface EmailDetail {
   ID: string; // Changed from number to string (UUID)
@@ -24,6 +26,7 @@ export default function EmailDetailPage() {
   const [email, setEmail] = useState<EmailDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -100,6 +103,9 @@ export default function EmailDetailPage() {
               </div>
             )}
           </div>
+          <div className="mt-4 text-right">
+            <Button onClick={() => setIsModalOpen(true)}>Generate AI Draft Reply</Button>
+          </div>
         </div>
       )}
 
@@ -118,6 +124,11 @@ export default function EmailDetailPage() {
           {email.BodyText}
         </div>
       </div>
+      <AIDraftReplyModal
+        emailContent={email.BodyText}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

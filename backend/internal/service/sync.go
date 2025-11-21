@@ -33,19 +33,55 @@ func (d *DefaultFetcher) FetchEmails(c *clientimap.Client, mailbox string, limit
 }
 
 // SyncService handles the business logic for synchronizing emails.
+
+// IMAPClient defines the interface for IMAP client operations that SyncService needs.
+type IMAPClient interface {
+	DialAndLogin(addr, username, password string) (*clientimap.Client, error)
+	Close(c *clientimap.Client)
+}
+
+// DefaultIMAPClient is the default implementation of IMAPClient using go-imap/client.
+type DefaultIMAPClient struct{}
+
+func (d *DefaultIMAPClient) DialAndLogin(addr, username, password string) (*clientimap.Client, error) {
+	c, err := clientimap.DialTLS(addr, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := c.Login(username, password); err != nil {
+		c.Close()
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (d *DefaultIMAPClient) Close(c *clientimap.Client) {
+	c.Close()
+}
+
+// AsynqClientInterface defines the interface for asynq.Client operations that SyncService needs.
+type AsynqClientInterface interface {
+	Enqueue(task *asynq.Task, opts ...asynq.Option) (*asynq.TaskInfo, error)
+}
+
+// SyncService handles the business logic for synchronizing emails.
 type SyncService struct {
 	db          *gorm.DB
+	imapClient  IMAPClient // Use the new IMAPClient interface
 	fetcher     EmailFetcher
-	asynqClient *asynq.Client
+	asynqClient AsynqClientInterface // Use the new AsynqClientInterface
 	contactService *ContactService
 	accountService *AccountService // New dependency for account management
 	config *configs.Config // Need full config to access security.EncryptionKey
 }
 
 // NewSyncService creates a new SyncService.
-func NewSyncService(db *gorm.DB, fetcher EmailFetcher, asynqClient *asynq.Client, contactService *ContactService, accountService *AccountService, config *configs.Config) *SyncService {
+func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, asynqClient AsynqClientInterface, contactService *ContactService, accountService *AccountService, config *configs.Config) *SyncService {
 	return &SyncService{
 		db:          db,
+		imapClient:  imapClient,
 		fetcher:     fetcher,
 		asynqClient: asynqClient,
 		contactService: contactService,
@@ -82,21 +118,14 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
 
 	// 3. Establish IMAP connection (dynamic, per-sync)
 	addr := fmt.Sprintf("%s:%d", account.ServerAddress, account.ServerPort)
-	imapClient, err := clientimap.DialTLS(addr, nil)
+	imapClient, err := s.imapClient.DialAndLogin(addr, account.Username, password)
 	if err != nil {
-		log.Printf("Error dialing IMAP server %s for account %s: %v", addr, account.ID, err)
+		log.Printf("Error dialing/logging into IMAP server %s for account %s: %v", addr, account.ID, err)
 		// Update account status to indicate connection failure
-		s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP connection failed: %v", err), nil)
-		return fmt.Errorf("failed to dial IMAP server: %w", err)
+		s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP connection/login failed: %v", err), nil)
+		return fmt.Errorf("failed to dial/login to IMAP server: %w", err)
 	}
-	defer imapClient.Close()
-
-	if err := imapClient.Login(account.Username, password); err != nil {
-		log.Printf("Error logging into IMAP for account %s: %v", account.ID, err)
-		// Update account status to indicate login failure
-		s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP login failed: %v", err), nil)
-		return fmt.Errorf("failed to login to IMAP server: %w", err)
-	}
+	defer s.imapClient.Close(imapClient)
 
 	// Connection successful, update account status
 	now := time.Now()
@@ -136,6 +165,7 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
 			email.ID = savedEmail.ID
 		} else if result.Error == gorm.ErrRecordNotFound {
 			// Create new
+			email.ID = uuid.New() // Generate new UUID
 			if err := s.db.WithContext(ctx).Create(&email).Error; err != nil {
 				log.Printf("Failed to create email for user %s: %v", userID, err)
 				continue

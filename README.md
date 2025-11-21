@@ -4,14 +4,16 @@
 
 EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI cognitive layer on top of traditional email services. It reads, understands, classifies, and summarizes emails, transforming unstructured communication into structured insights and tasks for executives, managers, and dealmakers.
 
-## 🚀 Features (Current Beta)
+## 🚀 Features (Current Beta v0.5.0)
 
 *   **Multi-Model AI Support**: Switch between DeepSeek, OpenAI, and Gemini via configuration.
 *   **Intelligent Summary**: Generates concise 3-sentence summaries of emails.
+*   **Smart Reply**: AI-generated draft replies based on context and user intent.
+*   **Relationship Intelligence**: Visual network graph of your email connections and interaction frequency.
 *   **Sentiment Radar**: Analyzes email sentiment (Positive/Negative/Neutral) and urgency (High/Medium/Low).
 *   **Contact Intelligence**: Automatically builds a contact database with interaction stats.
 *   **Async Processing**: Robust background job processing with Redis & Asynq.
-*   **Modern UI**: Next.js 14 Dashboard with real-time insights.
+*   **Modern UI**: Next.js 16 Dashboard with real-time insights.
 
 ## 📚 Documentation
 

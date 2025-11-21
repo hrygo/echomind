@@ -9,7 +9,7 @@ import (
 
 // EmailAccount represents a user's configured email account for IMAP synchronization.
 type EmailAccount struct {
-	ID                uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ID                uuid.UUID `gorm:"type:uuid;primary_key"`
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt `gorm:"index"`
