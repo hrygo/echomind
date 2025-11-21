@@ -27,7 +27,7 @@ export default function NetworkGraph() {
   const [graphData, setGraphData] = useState<NetworkGraphData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,6 +58,13 @@ export default function NetworkGraph() {
         setError(err.response?.data?.error || err.message || 'Failed to fetch network graph.');
       } finally {
         setLoading(false);
+        // Wait for next tick to ensure graph is rendered with data
+        setTimeout(() => {
+          if (fgRef.current) {
+            fgRef.current.zoomToFit(400);
+            fgRef.current.d3ReheatSimulation();
+          }
+        }, 100);
       }
     }
 
@@ -86,7 +93,7 @@ export default function NetworkGraph() {
   const nodeLabel = (node: Node) => `${node.label} (Interactions: ${node.interactionCount}, Sentiment: ${node.avgSentiment.toFixed(2)})`;
 
   return (
-    <div ref={containerRef} className="w-full h-[600px] bg-gray-50 rounded-lg shadow-md overflow-hidden">
+    <div ref={containerRef} className="w-full h-full bg-slate-50/50 overflow-hidden">
       <ForceGraph2D
         ref={fgRef}
         width={dimensions.width}
@@ -99,24 +106,29 @@ export default function NetworkGraph() {
           const label = nodeLabel(node as Node);
           const fontSize = 12 / globalScale;
           ctx.font = `${fontSize}px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-          const textWidth = ctx.measureText(label).width;
-          const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.fillRect((node.x || 0) - bckgDimensions[0] / 2, (node.y || 0) - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          
+          // 1. Draw Node Circle
+          const radius = 5;
+          ctx.beginPath();
+          ctx.arc((node.x || 0), (node.y || 0), radius, 0, 2 * Math.PI, false);
           ctx.fillStyle = nodeColor(node as Node);
-          ctx.fillText(label, (node.x || 0), (node.y || 0));
+          ctx.fill();
+          
+          // 2. Draw Text Label
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillStyle = '#475569'; // Slate-600 for text
+          ctx.fillText(label, (node.x || 0), (node.y || 0) + radius + 2);
 
-          node.__bckgDimensions = bckgDimensions as [number, number];
+          // Store dimensions for pointer interaction (approximate for circle)
+          node.__bckgDimensions = [radius * 2, radius * 2]; 
         }}
         nodePointerAreaPaint={(node: Node, color, ctx) => {
           ctx.fillStyle = color;
-          const bckgDimensions = node.__bckgDimensions;
-          if (bckgDimensions) {
-            ctx.fillRect((node.x || 0) - bckgDimensions[0] / 2, (node.y || 0) - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
-          }
+          const radius = 5;
+          ctx.beginPath();
+          ctx.arc((node.x || 0), (node.y || 0), radius + 2, 0, 2 * Math.PI, false); // Slightly larger hit area
+          ctx.fill();
         }}
         linkColor={() => 'rgba(0,0,0,0.2)'}
         linkWidth={link => link.weight * 0.5} // Example: Thicker links for stronger relationships

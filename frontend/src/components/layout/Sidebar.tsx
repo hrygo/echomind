@@ -60,16 +60,16 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-100 min-h-screen flex flex-col shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-20 fixed left-0 top-0 h-full">
+    <aside className="w-64 bg-white border-r border-slate-100 min-h-screen flex flex-col shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-40 fixed left-0 top-0 h-full">
       {/* Logo Section */}
-      <div className="h-16 flex items-center px-5 border-b border-slate-50 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-200/50">
-            <Zap className="text-white w-5 h-5 fill-current" />
+      <div className="h-20 flex items-center px-6 border-b border-slate-50 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200/50">
+            <Zap className="text-white w-6 h-6 fill-current" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-800 tracking-tight leading-none">{t('common.appName')}</h1>
-            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mt-0.5">{t('common.appSlogan')}</p>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">{t('common.appName')}</h1>
+            <p className="text-[11px] font-medium text-slate-400 mt-1 tracking-wide">{t('common.appSlogan')}</p>
           </div>
         </div>
       </div>

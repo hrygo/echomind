@@ -48,7 +48,7 @@ export function ManagerView() {
             <CheckCircle2 className="w-5 h-5 text-blue-600" />
             {t('dashboard.actionItems')}
             <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full ml-2">
-                {activeTasks.length} Pending
+                {activeTasks.length} {t('dashboard.pending')}
             </span>
             </h2>
             
@@ -57,13 +57,13 @@ export function ManagerView() {
                     onClick={() => setFilter('all')}
                     className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${filter === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                 >
-                    All
+                    {t('dashboard.all')}
                 </button>
                 <button 
                     onClick={() => setFilter('high')}
                     className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${filter === 'high' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                 >
-                    High Priority
+                    {t('dashboard.highPriority')}
                 </button>
             </div>
         </div>
@@ -72,7 +72,7 @@ export function ManagerView() {
           {visibleTasks.length === 0 ? (
              <div className="p-8 text-center text-slate-400">
                 <CheckCircle2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                <p>No pending tasks! Great job.</p>
+                <p>{t('dashboard.noPendingTasks')}</p>
              </div>
           ) : (
              <div className="divide-y divide-slate-50">
@@ -95,14 +95,14 @@ export function ManagerView() {
         {/* Stats Widget */}
         <div className="grid grid-cols-2 gap-3">
              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                 <p className="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">Completed</p>
+                 <p className="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">{t('dashboard.completed')}</p>
                  <p className="text-2xl font-bold text-slate-800">14</p>
-                 <p className="text-[10px] text-slate-400">This week</p>
+                 <p className="text-[10px] text-slate-400">{t('dashboard.thisWeek')}</p>
              </div>
              <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-                 <p className="text-xs font-medium text-orange-600 uppercase tracking-wider mb-1">Overdue</p>
+                 <p className="text-xs font-medium text-orange-600 uppercase tracking-wider mb-1">{t('dashboard.overdue')}</p>
                  <p className="text-2xl font-bold text-slate-800">{activeTasks.filter(t => t.isOverdue).length}</p>
-                 <p className="text-[10px] text-slate-400">Action needed</p>
+                 <p className="text-[10px] text-slate-400">{t('dashboard.actionNeeded')}</p>
              </div>
         </div>
 
@@ -127,7 +127,7 @@ export function ManagerView() {
                         <p className="text-xs text-slate-500 truncate">{item.subject}</p>
                     </div>
                     <div className="text-right whitespace-nowrap">
-                        <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded">Waiting</span>
+                        <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded">{t('dashboard.waiting')}</span>
                         <p className="text-[10px] text-slate-400 mt-0.5">{item.time}</p>
                     </div>
                 </div>
@@ -140,6 +140,7 @@ export function ManagerView() {
 }
 
 function TaskItem({ task, onToggle }: { task: Task; onToggle: () => void }) {
+    const { t } = useLanguage();
     return (
         <div 
             onClick={onToggle}
@@ -160,13 +161,13 @@ function TaskItem({ task, onToggle }: { task: Task; onToggle: () => void }) {
                     </h3>
                     {task.isOverdue && task.status !== 'completed' && (
                         <div className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            <AlertCircle className="w-3 h-3" /> Overdue
+                            <AlertCircle className="w-3 h-3" /> {t('dashboard.overdue')}
                         </div>
                     )}
                 </div>
                 
                 <p className="text-xs text-slate-500 mt-1 truncate">
-                    From: <span className="text-slate-600 font-medium">{task.sender}</span>
+                    {t('dashboard.from')} <span className="text-slate-600 font-medium">{task.sender}</span>
                 </p>
 
                 {/* Footer Tags */}
@@ -176,7 +177,7 @@ function TaskItem({ task, onToggle }: { task: Task; onToggle: () => void }) {
                           task.priority === 'Medium' ? 'bg-orange-50 text-orange-700 border-orange-100' :
                           'bg-slate-50 text-slate-600 border-slate-200'}
                     `}>
-                        {task.priority}
+                        {t(`dashboard.${task.priority.toLowerCase()}`)}
                     </span>
                     <span className="flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
                         <Calendar className="w-3 h-3" /> {task.due}

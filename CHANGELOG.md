@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.5.3] - 2025-11-22
+
+### Fixed
+- **Network Graph Rendering**: Resolved blurry canvas issues on high-DPI screens by implementing `ResizeObserver` for dynamic sizing.
+- **API Stability**: Fixed a 500 Internal Server Error in the Network Graph API caused by incorrect User ID type assertion.
+- **Localization**: Completed full Chinese translation for all Dashboard widgets (Smart Feed, Action Center, Intent Radar).
+
+### Changed
+- **Visual Identity**: Simplified the app slogan to "Turn noise into decisions" and increased the logo size in the sidebar for better brand presence.
+- **Layout Optimization**: Improved the Insights page layout to utilize full vertical screen space, removing unnecessary padding and max-width constraints.
+
 ## [v0.5.2] - 2025-11-22
 
 ### Added

@@ -17,11 +17,11 @@ export function ExecutiveView() {
                             <div className="p-2.5 bg-red-50 rounded-xl group-hover:bg-red-100 transition-colors">
                                 <AlertTriangle className="w-5 h-5 text-red-600" />
                             </div>
-                            <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wide">High Risk</span>
+                            <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wide">{t('dashboard.highRisk')}</span>
                         </div>
                         <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{t('dashboard.riskWarning')}</h3>
                         <p className="text-3xl font-bold text-slate-800 tracking-tight">3</p>
-                        <p className="text-xs text-slate-400 mt-2 font-medium">Critical feedback detected</p>
+                        <p className="text-xs text-slate-400 mt-2 font-medium">{t('dashboard.criticalFeedback')}</p>
                     </div>
 
                     {/* Trend Card */}
@@ -34,7 +34,7 @@ export function ExecutiveView() {
                         </div>
                         <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{t('dashboard.weeklyInteraction')}</h3>
                         <p className="text-3xl font-bold text-slate-800 tracking-tight">128</p>
-                        <p className="text-xs text-slate-400 mt-2 font-medium">Key stakeholder engagement</p>
+                        <p className="text-xs text-slate-400 mt-2 font-medium">{t('dashboard.keyStakeholderEngagement')}</p>
                     </div>
 
                     {/* Schedule Card */}
@@ -43,11 +43,11 @@ export function ExecutiveView() {
                             <div className="p-2.5 bg-purple-50 rounded-xl group-hover:bg-purple-100 transition-colors">
                                 <Calendar className="w-5 h-5 text-purple-600" />
                             </div>
-                            <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">Today</span>
+                            <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">{t('dashboard.today')}</span>
                         </div>
                         <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{t('dashboard.pendingDecisions')}</h3>
                         <p className="text-3xl font-bold text-slate-800 tracking-tight">5</p>
-                        <p className="text-xs text-slate-400 mt-2 font-medium">Approval & Budget Review</p>
+                        <p className="text-xs text-slate-400 mt-2 font-medium">{t('dashboard.approvalAndBudgetReview')}</p>
                     </div>
                 </div>
             </section>

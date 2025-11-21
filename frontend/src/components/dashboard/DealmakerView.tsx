@@ -1,6 +1,7 @@
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { ArrowRight, DollarSign, Users, Briefcase, Zap } from 'lucide-react';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const radarData = [
   { subject: 'Buying Intent', A: 120, fullMark: 150 },
@@ -18,15 +19,16 @@ const opportunities = [
 ];
 
 export function DealmakerView() {
+    const { t } = useLanguage();
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Radar Chart Section */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-1 flex flex-col">
                 <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
                     <Zap className="w-5 h-5 text-amber-500" />
-                    Intent Radar
+                    {t('dashboard.intentRadar')}
                 </h3>
-                <p className="text-sm text-slate-500 mb-4">Real-time analysis of email intent signals.</p>
+                <p className="text-sm text-slate-500 mb-4">{t('dashboard.radarDescription')}</p>
                 
                 <div className="flex-1 min-h-[300px] -ml-6">
                     <ResponsiveContainer width="100%" height="100%">
@@ -47,7 +49,7 @@ export function DealmakerView() {
                 </div>
                 <div className="mt-4 text-center">
                     <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
-                        Top Signal: Buying Intent (High)
+                        {t('dashboard.topSignal')}
                     </span>
                 </div>
             </div>
@@ -56,8 +58,8 @@ export function DealmakerView() {
             <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <div className="p-5 border-b border-slate-50 flex justify-between items-center">
-                        <h3 className="text-lg font-bold text-slate-800">Detected Opportunities</h3>
-                        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
+                        <h3 className="text-lg font-bold text-slate-800">{t('dashboard.detectedOpportunities')}</h3>
+                        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">{t('dashboard.viewAll')}</button>
                     </div>
                     <div className="divide-y divide-slate-50">
                         {opportunities.map((opp) => (
@@ -73,7 +75,7 @@ export function DealmakerView() {
                                 </div>
                                 <div className="text-right">
                                     <div className="text-sm font-bold text-slate-700">{opp.value}</div>
-                                    <div className="text-xs font-medium text-green-600 mt-0.5">{opp.confidence}% Confidence</div>
+                                    <div className="text-xs font-medium text-green-600 mt-0.5">{opp.confidence}% {t('dashboard.confidence')}</div>
                                 </div>
                                 <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500" />
                             </div>
@@ -89,8 +91,8 @@ export function DealmakerView() {
                                 <Users className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <h4 className="font-bold">New Connections</h4>
-                                <p className="text-xs text-slate-400">This week</p>
+                                <h4 className="font-bold">{t('dashboard.newConnections')}</h4>
+                                <p className="text-xs text-slate-400">{t('dashboard.thisWeek')}</p>
                             </div>
                         </div>
                         <div className="text-3xl font-bold mb-2">12</div>
@@ -108,8 +110,8 @@ export function DealmakerView() {
                         <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 text-blue-500">
                             <Users className="w-6 h-6" />
                         </div>
-                        <h4 className="font-semibold text-slate-800">Explore Network</h4>
-                        <p className="text-xs text-slate-500 mt-1">View full relationship graph</p>
+                        <h4 className="font-semibold text-slate-800">{t('dashboard.exploreNetwork')}</h4>
+                        <p className="text-xs text-slate-500 mt-1">{t('dashboard.viewFullGraph')}</p>
                     </div>
                 </div>
             </div>

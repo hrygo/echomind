@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertTriangle, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // Define the interface for our Smart Email item
 export interface SmartEmailItem {
@@ -50,6 +51,7 @@ const mockSmartFeed: SmartEmailItem[] = [
 ];
 
 export function SmartFeed() {
+  const { t } = useLanguage();
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
@@ -58,11 +60,11 @@ export function SmartFeed() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
           </span>
-          Smart Feed
-          <span className="text-xs font-normal text-slate-400 ml-2 bg-slate-100 px-2 py-0.5 rounded-full">Priority Only</span>
+          {t('dashboard.smartFeed')}
+          <span className="text-xs font-normal text-slate-400 ml-2 bg-slate-100 px-2 py-0.5 rounded-full">{t('dashboard.priorityOnly')}</span>
         </h3>
         <Link href="/dashboard/inbox?filter=smart" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
-          View All <ArrowRight className="w-4 h-4" />
+          {t('dashboard.viewAll')} <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
 
@@ -76,6 +78,7 @@ export function SmartFeed() {
 }
 
 function SmartFeedCard({ item }: { item: SmartEmailItem }) {
+  const { t } = useLanguage();
   const isHighRisk = item.riskLevel === 'High';
 
   return (
@@ -102,7 +105,7 @@ function SmartFeedCard({ item }: { item: SmartEmailItem }) {
             ${item.riskLevel === 'High' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}
           `}>
             {item.riskLevel === 'High' && <AlertTriangle className="w-3 h-3" />}
-            {item.riskLevel} Risk
+            {t(`dashboard.${item.riskLevel.toLowerCase()}`)} {t('dashboard.risk')}
           </span>
         )}
       </div>
@@ -111,7 +114,7 @@ function SmartFeedCard({ item }: { item: SmartEmailItem }) {
       <div className="ml-13 pl-0">
         <div className="bg-slate-50/80 rounded-lg p-3 text-sm text-slate-700 leading-relaxed border border-slate-100/50 relative">
             <div className="absolute top-3 left-0 w-1 h-full bg-blue-500 rounded-l-lg opacity-0"></div> {/* Decorative bar if needed */}
-            <span className="font-semibold text-blue-600/80 mr-1">AI Summary:</span>
+            <span className="font-semibold text-blue-600/80 mr-1">{t('dashboard.aiSummary')}</span>
             {item.summary}
         </div>
 
@@ -120,18 +123,18 @@ function SmartFeedCard({ item }: { item: SmartEmailItem }) {
             <div className="flex gap-2">
                  {item.suggestedAction === 'Approve' && (
                      <Button className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1.5 shadow-sm shadow-green-200 px-3">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {t('dashboard.approve')}
                      </Button>
                  )}
                  <Button className="h-8 text-slate-600 border border-slate-200 hover:bg-slate-50 bg-transparent px-3">
-                    Reply with AI
+                    {t('dashboard.replyWithAI')}
                  </Button>
             </div>
             
             {/* Suggested Action Label */}
             <div className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
-                Suggested: <span className="text-slate-600">{item.suggestedAction}</span>
+                {t('dashboard.suggested')} <span className="text-slate-600">{t(`dashboard.${item.suggestedAction.toLowerCase()}`)}</span>
             </div>
         </div>
       </div>
