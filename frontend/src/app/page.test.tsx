@@ -10,7 +10,7 @@ describe('Home Page', () => {
 
   it('renders the slogan', () => {
     render(<Home />);
-    const slogan = screen.getByText(/Your external brain for email./i);
+    const slogan = screen.getByText(/Your personal Chief of Staff for email. Turn noise into decisions./i);
     expect(slogan).toBeInTheDocument();
   });
 
