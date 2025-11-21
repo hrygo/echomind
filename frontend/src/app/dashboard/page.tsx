@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import apiClient from "@/lib/api";
 
 // Define Email interface based on API response
@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const categoryFilter = searchParams.get('category');
 
   useEffect(() => {
@@ -53,9 +54,13 @@ export default function DashboardPage() {
       const response = await apiClient.post<{ message: string }>("/sync");
       alert(response.data.message);
       // Optionally refetch or poll if sync is quick, or rely on worker for updates
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Sync error:", err);
-      if (err instanceof Error) {
+      if (err.response && err.response.status === 400) {
+        if (confirm(err.response.data.error + "\n\nGo to Settings now?")) {
+            router.push('/dashboard/settings');
+        }
+      } else if (err instanceof Error) {
         alert(`Sync failed: ${err.message}`);
       } else {
         alert("Sync failed: An unknown error occurred.");
