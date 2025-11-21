@@ -2,12 +2,12 @@ package handler
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
+	"gorm.io/gorm"
 )
 
 // AccountHandler handles requests related to user email accounts.

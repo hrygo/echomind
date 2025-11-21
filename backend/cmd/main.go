@@ -11,7 +11,6 @@ import (
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
-	clientimap "github.com/emersion/go-imap/client"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
@@ -85,7 +84,6 @@ func main() {
 	}))
 
 	// Dependencies for handlers
-	imapClient := &clientimap.Client{}
 	defaultFetcher := &service.DefaultFetcher{}
 
 	    // Initialize Services
