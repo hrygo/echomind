@@ -49,7 +49,7 @@
 *   **ORM**: `GORM` (PostgreSQL)
 *   **Config**: `Viper` (Supports YAML & Environment Variables)
 *   **Async Queue**: `Asynq` (Redis-based) - Used for background email analysis tasks.
-*   **WeChat Gateway**: Handles WeChat XML callbacks, signature verification, and voice processing.
+*   **WeChat Gateway**: Handles WeChat XML callbacks, signature verification, and voice processing via **OpenAI Whisper** (High-accuracy STT).
 *   **Spam Filter**: Rule-based filter (`internal/spam`) to pre-screen emails before AI processing.
 *   **AI Engine**: 
     *   **Architecture**: Adapter Pattern & Factory Pattern.
@@ -58,9 +58,9 @@
         *   `openai`: Uses `go-openai` SDK.
         *   `gemini`: Uses `generative-ai-go` SDK.
         *   `deepseek`: Adapts `openai` implementation with custom BaseURL.
-    *   **RAG Support**:
+    *   **RAG Support (v0.6.0+)**:
         *   **Embeddings**: OpenAI `text-embedding-3-small` or compatible.
-        *   **Vector DB**: `pgvector` (Postgres extension) for storing email embeddings.
+        *   **Vector DB**: **pgvector** (Postgres extension) for storing email embeddings (No external vector DB required).
     *   **Configuration**: Prompts are externalized in `config.yaml`.
 *   **Logging**: `Zap` (Structured Logging)
 
