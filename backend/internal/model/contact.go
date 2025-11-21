@@ -16,6 +16,7 @@ type Contact struct {
 	UserID           uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_email"`
 	Email            string `gorm:"not null;uniqueIndex:idx_user_email"`
 	Name             string
-	InteractionCount int
+	InteractionCount int       `gorm:"default:0;not null"`
 	LastInteractedAt time.Time
+	AvgSentiment     float64   `gorm:"type:numeric(3,2);default:0.0;not null"` // Range: -1.0 to 1.0
 }

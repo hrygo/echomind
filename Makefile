@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status logs restart logs-backend logs-worker logs-frontend
+.PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status restart logs-backend logs-worker logs-frontend
 
 # Version
 VERSION := 0.4.0
@@ -100,7 +100,7 @@ run-frontend: logs
 		echo "⚠️  Port 3000 is already in use. Process might be running."; \
 	else \
 		nohup pnpm --prefix frontend dev > $(FRONTEND_LOG) 2>&1 & \
-		echo "✅ Frontend started (PID: $!)."; \
+		# echo "✅ Frontend started (PID: $!)."; \
 	fi
 
 # Observability

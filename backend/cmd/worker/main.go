@@ -17,7 +17,7 @@ import (
 func main() {
 	// Initialize Viper
 	vip := viper.New()
-	vip.SetConfigFile("configs/config.yaml")
+	vip.SetConfigFile("backend/configs/config.yaml")
 	vip.AddConfigPath(".")
     
     // Enable Environment Variable Overrides
