@@ -95,6 +95,7 @@ func main() {
 	    accountService := service.NewAccountService(db, &appConfig.Security) // Initialize AccountService
 	    syncService := service.NewSyncService(db, defaultFetcher, asynqClient, contactService, accountService, &appConfig) // Pass accountService and appConfig
 		// Initialize Handlers
+	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService) // Pass syncService
 	emailHandler := handler.NewEmailHandler(emailService)
 	authHandler := handler.NewAuthHandler(userService)
@@ -112,6 +113,8 @@ func main() {
 		// Protected routes (require JWT authentication)
 		protected := api.Group("/").Use(middleware.AuthMiddleware(appConfig.Server.JWT))
 		{
+			protected.POST("/settings/account", accountHandler.ConnectAndSaveAccount) // New account route
+			protected.GET("/settings/account", accountHandler.GetAccountStatus)      // New account status route
 			protected.POST("/sync", syncHandler.SyncEmails)
 			protected.GET("/emails", emailHandler.ListEmails)
 			protected.GET("/emails/:id", emailHandler.GetEmail)
