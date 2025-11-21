@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hrygo/echomind/pkg/ai"
 	"github.com/google/generative-ai-go/genai"
+	"github.com/hrygo/echomind/pkg/ai"
 	"google.golang.org/api/option"
 )
 
@@ -30,12 +30,30 @@ func NewProvider(ctx context.Context, apiKey, modelName string, prompts map[stri
 	}, nil
 }
 
-func (p *Provider) Summarize(ctx context.Context, text string) (string, error) {
+func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResult, error) {
 	systemPrompt := p.prompts["summary"]
 	if systemPrompt == "" {
-		return "", errors.New("summary prompt not configured")
+		return ai.AnalysisResult{}, errors.New("summary prompt not configured")
 	}
-	return p.generateContent(ctx, systemPrompt, text)
+
+	model := p.client.GenerativeModel(p.model)
+	model.ResponseMIMEType = "application/json"
+	model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
+
+	resp, err := model.GenerateContent(ctx, genai.Text(text))
+	if err != nil {
+		return ai.AnalysisResult{}, err
+	}
+
+	response := extractText(resp)
+	cleaned := cleanMarkdown(response)
+
+	var result ai.AnalysisResult
+	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
+		return ai.AnalysisResult{Summary: response}, nil
+	}
+
+	return result, nil
 }
 
 func (p *Provider) Classify(ctx context.Context, text string) (string, error) {
@@ -53,23 +71,23 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 	}
 
 	model := p.client.GenerativeModel(p.model)
-    model.ResponseMIMEType = "application/json" // Force JSON mode for Gemini
-    
-    prompt := fmt.Sprintf("%s\n\nEmail Content:\n%s", systemPrompt, text)
-    resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+	model.ResponseMIMEType = "application/json" // Force JSON mode for Gemini
+
+	prompt := fmt.Sprintf("%s\n\nEmail Content:\n%s", systemPrompt, text)
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
 		return ai.SentimentResult{}, err
 	}
-    
-    response := extractText(resp)
+
+	response := extractText(resp)
 
 	var result struct {
 		Sentiment string `json:"sentiment"`
 		Urgency   string `json:"urgency"`
 	}
-    
-    // Gemini usually respects JSON mode well, but we can clean just in case
-    cleaned := cleanMarkdown(response)
+
+	// Gemini usually respects JSON mode well, but we can clean just in case
+	cleaned := cleanMarkdown(response)
 
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
 		return ai.SentimentResult{Sentiment: "Neutral", Urgency: "Medium"}, nil
@@ -83,8 +101,8 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 
 func (p *Provider) generateContent(ctx context.Context, systemPrompt, userContent string) (string, error) {
 	model := p.client.GenerativeModel(p.model)
-    model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
-    
+	model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
+
 	resp, err := model.GenerateContent(ctx, genai.Text(userContent))
 	if err != nil {
 		return "", err
@@ -97,14 +115,14 @@ func extractText(resp *genai.GenerateContentResponse) string {
 	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
 		return ""
 	}
-	
-    var sb strings.Builder
-    for _, part := range resp.Candidates[0].Content.Parts {
-        if txt, ok := part.(genai.Text); ok {
-            sb.WriteString(string(txt))
-        }
-    }
-    return sb.String()
+
+	var sb strings.Builder
+	for _, part := range resp.Candidates[0].Content.Parts {
+		if txt, ok := part.(genai.Text); ok {
+			sb.WriteString(string(txt))
+		}
+	}
+	return sb.String()
 }
 
 func cleanMarkdown(text string) string {
@@ -120,5 +138,5 @@ func cleanMarkdown(text string) string {
 			cleaned = cleaned[:len(cleaned)-3]
 		}
 	}
-    return strings.TrimSpace(cleaned)
+	return strings.TrimSpace(cleaned)
 }

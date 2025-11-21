@@ -21,7 +21,7 @@ func NewSummaryService(provider ai.AIProvider) *SummaryService {
 	}
 }
 
-func (s *SummaryService) GenerateSummary(ctx context.Context, text string) (string, error) {
+func (s *SummaryService) GenerateSummary(ctx context.Context, text string) (ai.AnalysisResult, error) {
 	return s.provider.Summarize(ctx, text)
 }
 
@@ -33,7 +33,7 @@ func (s *SummaryService) AnalyzeSentiment(ctx context.Context, text string) (ai.
 func AIProviderFactory(v *viper.Viper) (ai.AIProvider, error) {
 	providerType := v.GetString("ai.provider")
 	prompts := v.GetStringMapString("ai.prompts")
-	
+
 	switch providerType {
 	case "deepseek":
 		apiKey := v.GetString("ai.deepseek.api_key")

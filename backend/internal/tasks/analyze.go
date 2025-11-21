@@ -7,9 +7,10 @@ import (
 	"log"
 
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/pkg/ai"
-	"github.com/hibiken/asynq"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -33,7 +34,7 @@ func NewEmailAnalyzeTask(emailID, userID uuid.UUID) (*asynq.Task, error) {
 
 // Summarizer defines the interface for summary generation and sentiment analysis.
 type Summarizer interface {
-	GenerateSummary(ctx context.Context, text string) (string, error)
+	GenerateSummary(ctx context.Context, text string) (ai.AnalysisResult, error)
 	AnalyzeSentiment(ctx context.Context, text string) (ai.SentimentResult, error)
 }
 
@@ -52,34 +53,35 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("email %s not found for user %s: %v", p.EmailID, p.UserID, err)
 	}
 
-	// 2. Generate Summary
+	// 2. Generate Summary and Analysis
 	// Use BodyText or fallback to Snippet/Subject
 	textToAnalyze := email.BodyText
 	if textToAnalyze == "" {
 		textToAnalyze = email.Snippet // Fallback
 	}
-	
-	summary, err := summarizer.GenerateSummary(ctx, textToAnalyze)
+
+	analysis, err := summarizer.GenerateSummary(ctx, textToAnalyze)
 	if err != nil {
-		return fmt.Errorf("failed to generate summary for email %s (user %s): %v", p.EmailID, p.UserID, err)
+		return fmt.Errorf("failed to generate analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
 	}
 
-	// 3. Analyze Sentiment
-	sentimentResult, err := summarizer.AnalyzeSentiment(ctx, textToAnalyze)
-	if err != nil {
-		log.Printf("Warning: sentiment analysis failed for email %s (user %s): %v", email.ID, p.UserID, err)
-		// Continue without sentiment? Or fail? Let's continue for now.
-	} else {
-		email.Sentiment = sentimentResult.Sentiment
-		email.Urgency = sentimentResult.Urgency
-	}
+	// 3. Update Email fields
+	email.Summary = analysis.Summary
+	email.Category = analysis.Category
+	email.Sentiment = analysis.Sentiment
+	email.Urgency = analysis.Urgency
+	email.ActionItems = datatypes.JSON(jsonRaw(analysis.ActionItems))
 
 	// 4. Update Email, ensure it belongs to the user
-	email.Summary = summary
 	if err := db.WithContext(ctx).Where("user_id = ?", p.UserID).Save(&email).Error; err != nil {
 		return fmt.Errorf("failed to save analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
 	}
-	
-	log.Printf("Analysis complete for email %s (user %s). Summary: %s, Sentiment: %s", p.EmailID, p.UserID, summary, email.Sentiment)
+
+	log.Printf("Analysis complete for email %s (user %s). Category: %s, Sentiment: %s", p.EmailID, p.UserID, email.Category, email.Sentiment)
 	return nil
+}
+
+func jsonRaw(v interface{}) []byte {
+	b, _ := json.Marshal(v)
+	return b
 }

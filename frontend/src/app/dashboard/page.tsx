@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 import apiClient from "@/lib/api";
 
 // Define Email interface based on API response
@@ -13,17 +14,24 @@ interface Email {
   Summary: string;
   Sentiment: string;
   Urgency: string;
+  Category: string; // New field from AI analysis
+  ActionItems: string[]; // New field from AI analysis
 }
 
 export default function DashboardPage() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const categoryFilter = searchParams.get('category');
 
   useEffect(() => {
     async function fetchEmails() {
       try {
-        const response = await apiClient.get<Email[]>("/emails");
+        setLoading(true);
+        setError(null);
+        const url = categoryFilter ? `/emails?category=${categoryFilter}` : "/emails";
+        const response = await apiClient.get<Email[]>(url);
         setEmails(response.data);
       } catch (err: unknown) {
         console.error("Error fetching emails:", err);
@@ -38,7 +46,7 @@ export default function DashboardPage() {
     }
 
     fetchEmails();
-  }, []);
+  }, [categoryFilter]); // Re-fetch when categoryFilter changes
 
   const handleSync = async () => {
     try {
@@ -86,14 +94,14 @@ export default function DashboardPage() {
                   <h3 className="text-lg font-medium text-gray-900 mb-1">{email.Subject}</h3>
                   <div className="flex items-center gap-2 mt-2">
                     <p className="text-sm text-gray-600 line-clamp-2 flex-1">{email.Summary || "Analysis pending..."}</p>
-                    {email.Urgency === "High" && (
-                      <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded border border-red-200 shrink-0">
-                        High Priority
+                    {email.Sentiment && (
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded border shrink-0 ${email.Sentiment === 'Positive' ? 'bg-green-100 text-green-800 border-green-200' : email.Sentiment === 'Negative' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                        {email.Sentiment}
                       </span>
                     )}
-                    {email.Sentiment === "Negative" && (
-                      <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded border border-orange-200 shrink-0">
-                        Negative
+                    {email.Urgency && (
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded border shrink-0 ${email.Urgency === 'High' ? 'bg-orange-100 text-orange-800 border-orange-200' : email.Urgency === 'Medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : 'bg-blue-100 text-blue-800 border-blue-200'}`}>
+                        {email.Urgency} Urgency
                       </span>
                     )}
                   </div>

@@ -30,6 +30,22 @@ ai:
     model: "gemini-2.5-flash" # Options: gemini-2.5-flash, gemini-2.5-pro, gemini-3.0-pro
     
   prompts:
-    summary: "You are a professional executive assistant. Your goal is to summarize the following email into a concise 3-sentence summary highlighting the key actions, decisions, or information. Do not use conversational filler."
+    summary: |
+      You are a professional executive assistant. Your goal is to analyze the following email and return a structured JSON object with the following fields:
+      - "summary": A concise 3-sentence summary highlighting the key actions, decisions, or information.
+      - "category": Classify the email into one of these categories: 'Work', 'Newsletter', 'Notification', 'Personal', 'Spam'.
+      - "sentiment": Determine the overall sentiment: 'Positive', 'Neutral', 'Negative'.
+      - "urgency": Determine the urgency: 'High', 'Medium', 'Low'.
+      - "action_items": A list of extracted action items or tasks from the email. If no action items, return an empty array.
+      Do not use conversational filler. Example output:
+      ```json
+      {
+        "summary": "This is a concise summary of the email.",
+        "category": "Work",
+        "sentiment": "Neutral",
+        "urgency": "Medium",
+        "action_items": ["Follow up on project X", "Schedule meeting with team Y"]
+      }
+      ```
     classify: "Classify the following email into one of these categories: 'Work', 'Newsletter', 'Notification', 'Personal', 'Spam'. Return ONLY the category name."
     sentiment: 'Analyze the sentiment and urgency of the following email. Return the result in JSON format: {"sentiment": "Positive" | "Neutral" | "Negative", "urgency": "High" | "Medium" | "Low"}.'

@@ -28,12 +28,25 @@ func NewProvider(apiKey, model, baseURL string, prompts map[string]string) *Prov
 	}
 }
 
-func (p *Provider) Summarize(ctx context.Context, text string) (string, error) {
+func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResult, error) {
 	systemPrompt := p.prompts["summary"]
 	if systemPrompt == "" {
-		return "", errors.New("summary prompt not configured")
+		return ai.AnalysisResult{}, errors.New("summary prompt not configured")
 	}
-	return p.chatCompletion(ctx, systemPrompt, text, false)
+
+	response, err := p.chatCompletion(ctx, systemPrompt, text, true)
+	if err != nil {
+		return ai.AnalysisResult{}, err
+	}
+
+	cleaned := cleanMarkdown(response)
+	var result ai.AnalysisResult
+	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
+		// Fallback if JSON parsing fails
+		return ai.AnalysisResult{Summary: response}, nil
+	}
+
+	return result, nil
 }
 
 func (p *Provider) Classify(ctx context.Context, text string) (string, error) {
@@ -59,8 +72,8 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 		Sentiment string `json:"sentiment"`
 		Urgency   string `json:"urgency"`
 	}
-	
-    // Clean markdown if present
+
+	// Clean markdown if present
 	cleaned := cleanMarkdown(response)
 
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
@@ -113,5 +126,5 @@ func cleanMarkdown(text string) string {
 			cleaned = cleaned[:len(cleaned)-3]
 		}
 	}
-    return strings.TrimSpace(cleaned)
+	return strings.TrimSpace(cleaned)
 }

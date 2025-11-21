@@ -35,16 +35,16 @@
 
 **Focus**: AI Classification, Action Item Extraction, Smart Dashboard.
 
-- [ ] **Foundation & Cleanup**:
-    - [ ] **Commit Staged Changes**: Auth persistence fixes, Dashboard scaffolding, Backend/Infra updates.
-- [ ] **Backend: AI Analysis Engine**:
-    - [ ] **Refine Summary**: Update `Summarize` prompt to return structured JSON (Category, Sentiment, Action Items).
-    - [ ] **Model Update**: Add `Category`, `ActionItems` (JSONB) to `Email` model.
-    - [ ] **Classifier**: Implement logic to auto-tag emails (Work, Personal, Newsletter).
-- [ ] **Frontend: Smart Dashboard**:
-    - [ ] **Filters**: Add Sidebar/Tabs for `Category` filtering.
-    - [ ] **Action Items**: Display extracted tasks in Email Detail view.
-    - [ ] **Visuals**: Add badges for `Sentiment` and `Urgency`.
+- [x] **Foundation & Cleanup**:
+    - [x] **Commit Staged Changes**: Auth persistence fixes, Dashboard scaffolding, Backend/Infra updates.
+- [x] **Backend: AI Analysis Engine**:
+    - [x] **Refine Summary**: Update `Summarize` prompt to return structured JSON (Category, Sentiment, Action Items).
+    - [x] **Model Update**: Add `Category`, `ActionItems` (JSONB) to `Email` model.
+    - [x] **Classifier**: Implement logic to auto-tag emails (Work, Personal, Newsletter).
+- [x] **Frontend: Smart Dashboard**:
+    - [x] **Filters**: Add Sidebar/Tabs for `Category` filtering.
+    - [x] **Action Items**: Display extracted tasks in Email Detail view.
+    - [x] **Visuals**: Add badges for `Sentiment` and `Urgency`.
 
 ---
 

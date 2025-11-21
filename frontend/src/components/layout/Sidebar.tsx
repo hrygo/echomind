@@ -10,8 +10,18 @@ export function Sidebar() {
         <NavItem href="/dashboard" label="Inbox" active />
         <NavItem href="/dashboard/tasks" label="Tasks" />
         <NavItem href="/dashboard/insights" label="Insights" />
-        <NavItem href="/dashboard/settings" label="Settings" />
+        <NavItem href="/dashboard/settings" />
       </nav>
+      <div className="p-4 border-t border-gray-200 mt-auto">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Categories</h3>
+        <div className="space-y-1">
+          <NavItem href="/dashboard?category=Work" label="Work" />
+          <NavItem href="/dashboard?category=Personal" label="Personal" />
+          <NavItem href="/dashboard?category=Newsletter" label="Newsletter" />
+          <NavItem href="/dashboard?category=Notification" label="Notification" />
+          <NavItem href="/dashboard?category=Spam" label="Spam" />
+        </div>
+      </div>
     </aside>
   );
 }

@@ -14,6 +14,8 @@ interface EmailDetail {
   Summary: string;
   Sentiment: string;
   Urgency: string;
+  Category: string; // New field from AI analysis
+  ActionItems: string[]; // New field from AI analysis
 }
 
 export default function EmailDetailPage() {
@@ -85,7 +87,18 @@ export default function EmailDetailPage() {
           </div>
           <div className="text-indigo-800">
             <p className="font-medium mb-1">Summary:</p>
-            <p>{email.Summary}</p>
+            <p className="mb-4">{email.Summary}</p>
+
+            {email.ActionItems && email.ActionItems.length > 0 && (
+              <div className="mt-4">
+                <p className="font-medium mb-1">Action Items:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  {email.ActionItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}
