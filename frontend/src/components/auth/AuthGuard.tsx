@@ -17,13 +17,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
         if (isPublicPath) {
             // Allow access to public pages
-            setIsChecking(false);
+            setTimeout(() => setIsChecking(false), 0);
         } else if (!isAuthenticated || !token) {
             // Redirect to login if trying to access protected page without auth
             router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
         } else {
             // User is authenticated and accessing protected page
-            setIsChecking(false);
+            setTimeout(() => setIsChecking(false), 0);
         }
     }, [isAuthenticated, token, router, pathname]);
 

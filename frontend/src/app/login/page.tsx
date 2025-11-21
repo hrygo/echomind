@@ -1,5 +1,7 @@
 'use client';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -17,6 +19,11 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { AlertCircle } from 'lucide-react';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface AuthErrorResponse {
+  error: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,7 +47,7 @@ export default function LoginPage() {
       const { token, user } = response.data;
       setAuth(token, user);
       router.push('/dashboard'); // Redirect to dashboard after login
-    } catch (err: any) {
+    } catch (err: AxiosError<AuthErrorResponse>) {
       setError(
         err.response?.data?.error || 'Invalid email or password. Please try again.'
       );

@@ -1,5 +1,7 @@
 'use client';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,6 +18,11 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { AlertCircle } from 'lucide-react';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface AuthErrorResponse {
+  error: string;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -45,7 +52,7 @@ export default function RegisterPage() {
       });
       // Redirect to login on success with a query param to show success message
       router.push('/login?registered=true');
-    } catch (err: any) {
+    } catch (err: AxiosError<AuthErrorResponse>) {
       setError(
         err.response?.data?.error || 'Registration failed. Please try again.'
       );

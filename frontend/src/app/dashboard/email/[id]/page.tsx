@@ -31,9 +31,13 @@ export default function EmailDetailPage() {
         // Ensure `id` is treated as a string for UUID
         const response = await apiClient.get<EmailDetail>(`/emails/${id}`);
         setEmail(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching email:", err);
-        setError(err.message || "Failed to load email.");
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Failed to load email.");
+        }
       } finally {
         setLoading(false);
       }

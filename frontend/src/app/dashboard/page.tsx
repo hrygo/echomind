@@ -25,9 +25,13 @@ export default function DashboardPage() {
       try {
         const response = await apiClient.get<Email[]>("/emails");
         setEmails(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching emails:", err);
-        setError(err.message || "Failed to load emails.");
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Failed to load emails.");
+        }
       } finally {
         setLoading(false);
       }
@@ -41,9 +45,13 @@ export default function DashboardPage() {
       const response = await apiClient.post<{ message: string }>("/sync");
       alert(response.data.message);
       // Optionally refetch or poll if sync is quick, or rely on worker for updates
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Sync error:", err);
-      alert(`Sync failed: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`Sync failed: ${err.message}`);
+      } else {
+        alert("Sync failed: An unknown error occurred.");
+      }
     }
   };
 
