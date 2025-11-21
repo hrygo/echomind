@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
@@ -66,8 +67,12 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
 	}
 
 	// 2. Decrypt password
-	decryptionKey := s.config.Security.EncryptionKey // Access config via accountService
-	password, err := utils.Decrypt(account.EncryptedPassword, []byte(decryptionKey))
+	keyBytes, err := hex.DecodeString(s.config.Security.EncryptionKey)
+	if err != nil {
+		return fmt.Errorf("invalid encryption key configuration: %w", err)
+	}
+
+	password, err := utils.Decrypt(account.EncryptedPassword, keyBytes)
 	if err != nil {
 		log.Printf("Error decrypting password for account %s: %v", account.ID, err)
 		// Update account status to indicate decryption failure

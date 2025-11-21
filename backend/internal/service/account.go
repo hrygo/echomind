@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -36,7 +37,12 @@ func (s *AccountService) ConnectAndSaveAccount(ctx context.Context, userID uuid.
 	}
 
 	// 2. Encrypt password
-	encryptedPassword, err := utils.Encrypt(input.Password, []byte(s.config.EncryptionKey))
+	keyBytes, err := hex.DecodeString(s.config.EncryptionKey)
+	if err != nil {
+		return nil, fmt.Errorf("invalid encryption key configuration: %w", err)
+	}
+
+	encryptedPassword, err := utils.Encrypt(input.Password, keyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt password: %w", err)
 	}
