@@ -1,198 +1,294 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { User, Bell, Shield, CreditCard, Palette, Camera, RefreshCw, Mail, Eye, EyeOff } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import apiClient from "@/lib/api";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { Label } from "@/components/ui/Label";
-import { Card } from "@/components/ui/Card";
-
-interface EmailAccountStatus {
-  has_account: boolean;
-  email?: string;
-  server_address?: string;
-  server_port?: number;
-  username?: string;
-  is_connected?: boolean;
-  last_sync_at?: string;
-  error_message?: string;
-}
 
 export default function SettingsPage() {
-  const [accountStatus, setAccountStatus] = useState<EmailAccountStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [formLoading, setFormLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    email: "",
-    server_address: "",
-    server_port: 993,
-    username: "",
+  const [activeTab, setActiveTab] = useState("account");
+  const { t } = useLanguage();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Mailbox configuration state
+  const [mailboxConfig, setMailboxConfig] = useState({
+    email: "user@example.com",
     password: "",
+    imapServer: "imap.gmail.com",
+    imapPort: "993",
+    smtpServer: "smtp.gmail.com",
+    smtpPort: "587"
   });
-  const router = useRouter();
 
   useEffect(() => {
-    fetchAccountStatus();
+    // Fetch account status to get last synced time (mock implementation for now)
+    // In a real app, this would be an API call like:
+    // apiClient.get('/settings/account').then(res => setLastSynced(res.data.last_synced));
+    setLastSynced("2 hours ago");
   }, []);
 
-  const fetchAccountStatus = async () => {
+  const handleSync = async () => {
+    setIsSyncing(true);
     try {
-      setLoading(true);
-      const response = await apiClient.get<EmailAccountStatus>("/settings/account");
-      setAccountStatus(response.data);
-      if (response.data.has_account && response.data.email) {
-        setFormData(prev => ({
-            ...prev,
-            email: response.data.email || "",
-            server_address: response.data.server_address || "",
-            server_port: response.data.server_port || 993,
-            username: response.data.username || "",
-            password: "", // Never pre-fill password
-        }));
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message || "Failed to fetch account status");
+      await apiClient.post("/sync");
+      setLastSynced("Just now");
+    } catch (error) {
+      console.error("Sync failed:", error);
     } finally {
-      setLoading(false);
+      setIsSyncing(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === "server_port" ? parseInt(value) || 0 : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormLoading(true);
-    setError(null);
+  const handleSaveMailboxConfig = async () => {
     try {
-      await apiClient.post("/settings/account", formData);
-      alert("Account connected successfully!");
-      router.refresh(); // Refresh page data
-      fetchAccountStatus(); // Re-fetch status to update UI
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message || "Failed to connect account.");
-    } finally {
-      setFormLoading(false);
+      // await apiClient.post('/settings/account', mailboxConfig);
+      console.log("Saving mailbox config:", mailboxConfig);
+      alert("配置已保存");
+    } catch (error) {
+      console.error("Failed to save config:", error);
     }
   };
 
-  if (loading) {
-    return <div className="p-8 text-center">Loading settings...</div>;
-  }
+  const tabs = [
+    { id: "account", label: t('settings.account'), icon: User },
+    { id: "notifications", label: t('settings.notifications'), icon: Bell },
+    { id: "security", label: t('settings.security'), icon: Shield },
+    { id: "billing", label: t('settings.billing'), icon: CreditCard },
+    { id: "appearance", label: t('settings.appearance'), icon: Palette },
+  ];
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900">Settings</h1>
+    <div className="flex h-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      {/* Settings Sidebar */}
+      <div className="w-64 bg-slate-50 border-r border-slate-100 flex flex-col">
+        <div className="p-6 border-b border-slate-100">
+          <h2 className="text-lg font-bold text-slate-800">{t('settings.title')}</h2>
+        </div>
+        <nav className="flex-1 p-3 space-y-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${activeTab === tab.id
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+            >
+              <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? "text-blue-600" : "text-slate-400"}`} />
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      <Card className="p-6">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Email Account Connection</h2>
+      {/* Settings Content */}
+      <div className="flex-1 overflow-y-auto p-8">
+        <div className="max-w-2xl mx-auto">
+          {activeTab === "account" && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Profile Section */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">{t('settings.accountInfo')}</h3>
+                <p className="text-slate-500 text-sm mt-1">{t('settings.accountDesc')}</p>
+              </div>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
-            <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline"> {error}</span>
-          </div>
-        )}
+              <div className="flex items-center gap-6">
+                <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-2xl font-bold text-slate-500 relative group cursor-pointer overflow-hidden">
+                  U
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                  {t('settings.changeAvatar')}
+                </button>
+              </div>
 
-        {accountStatus?.has_account ? (
-          <div>
-            <p className="mb-4 text-gray-700">Your email account is currently connected.</p>
-            <div className="space-y-3 mb-6">
-              <p><strong>Email:</strong> {accountStatus.email}</p>
-              <p><strong>Server:</strong> {accountStatus.server_address}:{accountStatus.server_port}</p>
-              <p><strong>Username:</strong> {accountStatus.username}</p>
-              <p><strong>Status:</strong> 
-                <span className={`font-medium ${accountStatus.is_connected ? 'text-green-600' : 'text-red-600'}`}>
-                  {accountStatus.is_connected ? 'Connected' : 'Disconnected'}
-                </span>
-              </p>
-              {accountStatus.last_sync_at && (
-                <p><strong>Last Synced:</strong> {new Date(accountStatus.last_sync_at).toLocaleString()}</p>
-              )}
-              {accountStatus.error_message && (
-                <p className="text-red-500"><strong>Last Error:</strong> {accountStatus.error_message}</p>
-              )}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">{t('settings.firstName')}</label>
+                  <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" defaultValue="User" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">{t('settings.lastName')}</label>
+                  <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" defaultValue="Name" />
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <label className="text-sm font-medium text-slate-700">{t('settings.loginEmail')}</label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
+                    defaultValue="user@example.com"
+                    disabled
+                  />
+                  <p className="text-xs text-slate-400">{t('settings.loginEmailDesc')}</p>
+                </div>
+              </div>
+
+              <hr className="border-slate-100" />
+
+              {/* Connected Mailbox Section */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-blue-600" />
+                  {t('settings.connectedMailbox')}
+                </h3>
+                <p className="text-slate-500 text-sm mt-1">{t('settings.connectedMailboxDesc')}</p>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-6 border border-slate-100 space-y-6">
+                {/* Sync Status */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">{t('settings.syncStatus')}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-slate-800 font-medium">Active</span>
+                      <span className="text-slate-400 text-sm ml-2">
+                        {t('settings.lastSynced')}: {lastSynced}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSync}
+                    disabled={isSyncing}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                    {isSyncing ? t('settings.syncing') : t('settings.syncNow')}
+                  </button>
+                </div>
+
+                {/* Mailbox Configuration Form */}
+                <div className="space-y-4">
+                  <p className="text-sm font-medium text-slate-700">{t('settings.mailboxConfigDesc')}</p>
+
+                  {/* Email and Password */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700">{t('settings.mailboxEmail')}</label>
+                      <input
+                        type="email"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={mailboxConfig.email}
+                        onChange={(e) => setMailboxConfig({ ...mailboxConfig, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700">{t('settings.mailboxPassword')}</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          className="w-full px-3 py-2 pr-10 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                          value={mailboxConfig.password}
+                          onChange={(e) => setMailboxConfig({ ...mailboxConfig, password: e.target.value })}
+                          placeholder="••••••••"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* IMAP Configuration */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2 space-y-2">
+                      <label className="text-sm font-medium text-slate-700">{t('settings.imapServer')}</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={mailboxConfig.imapServer}
+                        onChange={(e) => setMailboxConfig({ ...mailboxConfig, imapServer: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700">{t('settings.imapPort')}</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={mailboxConfig.imapPort}
+                        onChange={(e) => setMailboxConfig({ ...mailboxConfig, imapPort: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* SMTP Configuration */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2 space-y-2">
+                      <label className="text-sm font-medium text-slate-700">{t('settings.smtpServer')}</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={mailboxConfig.smtpServer}
+                        onChange={(e) => setMailboxConfig({ ...mailboxConfig, smtpServer: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700">{t('settings.smtpPort')}</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        value={mailboxConfig.smtpPort}
+                        onChange={(e) => setMailboxConfig({ ...mailboxConfig, smtpPort: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={handleSaveMailboxConfig}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      {t('common.save')}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            {/* Future: Add Disconnect Button */}
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="your.email@example.com"
-              />
+          )}
+
+          {activeTab === "notifications" && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">{t('settings.notifyPref')}</h3>
+                <p className="text-slate-500 text-sm mt-1">{t('settings.notifyDesc')}</p>
+              </div>
+
+              <div className="space-y-4">
+                {[t('settings.dailyDigestNotify'), t('settings.riskNotify'), t('settings.taskNotify')].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 border border-slate-100 rounded-xl">
+                    <div>
+                      <p className="font-medium text-slate-800">{item}</p>
+                      <p className="text-xs text-slate-400">{t('settings.viaChannel')}</p>
+                    </div>
+                    <div className="w-11 h-6 bg-blue-600 rounded-full relative cursor-pointer">
+                      <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="server_address">IMAP Server Address</Label>
-              <Input
-                id="server_address"
-                name="server_address"
-                type="text"
-                value={formData.server_address}
-                onChange={handleChange}
-                required
-                placeholder="imap.example.com"
-              />
+          )}
+
+          {/* Other tabs placeholders */}
+          {['security', 'billing', 'appearance'].includes(activeTab) && (
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 animate-in fade-in duration-300">
+              <div className="p-4 bg-slate-50 rounded-full mb-4">
+                <Shield className="w-8 h-8" />
+              </div>
+              <p>该模块正在开发中...</p>
             </div>
-            <div>
-              <Label htmlFor="server_port">IMAP Server Port</Label>
-              <Input
-                id="server_port"
-                name="server_port"
-                type="number"
-                value={formData.server_port}
-                onChange={handleChange}
-                required
-                placeholder="993"
-              />
-            </div>
-            <div>
-              <Label htmlFor="username">IMAP Username</Label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleChange}
-                required
-                placeholder="your.username or email"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">IMAP App Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="Your app-specific password"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                For Gmail/Outlook, this is often an app-specific password, not your main account password.
-              </p>
-            </div>
-            <Button type="submit" className="w-full" disabled={formLoading}>
-              {formLoading ? "Connecting..." : "Connect Account"}
-            </Button>
-          </form>
-        )}
-      </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

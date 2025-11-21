@@ -10,9 +10,35 @@ import (
 	"github.com/hrygo/echomind/internal/tasks"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+// ZapLoggerAdapter adapts zap.Logger to asynq.Logger interface
+type ZapLoggerAdapter struct {
+	logger *zap.Logger
+}
+
+func (l *ZapLoggerAdapter) Debug(args ...interface{}) {
+	l.logger.Sugar().Debug(args...)
+}
+
+func (l *ZapLoggerAdapter) Info(args ...interface{}) {
+	l.logger.Sugar().Info(args...)
+}
+
+func (l *ZapLoggerAdapter) Warn(args ...interface{}) {
+	l.logger.Sugar().Warn(args...)
+}
+
+func (l *ZapLoggerAdapter) Error(args ...interface{}) {
+	l.logger.Sugar().Error(args...)
+}
+
+func (l *ZapLoggerAdapter) Fatal(args ...interface{}) {
+	l.logger.Sugar().Fatal(args...)
+}
 
 func main() {
 	// Initialize Viper
@@ -29,21 +55,27 @@ func main() {
 		log.Fatalf("Error reading config file, %s", err)
 	}
 
-	// Logger
-	logger, _ := zap.NewProduction()
+	// Logger Configuration
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	logger, _ := config.Build()
 	defer logger.Sync()
+
+	// Replace global logger
+	zap.ReplaceGlobals(logger)
 
 	// Database
 	dsn := vip.GetString("database.dsn")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.Fatal("Failed to connect to database", zap.Error(err))
 	}
 
 	// AI Service
 	aiProvider, err := service.AIProviderFactory(vip)
 	if err != nil {
-		log.Fatalf("Failed to create AI provider: %v", err)
+		logger.Fatal("Failed to create AI provider", zap.Error(err))
 	}
 	summarizer := service.NewSummaryService(aiProvider)
 
@@ -51,7 +83,10 @@ func main() {
 	redisAddr := vip.GetString("redis.addr")
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{Addr: redisAddr},
-		asynq.Config{Concurrency: 10},
+		asynq.Config{
+			Concurrency: 10,
+			Logger:      &ZapLoggerAdapter{logger: logger},
+		},
 	)
 
 	// Mux
@@ -61,6 +96,6 @@ func main() {
 	})
 
 	if err := srv.Run(mux); err != nil {
-		log.Fatalf("could not run server: %v", err)
+		logger.Fatal("could not run server", zap.Error(err))
 	}
 }

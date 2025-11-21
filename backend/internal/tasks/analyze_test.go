@@ -21,9 +21,11 @@ type MockSummarizer struct {
 	SentimentResult ai.SentimentResult
 	SummaryError    error
 	SentimentError  error
+	CallCount       int
 }
 
 func (m *MockSummarizer) GenerateSummary(ctx context.Context, text string) (ai.AnalysisResult, error) {
+	m.CallCount++
 	return m.SummaryResult, m.SummaryError
 }
 
@@ -91,7 +93,7 @@ func TestUpdateContactStats_ExistingContact(t *testing.T) {
 	err = db.Where("user_id = ? AND email = ?", userID, emailAddress).First(&updatedContact).Error
 	assert.NoError(t, err)
 	assert.Equal(t, 2, updatedContact.InteractionCount)
-	assert.Equal(t, (0.5*1 + -1.0)/2, updatedContact.AvgSentiment)
+	assert.Equal(t, (0.5*1+-1.0)/2, updatedContact.AvgSentiment)
 	assert.WithinDuration(t, newInteractedAt, updatedContact.LastInteractedAt, time.Second)
 }
 
@@ -150,4 +152,48 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 	assert.Equal(t, 1, contact.InteractionCount)
 	assert.Equal(t, 1.0, contact.AvgSentiment)
 	assert.WithinDuration(t, emailDate, contact.LastInteractedAt, time.Second)
+}
+
+func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
+	db := setupTestDB(t)
+	ctx := context.Background()
+
+	userID := uuid.New()
+	emailID := uuid.New()
+	senderEmail := "spammer@example.com"
+	emailDate := time.Now()
+
+	// Create a mock spam email
+	email := model.Email{
+		ID:        emailID,
+		UserID:    userID,
+		MessageID: "<spam-message-id>",
+		Subject:   "Unsubscribe from our newsletter",
+		Sender:    senderEmail,
+		Date:      emailDate,
+		BodyText:  "This is a spam email.",
+	}
+	db.Create(&email)
+
+	// Mock the summarizer
+	mockSummarizer := &MockSummarizer{}
+
+	// Create the task payload
+	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
+	task := asynq.NewTask(TypeEmailAnalyze, payload)
+
+	// Handle the task
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer)
+	assert.NoError(t, err)
+
+	// Verify email was updated as spam
+	var updatedEmail model.Email
+	db.First(&updatedEmail, "id = ?", emailID)
+	assert.Equal(t, "Spam", updatedEmail.Category)
+	assert.Equal(t, "Neutral", updatedEmail.Sentiment)
+	assert.Contains(t, updatedEmail.Summary, "Auto-detected as spam")
+	assert.Equal(t, "Low", updatedEmail.Urgency)
+
+	// Verify Summarizer was NOT called
+	assert.Equal(t, 0, mockSummarizer.CallCount)
 }

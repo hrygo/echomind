@@ -2,7 +2,7 @@
 
 > **Vision**: AI-powered Email Decision System. "External Brain for Executive Communication."
 > **Stage**: v0.5.1 (Stable/Beta).
-> **Active Sprint**: Phase 5 - Commercialization.
+> **Active Sprint**: Phase 5.1 - Dashboard UX Optimization.
 
 ## 1. The Golden Rules (Non-Negotiable)
 
@@ -46,13 +46,15 @@
 ### ✅ Completed (v0.1.0 - v0.5.1)
 *   **Core**: IMAP Sync, Email Parsing, Auth (JWT).
 *   **AI**: Summary, Sentiment, Classification, Contact Intelligence, Smart Reply.
+*   **Optimization**: Spam filtering to reduce AI usage.
 *   **UI**: Dashboard, Insights Graph, Account Settings.
 
-### 🚧 In Progress (Phase 5: v0.6.0 Target)
-*   **Monetization**: Stripe Integration, Webhooks.
-*   **Quotas**: Usage limits per user/org.
-*   **Teams**: Organization support.
+### 🚧 In Progress (Phase 5: v0.6.0 - v0.7.0)
+*   **Teams**: Organization, Shared Labels, Comments.
+*   **Optimization**: Search, Caching, Reliability.
+*   **Infrastructure**: 优化重构日志框架 (Logging Framework Refactoring).
 
-### 🔮 Future
-*   **Desktop App**: Flutter/Electron.
-*   **Advanced RAG**: Search across email history.
+### 🔮 Future Roadmap (6-Month Plan)
+*   **Phase 6 (Feb-Mar)**: AI-First Evolution (RAG, Multi-modal, Proactive Agents).
+*   **Phase 7 (Apr-May)**: Cross-Platform (Desktop, WeChat Voice AI).
+*   **Phase 8 (Jun+)**: Commercialization (Stripe, SSO).

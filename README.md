@@ -13,6 +13,7 @@ EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI co
 *   **Sentiment Radar**: Analyzes email sentiment (Positive/Negative/Neutral) and urgency (High/Medium/Low).
 *   **Contact Intelligence**: Automatically builds a contact database with interaction stats.
 *   **Async Processing**: Robust background job processing with Redis & Asynq.
+*   **Spam Filtering**: Rule-based filtering to skip AI analysis for spam emails, optimizing costs.
 *   **Modern UI**: Next.js 16 Dashboard with real-time insights.
 
 ## 📚 Documentation

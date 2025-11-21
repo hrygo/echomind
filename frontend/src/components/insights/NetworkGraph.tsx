@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
+import apiClient from '@/lib/api';
 
 interface Node {
   id: string;
@@ -28,28 +29,11 @@ export default function NetworkGraph() {
   useEffect(() => {
     async function fetchGraphData() {
       try {
-        const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
-        if (!token) {
-          setError('Authentication token not found.');
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch('/api/v1/insights/network', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch network graph.');
-        }
-
-        const data: NetworkGraphData = await response.json();
-        setGraphData(data);
+        const response = await apiClient.get<NetworkGraphData>('/insights/network');
+        setGraphData(response.data);
       } catch (err: any) {
-        setError(err.message);
+        console.error("Failed to fetch network graph:", err);
+        setError(err.response?.data?.error || err.message || 'Failed to fetch network graph.');
       } finally {
         setLoading(false);
       }

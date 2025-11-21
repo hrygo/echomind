@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/internal/model"
+	"github.com/hrygo/echomind/internal/spam"
 	"github.com/hrygo/echomind/pkg/ai"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -55,7 +56,25 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("email %s not found for user %s: %v", p.EmailID, p.UserID, err)
 	}
 
-	// 2. Generate Summary and Analysis
+	// 2. Check for Spam
+	spamFilter := spam.NewRuleBasedFilter()
+	isSpam, spamReason := spamFilter.IsSpam(&email)
+
+	if isSpam {
+		log.Printf("Email %s identified as spam: %s", p.EmailID, spamReason)
+		email.Category = "Spam"
+		email.Sentiment = "Neutral"
+		email.Summary = "Auto-detected as spam: " + spamReason
+		email.Urgency = "Low"
+		email.ActionItems = datatypes.JSON(jsonRaw([]string{}))
+
+		if err := db.WithContext(ctx).Where("user_id = ?", p.UserID).Save(&email).Error; err != nil {
+			return fmt.Errorf("failed to save spam analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
+		}
+		return nil
+	}
+
+	// 3. Generate Summary and Analysis
 	// Use BodyText or fallback to Snippet/Subject
 	textToAnalyze := email.BodyText
 	if textToAnalyze == "" {
@@ -67,21 +86,21 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("failed to generate analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
 	}
 
-	// 3. Update Email fields
+	// 4. Update Email fields
 	email.Summary = analysis.Summary
 	email.Category = analysis.Category
 	email.Sentiment = analysis.Sentiment
 	email.Urgency = analysis.Urgency
 	email.ActionItems = datatypes.JSON(jsonRaw(analysis.ActionItems))
 
-	// 4. Update Email, ensure it belongs to the user
+	// 5. Update Email, ensure it belongs to the user
 	if err := db.WithContext(ctx).Where("user_id = ?", p.UserID).Save(&email).Error; err != nil {
 		return fmt.Errorf("failed to save analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
 	}
 
 	log.Printf("Analysis complete for email %s (user %s). Category: %s, Sentiment: %s", p.EmailID, p.UserID, email.Category, email.Sentiment)
 
-	// 5. Update Contact Statistics for the sender
+	// 6. Update Contact Statistics for the sender
 	if err := updateContactStats(ctx, db, p.UserID, email.Sender, email.Sentiment, email.Date); err != nil {
 		log.Printf("Warning: Failed to update contact stats for sender %s: %v", email.Sender, err)
 		// Do not return error, as email analysis is complete, contact update can be retried or ignored

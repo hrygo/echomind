@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-worker run-frontend docker-up stop restart dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage
+.PHONY: init install run-backend run-worker run-frontend docker-up stop restart dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs
 
 # Version
 VERSION := 0.5.1
@@ -62,21 +62,36 @@ init:
 	@echo "Initializing frontend..."
 	cd frontend && pnpm install
 
+clean-logs:
+	@echo "Cleaning old logs..."
+	@rm -f $(LOG_DIR)/*.log 2>/dev/null || true
+
 # Development Flow
-dev: docker-up run-backend run-worker run-frontend
+dev: clean-logs docker-up run-backend run-worker run-frontend
 	@echo "----------------------------------------------------------------"
 	@echo "🚀 All services started!"
 	@echo "Backend:  http://localhost:8080"
 	@echo "Frontend: http://localhost:3000"
 	@echo "Check status with 'make status' or follow logs with 'make watch-logs'."
 	@echo "----------------------------------------------------------------"
+	@echo "⏳ Waiting 3 seconds for services to initialize..."
+	@sleep 3
+	@echo "🔍 Checking startup logs (head 100 lines)..."
+	@echo "--- [Backend Log Head] ---"
+	@head -n 100 $(BACKEND_LOG) 2>/dev/null || echo "Log file not created yet."
+	@echo ""
+	@echo "--- [Worker Log Head] ---"
+	@head -n 100 $(WORKER_LOG) 2>/dev/null || echo "Log file not created yet."
+	@echo ""
+	@echo "--- [Frontend Log Head] ---"
+	@head -n 100 $(FRONTEND_LOG) 2>/dev/null || echo "Log file not created yet."
 
 restart: stop dev
 
 stop:
 	@echo "Stopping services..."
-	@pkill -f "./bin/server" || true
-	@pkill -f "./bin/worker" || true
+	@pkill -f "bin/server" || true
+	@pkill -f "bin/worker" || true
 	@pkill -f "next dev" || true 
 	@cd deploy && docker-compose down
 	@echo "All services stopped."
@@ -99,15 +114,15 @@ run-backend: ensure-log-dir build
 	@echo "Starting backend server in background, logging to $(BACKEND_LOG)..."
 	@if lsof -i:8080 -t >/dev/null; then \
 		echo "⚠️  Port 8080 is already in use. Restarting backend..."; \
-		pkill -f "./bin/server" || true; \
+		pkill -f "bin/server" || true; \
 		sleep 1; \
 	fi
-	@nohup ./bin/server > $(BACKEND_LOG) 2>&1 & echo "✅ Backend started (PID: $$!)."
+	@cd backend && nohup ../bin/server > ../$(BACKEND_LOG) 2>&1 & echo "✅ Backend started (PID: $$!)."
 
 run-worker: ensure-log-dir build
 	@echo "Starting worker in background, logging to $(WORKER_LOG)..."
-	@pkill -f "./bin/worker" || true
-	@nohup ./bin/worker > $(WORKER_LOG) 2>&1 & echo "✅ Worker started (PID: $$!)."
+	@pkill -f "bin/worker" || true
+	@cd backend && nohup ../bin/worker > ../$(WORKER_LOG) 2>&1 & echo "✅ Worker started (PID: $$!)."
 
 run-frontend: ensure-log-dir
 	@echo "Starting frontend development server in background, logging to $(FRONTEND_LOG)..."
@@ -124,7 +139,7 @@ status:
 	@echo "Backend (port 8080):"
 	@lsof -i:8080 -t >/dev/null && echo "  🟢 Running (PID: $$(lsof -i:8080 -t))" || echo "  🔴 Not running"
 	@echo "Worker:"
-	@pgrep -f "./bin/worker" >/dev/null && echo "  🟢 Running (PID: $$(pgrep -f "./bin/worker"))" || echo "  🔴 Not running"
+	@pgrep -f "bin/worker" >/dev/null && echo "  🟢 Running (PID: $$(pgrep -f "bin/worker"))" || echo "  🔴 Not running"
 	@echo "Frontend (port 3000):"
 	@lsof -i:3000 -t >/dev/null && echo "  🟢 Running (PID: $$(lsof -i:3000 -t))" || echo "  🔴 Not running"
 	@echo ""
