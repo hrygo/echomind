@@ -31,16 +31,27 @@
 
 ---
 
-# 📅 Current Sprint: Phase 4 - Commercialization & Scaling
+# 📅 Current Sprint: Phase 4 - Multi-tenancy & Authentication Foundation
 
-**Focus**: Multi-tenancy, User Authentication, and Payment Integration.
+**Focus**: Multi-tenancy, User Authentication.
 
-- [ ] **Backend: User System**:
-    - [ ] Model: `User` (Email, PasswordHash, StripeCustomerID).
-    - [ ] Auth: JWT-based authentication middleware.
-- [ ] **Backend: Multi-tenancy**:
-    - [ ] Update: `Email` and `Contact` models to include `UserID`.
-    - [ ] Middleware: Enforce data isolation.
+- [x] **Backend: User System**:
+    - [x] Model: `User` (Email, PasswordHash).
+    - [x] Auth: JWT-based authentication (`internal/middleware/auth.go`, `pkg/utils/jwt.go`).
+    - [x] Handlers: Register/Login endpoints (`/api/v1/auth/*`).
+- [x] **Backend: Multi-tenancy (Data Isolation)**:
+    - [x] Update: `Email` and `Contact` models include `UserID` (UUID).
+    - [x] Service Refactor: `EmailService`, `ContactService`, `SyncService` now require `userID`.
+    - [x] Sync Worker: `EmailAnalyzeTask` payload includes `userID`.
+- [x] **Frontend: Auth Integration**:
+    - [x] Pages: Login (`/login`) & Register (`/register`).
+    - [x] State: Global Auth Store (Zustand) for Token management.
+    - [x] Guards: Protected Route wrappers.
+
+---
+
+# 🚧 Backlog: Commercialization & Scaling
+
 - [ ] **Commercialization**:
-    - [ ] Stripe Integration (Subscription management).
-    - [ ] Usage Limits (AI quotas).
+    - [ ] Stripe Integration.
+    - [ ] Usage Limits.
