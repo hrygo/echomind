@@ -31,20 +31,32 @@
 
 ---
 
-# 📅 Current Sprint: Phase 2 - Intelligent Analysis & Insights (v0.3.0)
+# 📅 Current Sprint: Phase 3 - Real-World Sync Integration (v0.4.0)
 
-**Focus**: AI Classification, Action Item Extraction, Smart Dashboard.
+**Focus**: User Credentials Management, Dynamic IMAP Connection, Settings UI.
+**Status**: Design Complete. Ready for Implementation.
 
-- [x] **Foundation & Cleanup**:
-    - [x] **Commit Staged Changes**: Auth persistence fixes, Dashboard scaffolding, Backend/Infra updates.
-- [x] **Backend: AI Analysis Engine**:
-    - [x] **Refine Summary**: Update `Summarize` prompt to return structured JSON (Category, Sentiment, Action Items).
-    - [x] **Model Update**: Add `Category`, `ActionItems` (JSONB) to `Email` model.
-    - [x] **Classifier**: Implement logic to auto-tag emails (Work, Personal, Newsletter).
-- [x] **Frontend: Smart Dashboard**:
-    - [x] **Filters**: Add Sidebar/Tabs for `Category` filtering.
-    - [x] **Action Items**: Display extracted tasks in Email Detail view.
-    - [x] **Visuals**: Add badges for `Sentiment` and `Urgency`.
+*Refer to `docs/tech-design-phase3.md` for detailed specifications, acceptance criteria, and implementation plan.*
+
+- [ ] **Backend: Account Management**:
+    - [ ] **Model**: Create `EmailAccount` model (UserID, Server, Port, Username, EncryptedPassword).
+    - [ ] **Security**: Implement AES encryption for storing IMAP passwords (at rest).
+    - [ ] **API**: Add endpoints to `POST /settings/account` (Connect) and `GET /settings/account` (Status).
+- [ ] **Backend: Dynamic Sync Engine**:
+    - [ ] **Refactor**: Update `SyncService` to load user credentials and create a fresh IMAP connection per request.
+    - [ ] **Error Handling**: Handle connection failures (Auth error, Timeout) and update account status.
+- [ ] **Frontend: Settings & Connect**:
+    - [ ] **UI**: Build "Connect Email" form in `Settings` page (Host, Port, User, Password).
+    - [ ] **Status**: Display connection status (Connected/Failed) and "Last Synced At".
+
+---
+
+# ✅ Completed Sprints
+
+## Phase 2: Intelligent Analysis & Insights (v0.3.0)
+- [x] **Backend**: AI Analysis Engine (Summary, Category, Sentiment, Action Items).
+- [x] **Backend**: Auto-Classifier Logic.
+- [x] **Frontend**: Smart Dashboard (Filters, Insights Card, Visual Badges).
 
 ---
 
