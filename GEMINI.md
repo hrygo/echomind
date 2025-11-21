@@ -35,6 +35,8 @@
 
 **Focus**: AI Classification, Action Item Extraction, Smart Dashboard.
 
+- [ ] **Foundation & Cleanup**:
+    - [ ] **Commit Staged Changes**: Auth persistence fixes, Dashboard scaffolding, Backend/Infra updates.
 - [ ] **Backend: AI Analysis Engine**:
     - [ ] **Refine Summary**: Update `Summarize` prompt to return structured JSON (Category, Sentiment, Action Items).
     - [ ] **Model Update**: Add `Category`, `ActionItems` (JSONB) to `Email` model.
