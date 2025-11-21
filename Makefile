@@ -1,5 +1,8 @@
 .PHONY: init run-backend run-frontend docker-up run-worker test lint build clean deploy help
 
+# Version
+VERSION := 0.2.0
+
 # Variables
 REPO_OWNER ?= your-username
 DB_PASSWORD ?= change-me-in-prod

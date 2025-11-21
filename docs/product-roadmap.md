@@ -1,6 +1,6 @@
 # 📅 产品路线图 - EchoMind
 
-**当前阶段**：Phase 4: Commercialization & Scaling (v0.1.0 Released)
+**当前阶段**：Phase 4: Commercialization & Scaling (v0.2.0 Released)
 **发布周期**：双周迭代 (Bi-weekly Sprint)
 
 ---
