@@ -18,9 +18,20 @@
     *   [x] **Spam Filtering**: 规则引擎过滤垃圾邮件。
     *   [ ] **本地缓存策略**: 优化前端缓存，减少网络请求。
 
-## 🗓️ Phase 6: 团队协作 (Team Collaboration)
+## 🗓️ Phase 6: The Neural Interface (UI/UX Refactor)
 **时间**: 2026.01 - 2026.02 (Month 2-3)
 **版本**: v0.7.0
+**目标**: 彻底重构 UI/UX，打造 AI Native 的交互体验 (参考 NotebookLM)。
+
+*   **Neural Interface (Fluid Canvas)**
+    *   [ ] **AI First Layout**: 移除传统邮件列表，首页变为 "Briefing" (智能简报) 和 "Studio" (问答画布)。
+    *   [ ] **RAG Deep Integration**: 问答即交互核心，支持引用跳转 (Citations) 和流式输出。
+    *   [ ] **Dynamic Widgets**: 根据意图自动渲染组件 (如：日历、关系图谱、审批卡片)。
+    *   [ ] **Context Manager**: 左侧栏管理 "关注点" (Contexts) 而非文件夹。
+
+## 🗓️ Phase 7: 团队协作 (Team Collaboration)
+**时间**: 2026.02 - 2026.03 (Month 3-4)
+**版本**: v0.8.0
 **目标**: 完成多用户协作基础，商业化前置准备。
 
 *   **团队协作 (Team Collaboration)**
@@ -28,24 +39,8 @@
     *   [ ] **共享标签/分类 (Shared Labels)**: 团队统一的邮件分类标准。
     *   [ ] **协作批注 (Comments)**: 团队成员在邮件内部进行讨论，不发送给外部。
 
-## 🗓️ Phase 7: 多端体验 (Cross-Platform)
-**时间**: 2026.02 - 2026.03 (Month 3-4)
-**版本**: v0.8.0
-**目标**: 让 AI 成为核心驱动力，具备多模态理解与主动服务能力。
-
-*   **RAG & Memory (记忆与检索)**
-    *   [ ] **全量语义检索**: 毫秒级搜索 "上季度财务报表相关的邮件"。
-    *   [ ] **对话式邮箱 (Chat with Inbox)**: "帮我起草给 David 的回复，参考上周的会议纪要"。
-    *   [ ] **用户画像自进化**: AI 自动学习用户的语气、偏好与工作习惯。
-*   **Multi-modal AI (多模态智能)**
-    *   [ ] **文档深度解析**: 自动总结 PDF/Word/PPT 附件核心内容。
-    *   [ ] **图片/票据识别**: 识别发票、截图中的关键信息。
-*   **Proactive Agents (主动智能体)**
-    *   [ ] **关系维护提醒**: "你已经 2 周没联系重要客户 Alice 了，建议跟进"。
-    *   [ ] **日程冲突预警**: 识别邮件中的会议邀请，并与日历比对。
-
-## 🗓️ Phase 7: 多端体验 (Cross-Platform)
-**时间**: 2026.04 - 2026.05 (Month 5-6)
+## 🗓️ Phase 8: 多端体验 (Cross-Platform)
+**时间**: 2026.03 - 2026.04 (Month 5-6)
 **版本**: v0.9.0
 **目标**: 覆盖桌面端与移动端，提供原生体验。
 
@@ -57,8 +52,8 @@
     *   [ ] **语音指令 (Voice AI)**: 发送语音 "帮我查一下未读的紧急邮件"，AI 自动回复摘要。
     *   [ ] **模板消息推送**: 实时推送高优先级邮件通知。
 
-## 🗓️ Phase 8: 商业化 (Commercialization) - 🚀 Launch
-**时间**: 2026.06+ (Month 7+)
+## 🗓️ Phase 9: 商业化 (Commercialization) - 🚀 Launch
+**时间**: 2026.05+ (Month 7+)
 **版本**: v1.0.0
 **目标**: 正式推出付费服务。
 

@@ -64,3 +64,31 @@ New endpoint that accepts a natural language query:
     *   *Mitigation*: Only embed "Important" emails first, or use a cheaper model (text-embedding-3-small).
 *   **Performance**: Hybrid search (Keyword + Vector) is hard to tune.
     *   *Mitigation*: Start with pure Vector search for "Concept" queries, fallback to SQL `ILIKE` for exact matches.
+
+## 5. Requirements for v0.7.0 Interoperability (Frontend "Neural Interface" Pre-requisites)
+
+To enable the radical UI/UX refactor planned for v0.7.0 ("Neural Interface"), the v0.6.0 RAG backend **must** provide the following capabilities:
+
+1.  **Citation Metadata in Search Results**:
+    *   **Requirement**: Search results (from `/api/v1/search`) must return not just the relevant email, but also precise metadata indicating *which part* of the email was used to generate the answer. This includes:
+        *   `email_id`: The ID of the source email.
+        *   `chunk_id`: (Optional, if chunking is used) The ID of the specific chunk.
+        *   `text_offset_start`, `text_offset_end`: Byte/character offsets within the *original email content* (or within the `content_chunk` if chunk_id is provided) to highlight the exact referenced text.
+    *   **Purpose**: Allows the v0.7.0 frontend to render accurate citations (`[1]`, `[2]`) and, upon clicking, scroll/highlight the exact text in the "Grounding Panel" (right sidebar).
+
+2.  **Structured Thread Data**:
+    *   **Requirement**: A dedicated API (or an extension to existing `Email` API) to retrieve a full, structured conversation thread given an `email_id` or `thread_id`. The response should clearly indicate the chronological order and parent-child relationships within the thread.
+    *   **Purpose**: Populates the "Grounding Panel" with the full context of a conversation when a user deep-dives into a citation.
+
+3.  **Streaming JSON Responses**:
+    *   **Requirement**: The `/api/v1/search` endpoint (or a new `/api/v1/chat` endpoint for RAG Q&A) should support **streaming responses**. This means the backend sends data chunks (e.g., individual words or sentences, or even JSON objects representing UI widgets) as they are generated, rather than waiting for the complete response.
+    *   **Purpose**: Enables a real-time, "typing effect" user experience in the v0.7.0 "Studio Mode" chat interface and allows for dynamic rendering of UI components (widgets) as AI determines intent.
+
+4.  **Dynamic Vector Store Filters**:
+    *   **Requirement**: The search API must support advanced filtering on the vector store queries. This includes filtering by:
+        *   `sender_email`
+        *   `receiver_email`
+        *   `date_range`
+        *   `thread_id`
+        *   Custom tags/labels (if implemented in v0.6.x for email classification).
+    *   **Purpose**: Powers the "Context Manager" (left sidebar) in v0.7.0, allowing users to define specific "Attention Scopes" and restrict AI answers to those contexts.
