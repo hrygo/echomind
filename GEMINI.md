@@ -31,27 +31,34 @@
 
 ---
 
-# 📅 Current Sprint: Phase 3 - Real-World Sync Integration (v0.4.0)
+# 📅 Current Sprint: Phase 4 - Commercialization (v0.5.0)
 
-**Focus**: User Credentials Management, Dynamic IMAP Connection, Settings UI.
-**Status**: Design Complete. Ready for Implementation.
+**Focus**: Advanced Features & Commercialization
 
-*Refer to `docs/tech-design-phase3.md` for detailed specifications, acceptance criteria, and implementation plan.*
-
-- [ ] **Backend: Account Management**:
-    - [ ] **Model**: Create `EmailAccount` model (UserID, Server, Port, Username, EncryptedPassword).
-    - [ ] **Security**: Implement AES encryption for storing IMAP passwords (at rest).
-    - [ ] **API**: Add endpoints to `POST /settings/account` (Connect) and `GET /settings/account` (Status).
-- [ ] **Backend: Dynamic Sync Engine**:
-    - [ ] **Refactor**: Update `SyncService` to load user credentials and create a fresh IMAP connection per request.
-    - [ ] **Error Handling**: Handle connection failures (Auth error, Timeout) and update account status.
-- [ ] **Frontend: Settings & Connect**:
-    - [ ] **UI**: Build "Connect Email" form in `Settings` page (Host, Port, User, Password).
-    - [ ] **Status**: Display connection status (Connected/Failed) and "Last Synced At".
+- [ ] **Phase 4: Commercialization**:
+    - [ ] Stripe Integration.
+    - [ ] Usage Limits.
 
 ---
 
 # ✅ Completed Sprints
+
+## Phase 3: Real-World Sync Integration (v0.4.0)
+**Focus**: User Credentials Management, Dynamic IMAP Connection, Settings UI.
+**Status**: Completed.
+
+*Refer to `docs/tech-design-phase3.md` for detailed specifications, acceptance criteria, and implementation plan.*
+
+- [x] **Backend: Account Management**:
+    - [x] **Model**: Create `EmailAccount` model (UserID, Server, Port, Username, EncryptedPassword).
+    - [x] **Security**: Implement AES encryption for storing IMAP passwords (at rest).
+    - [x] **API**: Add endpoints to `POST /settings/account` (Connect) and `GET /settings/account` (Status).
+- [x] **Backend: Dynamic Sync Engine**:
+    - [x] **Refactor**: Update `SyncService` to load user credentials and create a fresh IMAP connection per request.
+    - [x] **Error Handling**: Handle connection failures (Auth error, Timeout) and update account status.
+- [x] **Frontend: Settings & Connect**:
+    - [x] **UI**: Build "Connect Email" form in `Settings` page (Host, Port, User, Password).
+    - [x] **Status**: Display connection status (Connected/Failed) and "Last Synced At".
 
 ## Phase 2: Intelligent Analysis & Insights (v0.3.0)
 - [x] **Backend**: AI Analysis Engine (Summary, Category, Sentiment, Action Items).
@@ -60,7 +67,7 @@
 
 ---
 
-# 🚧 Backlog: Advanced Features & Commercialization
+# 🚧 Backlog: Advanced Features
 
 - [ ] **Phase 3: Deep Integration**:
     - [ ] Relationship Graph.
