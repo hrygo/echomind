@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status tail-logs logs restart logs-backend logs-worker logs-frontend
+.PHONY: init install run-backend run-frontend docker-up run-worker test lint build clean deploy help status view-logs logs restart view-logs-backend view-logs-worker view-logs-frontend
 
 # Version
 VERSION := 0.4.0
@@ -34,11 +34,11 @@ help:
 	@echo "  Testing & QA:"
 	@echo "    make test          - Run backend tests"
 	@echo "    make lint          - Run linters"
-	@echo "    make status        - Check status of running services"
-	@echo "    make tail-logs     - Tail all logs"
-	@echo "    make logs-backend  - Tail backend logs only"
-	@echo "    make logs-worker   - Tail worker logs only"
-	@echo "    make logs-frontend - Tail frontend logs only"
+	@echo "    make status        - Check status of running services and recent logs"
+	@echo "    make view-logs     - View last 500 lines of all logs"
+	@echo "    make view-logs-backend  - View last 500 lines of backend logs only"
+	@echo "    make view-logs-worker   - View last 500 lines of worker logs only"
+	@echo "    make view-logs-frontend - View last 500 lines of frontend logs only"
 	@echo ""
 	@echo "  Deployment:"
 	@echo "    make deploy        - Deploy to production"
@@ -61,7 +61,7 @@ dev: docker-up run-backend run-worker run-frontend
 	@echo "🚀 All services started!"
 	@echo "Backend:  http://localhost:8080"
 	@echo "Frontend: http://localhost:3000"
-	@echo "Check status with 'make status' or logs with 'make tail-logs'."
+	@echo "Check status with 'make status' or logs with 'make view-logs'."
 	@echo "----------------------------------------------------------------"
 
 restart: stop dev
@@ -92,7 +92,7 @@ run-backend: logs
 run-worker: logs
 	@echo "Starting worker in background, logging to $(WORKER_LOG)..."
 	@nohup ./bin/worker > $(WORKER_LOG) 2>&1 & \
-	echo "✅ Worker started (PID: $!).";
+	@echo "✅ Worker started (PID: $!).";
 
 run-frontend: logs
 	@echo "Starting frontend development server in background, logging to $(FRONTEND_LOG)..."
@@ -113,23 +113,26 @@ status:
 	@echo "Frontend (port 3000):"
 	@lsof -i:3000 -t >/dev/null && echo "  🟢 Running (PID: $(lsof -i:3000 -t))" || echo "  🔴 Not running"
 	@echo ""
-	@echo "--- Recent Logs (Last 2 lines) ---"
-	@echo "[Backend]:" && tail -n 2 $(BACKEND_LOG) 2>/dev/null || echo "  No logs."
-	@echo "[Worker]:" && tail -n 2 $(WORKER_LOG) 2>/dev/null || echo "  No logs."
-	@echo "[Frontend]:" && tail -n 2 $(FRONTEND_LOG) 2>/dev/null || echo "  No logs."
+	@echo "--- Recent Logs (Last 10 lines) ---"
+	@echo "[Backend]:" && tail -n 10 $(BACKEND_LOG) 2>/dev/null || echo "  No logs."
+	@echo "[Worker]:" && tail -n 10 $(WORKER_LOG) 2>/dev/null || echo "  No logs."
+	@echo "[Frontend]:" && tail -n 10 $(FRONTEND_LOG) 2>/dev/null || echo "  No logs."
 
-tail-logs:
-	@echo "Tailing all logs... (Ctrl+C to exit)"
-	@tail -f $(BACKEND_LOG) $(WORKER_LOG) $(FRONTEND_LOG) 2>/dev/null
+view-logs:
+	@echo "Viewing last 500 lines of all logs..."
+	@tail -n 500 $(BACKEND_LOG) $(WORKER_LOG) $(FRONTEND_LOG) 2>/dev/null || echo "  No logs yet or log files not found."
 
-logs-backend:
-	@tail -f $(BACKEND_LOG)
+view-logs-backend:
+	@echo "Viewing last 500 lines of backend logs..."
+	@tail -n 500 $(BACKEND_LOG)
 
-logs-worker:
-	@tail -f $(WORKER_LOG)
+view-logs-worker:
+	@echo "Viewing last 500 lines of worker logs..."
+	@tail -n 500 $(WORKER_LOG)
 
-logs-frontend:
-	@tail -f $(FRONTEND_LOG)
+view-logs-frontend:
+	@echo "Viewing last 500 lines of frontend logs..."
+	@tail -n 500 $(FRONTEND_LOG)
 
 # Code Quality
 test:

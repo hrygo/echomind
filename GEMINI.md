@@ -44,10 +44,10 @@ When working on features or debugging locally, **always use the provided `Makefi
 
 ### 🔍 Debugging & Logs
 *   **`make status`**: Check if services are running (PIDs) and view the last few log lines.
-*   **`make tail-logs`**: Stream logs from ALL services in real-time.
-*   **`make logs-backend`**: Stream Backend API logs only.
-*   **`make logs-worker`**: Stream Worker logs only.
-*   **`make logs-frontend`**: Stream Frontend logs only.
+*   **`make view-logs`**: View last 500 lines of all logs.
+*   **`make view-logs-backend`**: View last 500 lines of backend logs only.
+*   **`make view-logs-worker`**: View last 500 lines of worker logs only.
+*   **`make view-logs-frontend`**: View last 500 lines of frontend logs only.
 
 ## 2. Development Workflow
 1.  **Feature Branch**: Create a branch for your task (e.g., `feat/stripe-integration`).
@@ -61,7 +61,8 @@ When working on features or debugging locally, **always use the provided `Makefi
 *   **`backend/configs/config.yaml`**: **Ignored by Git**. Copy from example and fill in your local secrets (API Keys, DB Creds).
 *   **Environment Variables**: The application supports overriding config via env vars (e.g., `ECHOMIND_DATABASE_DSN`).
 
----
+### ✅ Debugging Rule: Prioritize `make` commands
+When debugging or verifying changes locally, **always prefer using `make` commands** (e.g., `make run-backend`, `make status`, `make view-logs`) over directly executing binaries or raw shell commands. This ensures consistency with the project's defined environment and logging practices.
 
 # 📅 Current Sprint: Phase 4 - Deep Insight & Relationship Intelligence (v0.5.0)
 
