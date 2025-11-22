@@ -1,8 +1,8 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: AI-powered Email Decision System. "External Brain for Executive Communication."
-> **Stage**: v0.6.0 (Alpha).
-> **Active Sprint**: Phase 5.2 - RAG & Semantic Search.
+> **Stage**: v0.6.4 (Alpha).
+> **Active Sprint**: Phase 5.3 - RAG Polish & Phase 6 Prep.
 
 
 ## 1. Technology Stack
@@ -36,17 +36,18 @@
 
 ## 3. Roadmap Status
 
-### ✅ Completed (v0.1.0 - v0.5.1)
+### ✅ Completed (v0.1.0 - v0.6.4)
 *   **Core**: IMAP Sync, Email Parsing, Auth (JWT).
 *   **AI**: Summary, Sentiment, Classification, Contact Intelligence, Smart Reply.
 *   **Optimization**: Spam filtering to reduce AI usage.
 *   **UI**: Dashboard, Insights Graph, Account Settings.
+*   **RAG & Search**: Vector embeddings, semantic search, search UI (Phase 5.2).
 
-### 🚧 In Progress (Phase 5.2: v0.6.0) - [Plan: docs/archive/v0.6.0_rag/weekly-plan.md]
-*   **Planning**: ✅ Completed (Design & Spec).
-*   **Infrastructure**: Docker (pgvector), Migration (Active Day 1).
-*   **RAG Core**: Embedding Pipeline, Vector DB.
-*   **Search**: Natural Language Search API.
+### 🚧 In Progress (Phase 5.3: v0.6.5-v0.7.0) - [Plan: docs/sprints/week2_rag_polish/sprint-plan.md]
+*   **Performance**: Search optimization, monitoring, benchmarking.
+*   **Testing**: Integration tests, E2E tests, 80% coverage target.
+*   **UX**: Search history, filters, error handling improvements.
+*   **Phase 6 Prep**: Team Collaboration design, database schema planning.
 
 ### 🔮 Future Roadmap (6-Month Plan)
 *   **Phase 6 (Jan-Feb)**: Team Collaboration (Shared Labels, Organization).
