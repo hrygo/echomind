@@ -9,7 +9,21 @@
         "logout": "退出登录",
         "settings": "账号设置",
         "profile": "个人资料",
-        "searchPlaceholder": "搜索邮件、联系人或任务..."
+        "searchPlaceholder": "搜索邮件、联系人或任务...",
+        "filters": "搜索过滤器",
+        "sender": "发件人",
+        "senderPlaceholder": "例如：alice@example.com",
+        "dateRange": "日期范围",
+        "clearFilters": "清除所有过滤器",
+        "searching": "搜索中...",
+        "noResults": "未找到结果",
+        "noResultsDesc": "我们找不到任何匹配您搜索的邮件。",
+        "searchTips": "搜索建议：",
+        "searchTip1": "检查输入是否有误",
+        "searchTip2": "尝试使用更广泛的关键词",
+        "searchTip3": "搜索发件人姓名或邮箱地址",
+        "searchTip4": "使用过滤器按日期筛选",
+        "foundResults": "为您找到 {count} 条关于 “{query}” 的结果"
     },
     "sidebar": {
         "intelligence": "智能驾驶舱",

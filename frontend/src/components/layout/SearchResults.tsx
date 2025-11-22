@@ -4,6 +4,7 @@ import { SearchResult } from "@/lib/api";
 import { Mail, Calendar, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface SearchResultsProps {
     results: SearchResult[];
@@ -15,6 +16,7 @@ interface SearchResultsProps {
 
 export function SearchResults({ results, isLoading, error, query, onClose }: SearchResultsProps) {
     const router = useRouter();
+    const { t } = useLanguage();
 
     const handleResultClick = (emailId: string) => {
         router.push(`/dashboard/emails/${emailId}`);
@@ -68,7 +70,7 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
                     <div className="text-red-500 mb-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                     </div>
-                    <p className="text-sm font-medium text-slate-800">Search Failed</p>
+                    <p className="text-sm font-medium text-slate-800">{t('common.error')}</p>
                     <p className="text-xs text-slate-500 mt-1">{error}</p>
                 </div>
             </div>
@@ -80,16 +82,16 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
                 <div className="p-8 text-center">
                     <Mail className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-slate-600">No results found</p>
-                    <p className="text-xs text-slate-400 mt-1 mb-4">We couldn&apos;t find any emails matching your search.</p>
+                    <p className="text-sm font-medium text-slate-600">{t('common.noResults')}</p>
+                    <p className="text-xs text-slate-400 mt-1 mb-4">{t('common.noResultsDesc')}</p>
                     
                     <div className="text-left bg-slate-50 rounded-lg p-3">
-                        <p className="text-xs font-semibold text-slate-500 mb-2">Search Tips:</p>
+                        <p className="text-xs font-semibold text-slate-500 mb-2">{t('common.searchTips')}</p>
                         <ul className="text-xs text-slate-500 space-y-1 list-disc pl-4">
-                            <li>Check for typos or spelling errors</li>
-                            <li>Try using broader keywords</li>
-                            <li>Search for sender name or email address</li>
-                            <li>Use filters to narrow down by date</li>
+                            <li>{t('common.searchTip1')}</li>
+                            <li>{t('common.searchTip2')}</li>
+                            <li>{t('common.searchTip3')}</li>
+                            <li>{t('common.searchTip4')}</li>
                         </ul>
                     </div>
                 </div>
@@ -101,7 +103,11 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50 max-h-96 overflow-y-auto">
             <div className="p-2 border-b border-slate-100 bg-slate-50">
                 <p className="text-xs font-medium text-slate-600 px-3 py-1">
-                    Found {results.length} result{results.length > 1 ? 's' : ''} for &quot;{query}&quot;
+                    {t('common.foundResults')
+                        .replace('{count}', results.length.toString())
+                        .replace('{plural}', results.length > 1 ? 's' : '')
+                        .replace('{query}', query)
+                    }
                 </p>
             </div>
             <div className="divide-y divide-slate-100">

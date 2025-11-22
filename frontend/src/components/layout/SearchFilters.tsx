@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Filter, Calendar, User, X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface SearchFiltersProps {
     filters: {
@@ -13,6 +14,7 @@ interface SearchFiltersProps {
 
 export function SearchFilters({ filters, onChange, onClose }: SearchFiltersProps) {
     const [localFilters, setLocalFilters] = useState(filters);
+    const { t } = useLanguage();
 
     useEffect(() => {
         setLocalFilters(filters);
@@ -29,7 +31,7 @@ export function SearchFilters({ filters, onChange, onClose }: SearchFiltersProps
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                     <Filter className="w-4 h-4 text-slate-500" />
-                    Search Filters
+                    {t('common.filters')}
                 </h3>
                 <button 
                     onClick={onClose}
@@ -42,7 +44,7 @@ export function SearchFilters({ filters, onChange, onClose }: SearchFiltersProps
             <div className="space-y-4">
                 {/* Sender Filter */}
                 <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5">Sender</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">{t('common.sender')}</label>
                     <div className="relative">
                         <User className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
                         <input
@@ -50,14 +52,14 @@ export function SearchFilters({ filters, onChange, onClose }: SearchFiltersProps
                             value={localFilters.sender}
                             onChange={(e) => handleChange('sender', e.target.value)}
                             className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                            placeholder="e.g. alice@example.com"
+                            placeholder={t('common.senderPlaceholder')}
                         />
                     </div>
                 </div>
 
                 {/* Date Range Filter */}
                 <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5">Date Range</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">{t('common.dateRange')}</label>
                     <div className="space-y-2">
                         <div className="relative">
                             <Calendar className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
@@ -91,7 +93,7 @@ export function SearchFilters({ filters, onChange, onClose }: SearchFiltersProps
                             }}
                             className="text-xs text-blue-600 hover:text-blue-700 font-medium w-full text-center hover:underline"
                         >
-                            Clear All Filters
+                            {t('common.clearFilters')}
                         </button>
                     </div>
                 )}

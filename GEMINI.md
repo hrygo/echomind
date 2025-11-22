@@ -53,3 +53,7 @@
 - Follow `internal/`, `pkg/` directory structure
 - Respect `backend/` vs `frontend/` boundary
 - Maintain naming conventions
+
+### Internationalization (i18n)
+- **Bilingual UI**: All user-facing text MUST support both English (en) and Chinese (zh).
+- **No Hardcoding**: Never hardcode strings in components. Use `t('key')` and update locale files.

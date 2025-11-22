@@ -9,7 +9,21 @@
         "logout": "Logout",
         "settings": "Settings",
         "profile": "Profile",
-        "searchPlaceholder": "Search emails, contacts, or tasks..."
+        "searchPlaceholder": "Search emails, contacts, or tasks...",
+        "filters": "Search Filters",
+        "sender": "Sender",
+        "senderPlaceholder": "e.g. alice@example.com",
+        "dateRange": "Date Range",
+        "clearFilters": "Clear All Filters",
+        "searching": "Searching...",
+        "noResults": "No results found",
+        "noResultsDesc": "We couldn't find any emails matching your search.",
+        "searchTips": "Search Tips:",
+        "searchTip1": "Check for typos or spelling errors",
+        "searchTip2": "Try using broader keywords",
+        "searchTip3": "Search for sender name or email address",
+        "searchTip4": "Use filters to narrow down by date",
+        "foundResults": "Found {count} result{plural} for \"{query}\""
     },
     "sidebar": {
         "intelligence": "Intelligence",
