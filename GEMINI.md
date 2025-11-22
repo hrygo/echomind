@@ -12,20 +12,7 @@
 
 ---
 
-## 2. Development Workflow
-
-```bash
-# Start
-make dev    # All services (Postgres, Redis, Backend, Worker, Frontend)
-make logs   # View logs
-
-# Verify
-make test   # Backend + Frontend tests
-```
-
----
-
-## 3. Roadmap Status
+## 2. Roadmap Status
 
 ### ✅ Recent Completion (v0.6.0 → v0.6.4)
 **Phase 5.2 - RAG & Semantic Search** (2025-11-22)
@@ -47,7 +34,7 @@ make test   # Backend + Frontend tests
 
 ---
 
-## 4. The Golden Rules (Non-Negotiable)
+## 3. The Golden Rules (Non-Negotiable)
 
 ### Quality (Test-Driven)
 `make test` MUST pass before commit. Red → Green → Refactor.
