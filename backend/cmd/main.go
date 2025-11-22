@@ -148,6 +148,7 @@ func main() {
 			protected.POST("/sync", syncHandler.SyncEmails)
 			protected.GET("/emails", emailHandler.ListEmails)
 			protected.GET("/emails/:id", emailHandler.GetEmail)
+			protected.DELETE("/emails/all", emailHandler.DeleteAllEmails)
 			protected.GET("/insights/network", insightHandler.GetNetworkGraph)
 			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
 			protected.GET("/search", searchHandler.Search)

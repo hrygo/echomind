@@ -33,12 +33,14 @@ type RedisConfig struct {
 }
 
 type AIConfig struct {
-	Provider string       `mapstructure:"provider"`
-	ChunkSize int         `mapstructure:"chunk_size"` // Max tokens per chunk
-	Deepseek DeepseekConfig `mapstructure:"deepseek"`
-	OpenAI   OpenAIConfig   `mapstructure:"openai"`
-	Gemini   GeminiConfig   `mapstructure:"gemini"`
-	Prompts  PromptConfig   `mapstructure:"prompts"`
+	Provider          string         `mapstructure:"provider"`
+	EmbeddingProvider string         `mapstructure:"embedding_provider"` // New: Separate provider for embeddings
+	EmbeddingModel    string         `mapstructure:"embedding_model"`    // New: Separate model for embeddings
+	ChunkSize         int            `mapstructure:"chunk_size"`         // Max tokens per chunk
+	Deepseek          DeepseekConfig `mapstructure:"deepseek"`
+	OpenAI            OpenAIConfig   `mapstructure:"openai"`
+	Gemini            GeminiConfig   `mapstructure:"gemini"`
+	Prompts           PromptConfig   `mapstructure:"prompts"`
 }
 
 type DeepseekConfig struct {

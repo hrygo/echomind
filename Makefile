@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-worker run-frontend docker-up stop restart dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs
+.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs
 
 # Version
 VERSION := 0.6.4
@@ -18,38 +18,24 @@ help:
 	@echo "EchoMind Makefile Commands:"
 	@echo "  Development Lifecycle:"
 	@echo "    make init          - Initialize project (install dependencies)"
-	@echo "    make install       - Alias for 'init'"
-	@echo "    make dev           - Start all services (Infrastructure, Backend, Worker, Frontend) in background"
-	@echo "    make restart       - Stop and restart all services"
-	@echo "    make stop          - Stop all running services"
+	@echo "    make dev           - Start all services (Infrastructure + Apps)"
+	@echo "    make reload        - Restart only Apps (Backend, Worker, Frontend)"
+	@echo "    make restart       - Restart EVERYTHING (including Docker)"
+	@echo "    make stop          - Stop EVERYTHING"
+	@echo "    make stop-apps     - Stop only Apps"
 	@echo "    make clean         - Clean build artifacts and logs"
 	@echo ""
 	@echo "  Individual Services:"
-	@echo "    make docker-up     - Start Local Docker services (Postgres & Redis)"
-	@echo "    make run-backend   - Build and Start Backend API server (Background)"
-	@echo "    make run-worker    - Build and Start Backend Worker (Background)"
-	@echo "    make run-frontend  - Start Frontend server (Background)"
+	@echo "    make docker-up     - Start Local Docker services"
+	@echo "    make run-backend   - Build and Start Backend API"
+	@echo "    make run-worker    - Build and Start Worker"
+	@echo "    make run-frontend  - Start Frontend"
 	@echo "    make build         - Build backend binaries"
 	@echo ""
-	@echo "  Infrastructure Interaction:"
-	@echo "    make db-shell      - Connect to running Postgres database via psql"
-	@echo "    make redis-shell   - Connect to running Redis instance via redis-cli"
-	@echo ""
-	@echo "  Testing & QA:"
-	@echo "    make test          - Run backend tests"
-	@echo "    make test-coverage - Run backend tests with coverage report"
-	@echo "    make lint          - Run linters"
-	@echo ""
 	@echo "  Observability:"
-	@echo "    make status        - Check status of running services and recent logs"
-	@echo "    make logs          - View last 500 lines of all logs"
-	@echo "    make watch-logs    - Follow (tail -f) all logs"
-	@echo "    make watch-backend - Follow backend logs"
-	@echo "    make watch-worker  - Follow worker logs"
-	@echo "    make watch-frontend- Follow frontend logs"
-	@echo ""
-	@echo "  Deployment:"
-	@echo "    make deploy        - Deploy to production"
+	@echo "    make status        - Check status"
+	@echo "    make logs          - View logs"
+	@echo "    make watch-logs    - Follow logs"
 
 ensure-log-dir:
 	@mkdir -p $(LOG_DIR)
@@ -67,39 +53,58 @@ clean-logs:
 	@rm -f $(LOG_DIR)/*.log 2>/dev/null || true
 
 # Development Flow
-dev: clean-logs docker-up run-backend run-worker run-frontend
+dev: clean-logs docker-up wait-for-db run-backend run-worker run-frontend
 	@echo "----------------------------------------------------------------"
 	@echo "🚀 All services started!"
 	@echo "Backend:  http://localhost:8080"
 	@echo "Frontend: http://localhost:3000"
-	@echo "Check status with 'make status' or follow logs with 'make watch-logs'."
 	@echo "----------------------------------------------------------------"
-	@echo "⏳ Waiting 3 seconds for services to initialize..."
-	@sleep 3
-	@echo "🔍 Checking startup logs (head 100 lines)..."
-	@echo "--- [Backend Log Head] ---"
-	@head -n 100 $(BACKEND_LOG) 2>/dev/null || echo "Log file not created yet."
-	@echo ""
-	@echo "--- [Worker Log Head] ---"
-	@head -n 100 $(WORKER_LOG) 2>/dev/null || echo "Log file not created yet."
-	@echo ""
-	@echo "--- [Frontend Log Head] ---"
-	@head -n 100 $(FRONTEND_LOG) 2>/dev/null || echo "Log file not created yet."
+	@echo "🔍 Checking startup logs (head 20 lines)..."
+	@sleep 2
+	@head -n 20 $(BACKEND_LOG) 2>/dev/null || true
 
+# Reload: Stop apps, rebuild, start apps (Keep DB running)
+reload: stop-apps run-backend run-worker run-frontend
+	@echo "♻️  Apps reloaded!"
+
+# Restart: Stop everything, start everything
 restart: stop dev
 
-stop:
-	@echo "Stopping services..."
+# Stop Apps only
+stop-apps:
+	@echo "Stopping applications..."
 	@pkill -f "bin/server" || true
 	@pkill -f "bin/worker" || true
-	@pkill -f "next dev" || true 
+	@pkill -f "next-server" || true
+	@pkill -f "next dev" || true
+	@# Kill processes on ports if pkill failed
+	@lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+
+# Stop Infrastructure only
+stop-infra:
+	@echo "Stopping infrastructure..."
 	@cd deploy && docker compose down
-	@echo "All services stopped."
+
+stop: stop-apps stop-infra
+	@echo "🛑 All services stopped."
 
 # Infrastructure
 docker-up:
 	@echo "Bringing up Local Docker services..."
 	cd deploy && docker compose up -d
+
+wait-for-db:
+	@echo "⏳ Waiting for Database (port 5432)..."
+	@for i in {1..30}; do \
+		if nc -z localhost 5432 2>/dev/null; then \
+			echo "✅ Database is ready!"; \
+			exit 0; \
+		fi; \
+		sleep 1; \
+	done; \
+	echo "❌ Database failed to start in 30s."; \
+	exit 1
 
 db-shell:
 	@echo "Connecting to Postgres..."
@@ -111,78 +116,42 @@ redis-shell:
 
 # Service Runners
 run-backend: ensure-log-dir build
-	@echo "Starting backend server in background, logging to $(BACKEND_LOG)..."
-	@if lsof -i:8080 -t >/dev/null; then \
-		echo "⚠️  Port 8080 is already in use. Restarting backend..."; \
-		pkill -f "bin/server" || true; \
-		sleep 1; \
-	fi
+	@echo "Starting backend server..."
 	@cd backend && nohup ../bin/server > ../$(BACKEND_LOG) 2>&1 & echo "✅ Backend started (PID: $$!)."
 
 run-worker: ensure-log-dir build
-	@echo "Starting worker in background, logging to $(WORKER_LOG)..."
-	@pkill -f "bin/worker" || true
+	@echo "Starting worker..."
 	@cd backend && nohup ../bin/worker > ../$(WORKER_LOG) 2>&1 & echo "✅ Worker started (PID: $$!)."
 
-reindex: build
-	@echo "Running reindex..."
-	@cd backend && go run ./cmd/reindex/main.go
-
 run-frontend: ensure-log-dir
-	@echo "Starting frontend development server in background, logging to $(FRONTEND_LOG)..."
-	@if lsof -i:3000 -t >/dev/null; then \
-		echo "⚠️  Port 3000 is already in use. Process might be running."; \
-	else \
-		nohup pnpm --prefix frontend dev > $(FRONTEND_LOG) 2>&1 & \
-		echo "✅ Frontend started."; \
-	fi
+	@echo "Starting frontend..."
+	@nohup pnpm --prefix frontend dev > $(FRONTEND_LOG) 2>&1 & echo "✅ Frontend started."
 
 # Observability
 status:
 	@echo "--- Service Status ---"
-	@echo "Backend (port 8080):"
-	@lsof -i:8080 -t >/dev/null && echo "  🟢 Running (PID: $$(lsof -i:8080 -t))" || echo "  🔴 Not running"
-	@echo "Worker:"
-	@pgrep -f "bin/worker" >/dev/null && echo "  🟢 Running (PID: $$(pgrep -f "bin/worker"))" || echo "  🔴 Not running"
-	@echo "Frontend (port 3000):"
-	@lsof -i:3000 -t >/dev/null && echo "  🟢 Running (PID: $$(lsof -i:3000 -t))" || echo "  🔴 Not running"
-	@echo ""
-	@echo "--- Recent Logs (Last 10 lines) ---"
-	@echo "[Backend]:" && tail -n 10 $(BACKEND_LOG) 2>/dev/null || echo "  No logs."
-	@echo "[Worker]:" && tail -n 10 $(WORKER_LOG) 2>/dev/null || echo "  No logs."
-	@echo "[Frontend]:" && tail -n 10 $(FRONTEND_LOG) 2>/dev/null || echo "  No logs."
+	@echo "Backend (8080): $$(lsof -i:8080 -t >/dev/null && echo "🟢 Running" || echo "🔴 Stopped")"
+	@echo "Frontend (3000): $$(lsof -i:3000 -t >/dev/null && echo "🟢 Running" || echo "🔴 Stopped")"
+	@echo "Worker:         $$(pgrep -f "bin/worker" >/dev/null && echo "🟢 Running" || echo "🔴 Stopped")"
+	@echo "Postgres (5432):$$(nc -z localhost 5432 2>/dev/null && echo "🟢 Running" || echo "🔴 Stopped")"
+	@echo "Redis (6380):   $$(nc -z localhost 6380 2>/dev/null && echo "🟢 Running" || echo "🔴 Stopped")"
 
 logs:
 	@echo "Viewing last 500 lines of all logs..."
-	@tail -n 500 $(BACKEND_LOG) $(WORKER_LOG) $(FRONTEND_LOG) 2>/dev/null || echo "  No logs yet or log files not found."
+	@tail -n 500 $(BACKEND_LOG) $(WORKER_LOG) $(FRONTEND_LOG) 2>/dev/null || echo "  No logs yet."
 
 watch-logs:
-	@echo "Following all logs (Press Ctrl+C to exit)..."
+	@echo "Following all logs (Ctrl+C to exit)..."
 	@tail -f $(BACKEND_LOG) $(WORKER_LOG) $(FRONTEND_LOG)
 
 watch-backend:
-	@echo "Following backend logs..."
 	@tail -f $(BACKEND_LOG)
 
 watch-worker:
-	@echo "Following worker logs..."
 	@tail -f $(WORKER_LOG)
 
 watch-frontend:
-	@echo "Following frontend logs..."
 	@tail -f $(FRONTEND_LOG)
-
-logs-backend:
-	@echo "Viewing last 500 lines of backend logs..."
-	@tail -n 500 $(BACKEND_LOG)
-
-logs-worker:
-	@echo "Viewing last 500 lines of worker logs..."
-	@tail -n 500 $(WORKER_LOG)
-
-logs-frontend:
-	@echo "Viewing last 500 lines of frontend logs..."
-	@tail -n 500 $(FRONTEND_LOG)
 
 # Code Quality
 test:

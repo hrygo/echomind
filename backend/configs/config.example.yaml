@@ -17,39 +17,44 @@ redis:
 
 ai:
   provider: "deepseek" # Options: deepseek, openai, gemini
+  embedding_provider: "openai" # Options: openai (Recommended for 1536 dim), deepseek (if supported), gemini
+  embedding_model: "text-embedding-3-small" # Model for embeddings
   chunk_size: 1000 # Max tokens per chunk (1 token ~= 4 chars). Recommended: 500-1000
-  
+
   deepseek:
     api_key: "YOUR_DEEPSEEK_KEY"
     model: "deepseek-chat" # Options: deepseek-chat, deepseek-coder
     base_url: "https://api.deepseek.com/v1"
-    
+
   openai:
     api_key: "YOUR_OPENAI_KEY"
     model: "gpt-4o" # Options: gpt-4o, gpt-4-turbo, gpt-3.5-turbo
     base_url: "" # Optional, for proxies or compatible services
-    
+
   gemini:
     api_key: "YOUR_GEMINI_KEY"
     model: "gemini-2.5-flash" # Options: gemini-2.5-flash, gemini-2.5-pro, gemini-3.0-pro
-    
+
   prompts:
     summary: |
-      You are a professional executive assistant. Your goal is to analyze the following email and return a structured JSON object with the following fields:
-      - "summary": A concise 3-sentence summary highlighting the key actions, decisions, or information.
-      - "category": Classify the email into one of these categories: 'Work', 'Newsletter', 'Notification', 'Personal', 'Spam'.
-      - "sentiment": Determine the overall sentiment: 'Positive', 'Neutral', 'Negative'.
-      - "urgency": Determine the urgency: 'High', 'Medium', 'Low'.
-      - "action_items": A list of extracted action items or tasks from the email. If no action items, return an empty array.
-      Do not use conversational filler. Example output:
+      你是一位专业的行政助理。你的目标是分析以下邮件，并返回一个结构化的 JSON 对象，包含以下字段：
+      - "summary": 用中文简明扼要地总结邮件内容（3句话以内），突出关键行动、决策或信息。
+      - "category": 将邮件归类为以下之一：'Work' (工作), 'Newsletter' (通讯), 'Notification' (通知), 'Personal' (个人), 'Spam' (垃圾邮件)。请返回英文类别名称。
+      - "sentiment": 确定整体情感：'Positive' (积极), 'Neutral' (中性), 'Negative' (消极)。请返回英文情感名称。
+      - "urgency": 确定紧急程度：'High' (高), 'Medium' (中), 'Low' (低)。请返回英文紧急程度名称。
+      - "action_items": 提取邮件中的待办事项或行动项列表（中文）。如果没有，返回空数组。
+      请勿包含任何对话填充词。示例输出：
       ```json
       {
-        "summary": "This is a concise summary of the email.",
+        "summary": "这是一个关于邮件内容的简明总结。",
         "category": "Work",
         "sentiment": "Neutral",
         "urgency": "Medium",
-        "action_items": ["Follow up on project X", "Schedule meeting with team Y"]
+        "action_items": ["跟进项目X", "安排与Y团队的会议"]
       }
       ```
-    classify: "Classify the following email into one of these categories: 'Work', 'Newsletter', 'Notification', 'Personal', 'Spam'. Return ONLY the category name."
-    sentiment: 'Analyze the sentiment and urgency of the following email. Return the result in JSON format: {"sentiment": "Positive" | "Neutral" | "Negative", "urgency": "High" | "Medium" | "Low"}.'
+    classify: "将以下邮件归类为以下之一：'Work', 'Newsletter', 'Notification', 'Personal', 'Spam'。仅返回类别名称（英文）。"
+    sentiment: '分析以下邮件的情感和紧急程度。返回 JSON 格式结果：{"sentiment": "Positive" | "Neutral" | "Negative", "urgency": "High" | "Medium" | "Low"}。'
+    draft_reply: |
+      你是一位高效的职业经理人。请根据原始邮件内容和用户的简短提示，用中文起草一封专业、得体且切中要点的回复邮件。
+      保持语气专业、友好。如果用户提示很简略，请根据上下文合理补充。

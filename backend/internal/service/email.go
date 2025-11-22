@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -59,4 +60,19 @@ func (s *EmailService) CreateEmail(ctx context.Context, email *model.Email) erro
 // UpdateEmail updates an existing email record.
 func (s *EmailService) UpdateEmail(ctx context.Context, email *model.Email) error {
 	return s.db.WithContext(ctx).Save(email).Error
+}
+
+// DeleteAllUserEmails deletes all emails and their associated embeddings for a given user.
+func (s *EmailService) DeleteAllUserEmails(ctx context.Context, userID uuid.UUID) error {
+	// Delete associated embeddings first (due to foreign key constraints with CASCADE might handle this, but explicit is safer)
+	if err := s.db.WithContext(ctx).Exec("DELETE FROM email_embeddings WHERE email_id IN (SELECT id FROM emails WHERE user_id = ?)", userID).Error; err != nil {
+		return fmt.Errorf("failed to delete embeddings for user %s: %w", userID, err)
+	}
+
+	// Then delete the emails themselves
+	if err := s.db.WithContext(ctx).Where("user_id = ?", userID).Delete(&model.Email{}).Error; err != nil {
+		return fmt.Errorf("failed to delete emails for user %s: %w", userID, err)
+	}
+
+	return nil
 }

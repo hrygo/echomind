@@ -151,3 +151,31 @@ func cleanMarkdown(text string) string {
 	}
 	return strings.TrimSpace(cleaned)
 }
+
+// Embed generates a vector for a single text.
+func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
+	em := p.client.EmbeddingModel(p.model)
+	res, err := em.EmbedContent(ctx, genai.Text(text))
+	if err != nil {
+		return nil, err
+	}
+	return res.Embedding.Values, nil
+}
+
+// EmbedBatch generates vectors for multiple texts.
+func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
+	em := p.client.EmbeddingModel(p.model)
+	batch := em.NewBatch()
+	for _, text := range texts {
+		batch.AddContent(genai.Text(text))
+	}
+	res, err := em.BatchEmbedContents(ctx, batch)
+	if err != nil {
+		return nil, err
+	}
+	var embeddings [][]float32
+	for _, e := range res.Embeddings {
+		embeddings = append(embeddings, e.Values)
+	}
+	return embeddings, nil
+}

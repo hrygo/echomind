@@ -1,21 +1,29 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
 	"github.com/hrygo/echomind/internal/middleware"
-	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type EmailHandler struct {
-	emailService *service.EmailService
+// EmailServicer defines the interface for the email service that the handler depends on.
+type EmailServicer interface {
+	ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int) ([]model.Email, error)
+	GetEmail(ctx context.Context, userID, emailID uuid.UUID) (*model.Email, error)
+	DeleteAllUserEmails(ctx context.Context, userID uuid.UUID) error
 }
 
-func NewEmailHandler(emailService *service.EmailService) *EmailHandler {
+type EmailHandler struct {
+	emailService EmailServicer
+}
+
+func NewEmailHandler(emailService EmailServicer) *EmailHandler {
 	return &EmailHandler{emailService: emailService}
 }
 
@@ -76,4 +84,20 @@ func (h *EmailHandler) GetEmail(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, email)
+}
+
+// DeleteAllEmails deletes all emails for the authenticated user.
+func (h *EmailHandler) DeleteAllEmails(c *gin.Context) {
+	userID, ok := middleware.GetUserIDFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	if err := h.emailService.DeleteAllUserEmails(c.Request.Context(), userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete all emails", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "All emails deleted successfully"})
 }

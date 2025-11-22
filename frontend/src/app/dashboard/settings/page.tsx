@@ -56,11 +56,14 @@ export default function SettingsPage() {
         username: mailboxConfig.email, // Assuming username is email
         password: mailboxConfig.password
       });
-      // console.log("Saving mailbox config:", mailboxConfig);
       alert("配置已保存");
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error("Failed to save config:", error);
-      alert("保存失败，请检查配置");
+      alert(
+        error.response?.data?.error ||
+          (error.message === 'Network Error' ? '网络错误，请检查API服务是否运行' : '保存失败，请检查配置')
+      );
     }
   };
 
