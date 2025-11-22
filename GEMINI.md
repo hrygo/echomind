@@ -24,7 +24,7 @@
 **Phase 5.3 - RAG Polish & Phase 6 Prep** | [Plan](docs/sprints/week2_rag_polish/sprint-plan.md)
 - ✅ Performance: < 500ms search (Benchmarked)
 - ✅ Testing: Backend Integration & Frontend E2E Tests added
-- UX: Search history, filters (Next)
+- ✅ UX: Search history, filters, i18n
 - Design: Team Collaboration architecture (Next)
 
 ### 🔮 Future (6-Month Plan)

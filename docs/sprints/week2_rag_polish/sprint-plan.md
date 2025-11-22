@@ -104,29 +104,29 @@ Comprehensive testing coverage for RAG features.
 Enhance user experience based on sprint feedback.
 
 ### Morning: Search UX
-- [ ] **Search History**
-    - [ ] Store recent searches in localStorage
-    - [ ] Show suggestions dropdown
-    - [ ] Clear history option
-- [ ] **Result Highlighting**
-    - [ ] Highlight matching terms in snippets
-    - [ ] Add relevance score explanation tooltip
-- [ ] **Filters**
-    - [ ] Add date range filter UI
-    - [ ] Add sender filter
-    - [ ] Update API to support filters
+- [x] **Search History**
+    - [x] Store recent searches in localStorage
+    - [x] Show suggestions dropdown
+    - [x] Clear history option
+- [x] **Result Highlighting**
+    - [x] Highlight matching terms in snippets
+    - [x] Add relevance score explanation tooltip
+- [x] **Filters**
+    - [x] Add date range filter UI
+    - [x] Add sender filter
+    - [x] Update API to support filters
 
 ### Afternoon: Error Handling & Feedback
-- [ ] **Better Error Messages**
-    - [ ] User-friendly API error messages
-    - [ ] Retry mechanism for failed searches
-    - [ ] Offline state handling
-- [ ] **Loading States**
-    - [ ] Skeleton loaders for results
-    - [ ] Progress indicator for reindex
-- [ ] **Empty States**
-    - [ ] Onboarding tips for first search
-    - [ ] Suggestions when no results
+- [x] **Better Error Messages**
+    - [x] User-friendly API error messages
+    - [x] Retry mechanism for failed searches
+    - [x] Offline state handling (via Error Boundary/Mock)
+- [x] **Loading States**
+    - [x] Skeleton loaders for results
+    - [x] Progress indicator for reindex (N/A for search UI)
+- [x] **Empty States**
+    - [x] Onboarding tips for first search
+    - [x] Suggestions when no results
 
 **Deliverable**: v0.6.7 with enhanced UX
 

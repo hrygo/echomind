@@ -94,3 +94,22 @@
 ### Redis Keys
 *   `asynq:{queue}`: Background task queues.
 *   `echomind:cache:{key}`: General caching.
+
+## 6. 可观测性 (Observability)
+
+系统集成了结构化日志与基础监控指标，确保生产环境的可见性。
+
+*   **Structured Logging**: 使用 Uber `Zap` 库。
+    *   **Request IDs**: 每个 HTTP 请求分配唯一 `X-Request-ID`，贯穿处理链路。
+    *   **Levels**: `Info` (常规操作), `Warn` (业务异常), `Error` (系统故障/Panic).
+    *   **Fields**: Log entries include `userID`, `duration`, `query` (for search), etc.
+*   **Health Checks**:
+    *   `GET /api/v1/health`: 检查数据库 (Postgres + pgvector) 连接状态。
+*   **Metrics (Logs)**:
+    *   Search Latency: 记录每次搜索的耗时。
+    *   Embedding Latency: 记录向量生成的耗时（外部 API 调用）。
+
+## 7. API 接口 (API)
+
+详细 API 文档请参考: [docs/api.md](api.md)
+
