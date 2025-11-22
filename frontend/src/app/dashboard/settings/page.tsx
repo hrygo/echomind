@@ -34,8 +34,14 @@ export default function SettingsPage() {
     try {
       await apiClient.post("/sync");
       setLastSynced("Just now");
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error("Sync failed:", error);
+      if (error.response?.status === 400) {
+        alert(error.response.data.error || "请先配置邮箱账户");
+      } else {
+        alert("同步失败，请稍后重试");
+      }
     } finally {
       setIsSyncing(false);
     }
@@ -43,11 +49,18 @@ export default function SettingsPage() {
 
   const handleSaveMailboxConfig = async () => {
     try {
-      // await apiClient.post('/settings/account', mailboxConfig);
-      console.log("Saving mailbox config:", mailboxConfig);
+      await apiClient.post('/settings/account', {
+        email: mailboxConfig.email,
+        server_address: mailboxConfig.imapServer,
+        server_port: parseInt(mailboxConfig.imapPort),
+        username: mailboxConfig.email, // Assuming username is email
+        password: mailboxConfig.password
+      });
+      // console.log("Saving mailbox config:", mailboxConfig);
       alert("配置已保存");
     } catch (error) {
       console.error("Failed to save config:", error);
+      alert("保存失败，请检查配置");
     }
   };
 

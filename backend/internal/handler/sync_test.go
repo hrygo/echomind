@@ -13,6 +13,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/internal/handler"
+	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/pkg/imap"
@@ -52,11 +53,9 @@ func (m *MockIMAPClient) Close(c *clientimap.Client) {
 	}
 }
 
-func TestSyncHandler(t *testing.T) {
-	// Setup Gin in test mode
+func setupSyncTest(t *testing.T) (*handler.SyncHandler, *gorm.DB, *configs.Config) {
 	gin.SetMode(gin.TestMode)
 
-	// Mock DB and Client (not directly used by handler, but passed to service)
 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("Failed to connect to db: %v", err)
@@ -64,52 +63,36 @@ func TestSyncHandler(t *testing.T) {
 	if err := db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailAccount{}); err != nil {
 		t.Fatalf("Failed to auto migrate database: %v", err)
 	}
-	mockDB := db
 
-	// Create a mock fetcher to satisfy the handler's dependencies
 	mockFetcher := &MockFetcher{}
-
-	// Create mock contact service
-	mockContactService := service.NewContactService(mockDB)
-
-	// Create mock asynq client, account service and config
+	mockContactService := service.NewContactService(db)
 	mockAsynqClient := &asynq.Client{}
 	mockConfig := &configs.Config{Security: configs.SecurityConfig{EncryptionKey: "d2f4e23a4b5016b994844b91c48a92c1439bbf17b91a37e4a49ab39c3dbee75f"}}
-	mockAccountService := service.NewAccountService(mockDB, &mockConfig.Security)
+	mockAccountService := service.NewAccountService(db, &mockConfig.Security)
 
-	// Create a mock IMAP client that does nothing but return a dummy client
 	mockIMAPClient := &MockIMAPClient{
 		DialAndLoginFunc: func(addr, username, password string) (*clientimap.Client, error) {
-			return &clientimap.Client{}, nil // Simulate successful connection and login
+			return &clientimap.Client{}, nil 
 		},
-		CloseFunc: func(c *clientimap.Client) { /* do nothing */ },
+		CloseFunc: func(c *clientimap.Client) { },
 	}
-	syncService := service.NewSyncService(mockDB, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
+	
+	syncService := service.NewSyncService(db, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
+	return handler.NewSyncHandler(syncService), db, mockConfig
+}
 
-	// Create an instance of the handler with the service
-	syncHandler := handler.NewSyncHandler(syncService)
+func TestSyncHandler_Success(t *testing.T) {
+	syncHandler, db, mockConfig := setupSyncTest(t)
 
-	// Create a Gin context and recorder
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/api/v1/sync", nil)
 
-	// Create a test request
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/sync", nil)
-	c.Request = req
-
-	// Set a mock UserID in the context to simulate authentication
 	userID := uuid.New()
-	c.Set("userID", userID)
+	c.Set(middleware.ContextUserIDKey, userID)
 
-	// Create a mock EmailAccount for the user
-	encryptionKeyBytes, err := hex.DecodeString(mockConfig.Security.EncryptionKey)
-	if err != nil {
-		t.Fatalf("Failed to decode encryption key: %v", err)
-	}
-	encryptedPassword, err := utils.Encrypt("testpassword", encryptionKeyBytes)
-	if err != nil {
-		t.Fatalf("Failed to encrypt password: %v", err)
-	}
+	encryptionKeyBytes, _ := hex.DecodeString(mockConfig.Security.EncryptionKey)
+	encryptedPassword, _ := utils.Encrypt("testpassword", encryptionKeyBytes)
 
 	mockAccount := model.EmailAccount{
 		ID:                uuid.New(),
@@ -118,18 +101,37 @@ func TestSyncHandler(t *testing.T) {
 		ServerAddress:     "imap.test.com",
 		ServerPort:        993,
 		Username:          "test@example.com",
-		EncryptedPassword: encryptedPassword, // Use the actually encrypted password
+		EncryptedPassword: encryptedPassword,
 		IsConnected:       true,
 	}
 	db.Create(&mockAccount)
 
-	// Call the handler directly
 	syncHandler.SyncEmails(c)
 
-	// Assert the response
 	assert.Equal(t, http.StatusOK, w.Code)
+	
+	var response map[string]string
+	json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Equal(t, "Sync initiated successfully", response["message"])
+}
 
-	expectedBody := gin.H{"message": "Sync initiated successfully"}
-	jsonBody, _ := json.Marshal(expectedBody)
-	assert.Equal(t, string(jsonBody), w.Body.String())
+func TestSyncHandler_NoAccount(t *testing.T) {
+	syncHandler, _, _ := setupSyncTest(t)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/api/v1/sync", nil)
+
+	userID := uuid.New()
+	c.Set(middleware.ContextUserIDKey, userID)
+
+	// Do not create an account for this user
+
+	syncHandler.SyncEmails(c)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var response map[string]string
+	json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Equal(t, "Please configure your email account in Settings first.", response["error"])
 }
