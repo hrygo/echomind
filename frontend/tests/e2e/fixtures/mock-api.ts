@@ -17,6 +17,7 @@ export const mockApi = async (page: Page) => {
 
   // Mock Auth Login
   await page.route('**/api/v1/auth/login', async (route) => {
+    console.log('MOCK HIT: Login');
     const json = {
       token: 'mock-jwt-token',
       user: {
