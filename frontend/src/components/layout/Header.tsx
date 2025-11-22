@@ -6,6 +6,8 @@ import { Search, Bell, Settings, LogOut, Globe } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { searchEmails, SearchResult } from "@/lib/api";
 import { SearchResults } from "./SearchResults";
+import { SearchHistory } from "./SearchHistory";
+import { useSearchHistory } from "@/hooks/useSearchHistory";
 
 export function Header() {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -13,23 +15,29 @@ export function Header() {
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [isInputFocused, setIsInputFocused] = useState(false);
+    const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
     const { language, setLanguage, t } = useLanguage();
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
     };
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) {
+    const handleSearch = async (queryOverride?: string) => {
+        const query = typeof queryOverride === 'string' ? queryOverride : searchQuery;
+        if (!query.trim()) {
             setShowResults(false);
             return;
         }
 
+        if (queryOverride) setSearchQuery(queryOverride);
+
+        addToHistory(query);
         setIsSearching(true);
         setShowResults(true);
 
         try {
-            const response = await searchEmails(searchQuery, 10);
+            const response = await searchEmails(query, 10);
             setSearchResults(response.results);
         } catch (error) {
             console.error("Search failed:", error);
@@ -61,19 +69,36 @@ export function Header() {
                     <input
                         type="text"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            if (!e.target.value) setShowResults(false);
+                        }}
                         onKeyPress={handleKeyPress}
-                        onFocus={() => searchQuery && setShowResults(true)}
+                        onFocus={() => {
+                            setIsInputFocused(true);
+                            if (searchQuery) setShowResults(true);
+                        }}
+                        onBlur={() => {
+                            // Delay to allow clicking on history items
+                            setTimeout(() => setIsInputFocused(false), 200);
+                        }}
                         className="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200 text-sm font-medium"
                         placeholder={t('common.searchPlaceholder')}
                     />
                 </div>
-                {showResults && (
+                {showResults ? (
                     <SearchResults
                         results={searchResults}
                         isLoading={isSearching}
                         query={searchQuery}
                         onClose={handleCloseResults}
+                    />
+                ) : (isInputFocused && !searchQuery && history.length > 0) && (
+                    <SearchHistory
+                        history={history}
+                        onSelect={(query) => handleSearch(query)}
+                        onRemove={removeFromHistory}
+                        onClear={clearHistory}
                     />
                 )}
             </div>

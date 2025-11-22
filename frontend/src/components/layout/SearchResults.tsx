@@ -19,6 +19,19 @@ export function SearchResults({ results, isLoading, query, onClose }: SearchResu
         onClose();
     };
 
+    const highlightText = (text: string, query: string) => {
+        if (!query.trim()) return text;
+        const words = query.trim().split(/\s+/).filter(word => word.length > 0);
+        if (words.length === 0) return text;
+
+        const pattern = new RegExp(`(${words.join('|')})`, 'gi');
+        const parts = text.split(pattern);
+
+        return parts.map((part, i) => 
+            pattern.test(part) ? <span key={i} className="bg-yellow-200 text-slate-900 font-medium rounded-sm px-0.5">{part}</span> : part
+        );
+    };
+
     if (isLoading) {
         return (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
@@ -46,7 +59,7 @@ export function SearchResults({ results, isLoading, query, onClose }: SearchResu
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50 max-h-96 overflow-y-auto">
             <div className="p-2 border-b border-slate-100 bg-slate-50">
                 <p className="text-xs font-medium text-slate-600 px-3 py-1">
-                    Found {results.length} result{results.length > 1 ? 's' : ''} for "{query}"
+                    Found {results.length} result{results.length > 1 ? 's' : ''} for &quot;{query}&quot;
                 </p>
             </div>
             <div className="divide-y divide-slate-100">
@@ -59,10 +72,10 @@ export function SearchResults({ results, isLoading, query, onClose }: SearchResu
                         <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-semibold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
-                                    {result.subject || "(No Subject)"}
+                                    {highlightText(result.subject || "(No Subject)", query)}
                                 </h4>
                                 <p className="text-xs text-slate-500 line-clamp-2 mt-1">
-                                    {result.snippet}
+                                    {highlightText(result.snippet, query)}
                                 </p>
                                 <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
                                     <span className="flex items-center gap-1">
@@ -76,7 +89,10 @@ export function SearchResults({ results, isLoading, query, onClose }: SearchResu
                                 </div>
                             </div>
                             <div className="flex-shrink-0">
-                                <div className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                <div 
+                                    className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded cursor-help"
+                                    title={`Relevance Score: ${(result.score * 100).toFixed(1)}%\nCalculated using semantic vector similarity.`}
+                                >
                                     {(result.score * 100).toFixed(0)}%
                                 </div>
                             </div>

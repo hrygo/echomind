@@ -39,5 +39,25 @@ test.describe('Search Functionality', () => {
     // Since we expect 0 results (empty DB for this user), check for "No results found"
     const resultsContainer = page.locator('text=No results found');
     await expect(resultsContainer).toBeVisible({ timeout: 10000 });
+
+    // 8. Test Search History
+    // Clear input to show history
+    await searchInput.fill('');
+    // History should be visible now
+    const historyContainer = page.locator('text=Recent Searches');
+    await expect(historyContainer).toBeVisible();
+    await expect(page.locator('text=Test Query')).toBeVisible();
+
+    // 9. Select from history
+    await page.click('text=Test Query');
+    // Should trigger search again
+    await expect(resultsContainer).toBeVisible();
+    
+    // 10. Clear History
+    await searchInput.fill('');
+    await expect(historyContainer).toBeVisible();
+    await page.click('text=Clear');
+    // History should disappear (or be empty)
+    await expect(historyContainer).not.toBeVisible();
   });
 });
