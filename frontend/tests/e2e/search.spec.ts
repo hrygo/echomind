@@ -59,5 +59,27 @@ test.describe('Search Functionality', () => {
     await page.click('text=Clear');
     // History should disappear (or be empty)
     await expect(historyContainer).not.toBeVisible();
+
+    // 11. Test Filters
+    // Open Filter Menu
+    await page.click('button[title="Search Filters"]');
+    const filterMenu = page.locator('text=Search Filters');
+    await expect(filterMenu).toBeVisible();
+
+    // Set Sender Filter
+    await page.fill('input[placeholder="e.g. alice@example.com"]', 'test@example.com');
+    
+    // Close Filter Menu
+    await page.click('button[title="Search Filters"]'); // Toggle off or click X
+    // (Note: The X button is inside the menu, the toggle button is outside)
+    
+    // Check if filter indicator is active (dot)
+    const activeIndicator = page.locator('button[title="Search Filters"] span.bg-blue-600');
+    await expect(activeIndicator).toBeVisible();
+
+    // Perform search with filter
+    await searchInput.fill('Filtered Query');
+    await searchInput.press('Enter');
+    await expect(resultsContainer).toBeVisible();
   });
 });

@@ -3,6 +3,7 @@
 import { SearchResult } from "@/lib/api";
 import { Mail, Calendar, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface SearchResultsProps {
     results: SearchResult[];
@@ -36,9 +37,25 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
     if (isLoading) {
         return (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
-                <div className="p-8 text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <p className="mt-3 text-sm text-slate-500">Searching...</p>
+                <div className="p-2 border-b border-slate-100 bg-slate-50">
+                    <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="divide-y divide-slate-100">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="px-4 py-3">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-4 w-3/4" />
+                                    <Skeleton className="h-3 w-full" />
+                                    <div className="flex gap-3 pt-1">
+                                        <Skeleton className="h-3 w-20" />
+                                        <Skeleton className="h-3 w-20" />
+                                    </div>
+                                </div>
+                                <Skeleton className="h-6 w-10 rounded" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
@@ -64,7 +81,17 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
                 <div className="p-8 text-center">
                     <Mail className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="text-sm font-medium text-slate-600">No results found</p>
-                    <p className="text-xs text-slate-400 mt-1">Try a different search query</p>
+                    <p className="text-xs text-slate-400 mt-1 mb-4">We couldn&apos;t find any emails matching your search.</p>
+                    
+                    <div className="text-left bg-slate-50 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-slate-500 mb-2">Search Tips:</p>
+                        <ul className="text-xs text-slate-500 space-y-1 list-disc pl-4">
+                            <li>Check for typos or spelling errors</li>
+                            <li>Try using broader keywords</li>
+                            <li>Search for sender name or email address</li>
+                            <li>Use filters to narrow down by date</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         );

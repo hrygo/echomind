@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Bell, Settings, LogOut, Globe } from "lucide-react";
+import { Search, Bell, Settings, LogOut, Globe, Filter } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { searchEmails, SearchResult } from "@/lib/api";
 import { SearchResults } from "./SearchResults";
 import { SearchHistory } from "./SearchHistory";
+import { SearchFilters } from "./SearchFilters";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
 
 export function Header() {
@@ -17,6 +18,8 @@ export function Header() {
     const [searchError, setSearchError] = useState<string | null>(null);
     const [showResults, setShowResults] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({ sender: '', startDate: '', endDate: '' });
     const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
     const { language, setLanguage, t } = useLanguage();
 
@@ -39,7 +42,7 @@ export function Header() {
         setShowResults(true);
 
         try {
-            const response = await searchEmails(query, 10);
+            const response = await searchEmails(query, filters, 10);
             setSearchResults(response.results);
         } catch (error) {
             console.error("Search failed:", error);
@@ -64,8 +67,8 @@ export function Header() {
     return (
         <header className="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-8 sticky top-0 z-30 transition-all duration-200">
             {/* Search Bar */}
-            <div className="flex-1 max-w-xl relative">
-                <div className="relative group">
+            <div className="flex-1 max-w-xl relative flex items-center gap-2">
+                <div className="relative group flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                     </div>
@@ -89,6 +92,31 @@ export function Header() {
                         placeholder={t('common.searchPlaceholder')}
                     />
                 </div>
+                
+                <div className="relative">
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`p-2.5 rounded-xl transition-colors ${
+                            showFilters || filters.sender || filters.startDate || filters.endDate
+                                ? 'bg-blue-50 text-blue-600 border border-blue-100' 
+                                : 'bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200'
+                        }`}
+                        title="Search Filters"
+                    >
+                        <Filter className="w-4 h-4" />
+                        {(filters.sender || filters.startDate || filters.endDate) && (
+                            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                        )}
+                    </button>
+                    {showFilters && (
+                        <SearchFilters
+                            filters={filters}
+                            onChange={setFilters}
+                            onClose={() => setShowFilters(false)}
+                        />
+                    )}
+                </div>
+
                 {showResults ? (
                     <SearchResults
                         results={searchResults}

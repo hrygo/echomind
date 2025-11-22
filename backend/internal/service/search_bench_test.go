@@ -156,7 +156,7 @@ func benchmarkSearch(b *testing.B, count int) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := svc.Search(ctx, userID, "benchmark query", 10)
+		_, err := svc.Search(ctx, userID, "benchmark query", service.SearchFilters{}, 10)
 		if err != nil {
 			b.Fatalf("Search failed: %v", err)
 		}

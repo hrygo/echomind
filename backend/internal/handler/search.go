@@ -14,7 +14,7 @@ import (
 )
 
 type Searcher interface {
-	Search(ctx context.Context, userID uuid.UUID, query string, limit int) ([]service.SearchResult, error)
+	Search(ctx context.Context, userID uuid.UUID, query string, filters service.SearchFilters, limit int) ([]service.SearchResult, error)
 }
 
 type SearchHandler struct {
@@ -54,6 +54,28 @@ func (h *SearchHandler) Search(c *gin.Context) {
 		return
 	}
 
+	// Parse filters
+	var filters service.SearchFilters
+	filters.Sender = c.Query("sender")
+
+	if startDateStr := c.Query("start_date"); startDateStr != "" {
+		if t, err := time.Parse(time.DateOnly, startDateStr); err == nil {
+			filters.StartDate = &t
+		} else {
+			h.logger.Warnw("Invalid start_date format", "start_date", startDateStr)
+		}
+	}
+
+	if endDateStr := c.Query("end_date"); endDateStr != "" {
+		if t, err := time.Parse(time.DateOnly, endDateStr); err == nil {
+			// Add 23:59:59 to include the entire end date
+			t = t.Add(24*time.Hour - time.Nanosecond)
+			filters.EndDate = &t
+		} else {
+			h.logger.Warnw("Invalid end_date format", "end_date", endDateStr)
+		}
+	}
+
 	// Get limit parameter (optional, default to 10)
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.Atoi(limitStr)
@@ -61,10 +83,10 @@ func (h *SearchHandler) Search(c *gin.Context) {
 		limit = 10
 	}
 
-	h.logger.Infow("Search request", "userID", userID, "query", query, "limit", limit)
+	h.logger.Infow("Search request", "userID", userID, "query", query, "filters", filters, "limit", limit)
 
 	// Perform search
-	results, err := h.searchService.Search(c.Request.Context(), userID, query, limit)
+	results, err := h.searchService.Search(c.Request.Context(), userID, query, filters, limit)
 	duration := time.Since(start)
 
 	if err != nil {

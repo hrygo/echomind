@@ -101,7 +101,7 @@ func TestSearchService_Search_Integration(t *testing.T) {
 	svc := service.NewSearchService(db, fixedEmbedder)
 
 	// Test Search
-	results, err := svc.Search(context.Background(), userID, "Project", 10)
+	results, err := svc.Search(context.Background(), userID, "Project", service.SearchFilters{}, 10)
 	assert.NoError(t, err)
 	assert.Len(t, results, 1)
 	assert.Equal(t, emailID, results[0].EmailID)

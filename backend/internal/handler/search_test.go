@@ -23,8 +23,8 @@ type MockSearcher struct {
 	mock.Mock
 }
 
-func (m *MockSearcher) Search(ctx context.Context, userID uuid.UUID, query string, limit int) ([]service.SearchResult, error) {
-	args := m.Called(ctx, userID, query, limit)
+func (m *MockSearcher) Search(ctx context.Context, userID uuid.UUID, query string, filters service.SearchFilters, limit int) ([]service.SearchResult, error) {
+	args := m.Called(ctx, userID, query, filters, limit)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -50,7 +50,7 @@ func TestSearchHandler_Search(t *testing.T) {
 			{EmailID: uuid.New(), Subject: "Test", Score: 0.9},
 		}
 
-		mockSearcher.On("Search", mock.Anything, userID, "project", 5).Return(expectedResults, nil)
+		mockSearcher.On("Search", mock.Anything, userID, "project", service.SearchFilters{}, 5).Return(expectedResults, nil)
 
 		h.Search(c)
 
@@ -90,7 +90,7 @@ func TestSearchHandler_Search(t *testing.T) {
 		c.Set(middleware.ContextUserIDKey, userID)
 		c.Request = httptest.NewRequest("GET", "/api/v1/search?q=error", nil)
 
-		mockSearcher.On("Search", mock.Anything, userID, "error", 10).Return(nil, errors.New("db error"))
+		mockSearcher.On("Search", mock.Anything, userID, "error", service.SearchFilters{}, 10).Return(nil, errors.New("db error"))
 
 		h.Search(c)
 
