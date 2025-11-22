@@ -93,21 +93,21 @@ stop:
 	@pkill -f "bin/server" || true
 	@pkill -f "bin/worker" || true
 	@pkill -f "next dev" || true 
-	@cd deploy && docker-compose down
+	@cd deploy && docker compose down
 	@echo "All services stopped."
 
 # Infrastructure
 docker-up:
 	@echo "Bringing up Local Docker services..."
-	cd deploy && docker-compose up -d
+	cd deploy && docker compose up -d
 
 db-shell:
 	@echo "Connecting to Postgres..."
-	@cd deploy && docker-compose exec db psql -U echomind -d echomind
+	@cd deploy && docker compose exec db psql -U echomind -d echomind
 
 redis-shell:
 	@echo "Connecting to Redis..."
-	@cd deploy && docker-compose exec redis redis-cli
+	@cd deploy && docker compose exec redis redis-cli
 
 # Service Runners
 run-backend: ensure-log-dir build

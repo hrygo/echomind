@@ -23,7 +23,7 @@ trap cleanup SIGINT SIGTERM
 
 # 1. Start Infrastructure (Docker)
 echo -e "${GREEN}[1/4] Starting Infrastructure (Postgres & Redis)...${NC}"
-cd deploy && docker-compose up -d
+cd deploy && docker compose up -d
 if [ $? -ne 0 ]; then
     echo -e "${RED}Failed to start Docker services.${NC}"
     exit 1

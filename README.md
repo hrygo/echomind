@@ -68,13 +68,13 @@ make init
     ```
 2.  **Update Credentials**: Edit `backend/configs/config.yaml` and replace the placeholders with your actual values:
     *   `server.jwt.secret`: Set a secure random string.
-    *   `database`: Update `user` and `password` if you changed them in `docker-compose.yml`.
+    *   `database`: Update `user` and `password` if you changed them in `deploy/docker-compose.yml`.
     *   `ai`: Add your API keys (e.g., `YOUR_DEEPSEEK_KEY`).
 
 **Production / CI/CD:**
 
 *   **Environment Variables**: The application supports overriding any config via environment variables with the `ECHOMIND_` prefix (e.g., `ECHOMIND_SERVER_JWT_SECRET`, `ECHOMIND_AI_DEEPSEEK_API_KEY`).
-*   **Docker Compose**: The `deploy/docker-compose.prod.yml` is configured to use environment variables for sensitive data.
+*   **Docker Compose**: The `deploy/docker-compose.prod.yml` uses environment variables for sensitive data. Note: Use `docker compose` (Docker Compose v2 CLI) instead of the deprecated `docker-compose` standalone command.
 
 ### 4. Run the App
 **One-Click Start:**
