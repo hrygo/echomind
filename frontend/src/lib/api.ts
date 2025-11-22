@@ -31,4 +31,28 @@ apiClient.interceptors.response.use(
     }
 );
 
+// Types
+export interface SearchResult {
+    email_id: string;
+    subject: string;
+    snippet: string;
+    sender: string;
+    date: string;
+    score: number;
+}
+
+export interface SearchResponse {
+    query: string;
+    results: SearchResult[];
+    count: number;
+}
+
+// API Functions
+export const searchEmails = async (query: string, limit: number = 10): Promise<SearchResponse> => {
+    const response = await apiClient.get<SearchResponse>('/search', {
+        params: { q: query, limit },
+    });
+    return response.data;
+};
+
 export default apiClient;

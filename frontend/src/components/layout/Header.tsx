@@ -4,29 +4,78 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search, Bell, Settings, LogOut, Globe } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { searchEmails, SearchResult } from "@/lib/api";
+import { SearchResults } from "./SearchResults";
 
 export function Header() {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showResults, setShowResults] = useState(false);
     const { language, setLanguage, t } = useLanguage();
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
     };
 
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) {
+            setShowResults(false);
+            return;
+        }
+
+        setIsSearching(true);
+        setShowResults(true);
+
+        try {
+            const response = await searchEmails(searchQuery, 10);
+            setSearchResults(response.results);
+        } catch (error) {
+            console.error("Search failed:", error);
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
+    const handleCloseResults = () => {
+        setShowResults(false);
+        setSearchQuery("");
+    };
+
     return (
         <header className="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-8 sticky top-0 z-30 transition-all duration-200">
             {/* Search Bar */}
-            <div className="flex-1 max-w-xl">
+            <div className="flex-1 max-w-xl relative">
                 <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                     </div>
                     <input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        onFocus={() => searchQuery && setShowResults(true)}
                         className="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200 text-sm font-medium"
                         placeholder={t('common.searchPlaceholder')}
                     />
                 </div>
+                {showResults && (
+                    <SearchResults
+                        results={searchResults}
+                        isLoading={isSearching}
+                        query={searchQuery}
+                        onClose={handleCloseResults}
+                    />
+                )}
             </div>
 
             {/* Right Actions */}
