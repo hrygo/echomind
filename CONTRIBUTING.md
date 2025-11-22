@@ -13,33 +13,41 @@ Thank you for your interest in contributing to EchoMind! We welcome contribution
 
 *   **Conventional Commits**: We follow [Conventional Commits](https://www.conventionalcommits.org/).
     *   Format: `<type>(<scope>): <subject>`
-    *   **Types**:
-        *   `feat`: New feature
-        *   `fix`: Bug fix
-        *   `docs`: Documentation changes
-        *   `refactor`: Code changes without fixing bugs or adding features
-        *   `test`: Adding missing tests
-        *   `chore`: Maintainance tasks (build, ci, deps)
+    *   **Types**: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`, `ci`.
 *   **Atomic Commits**: Commit often. Each commit should do one thing and do it well. Avoid "mega-commits".
-*   **Independent Release**: Once a feature module (and its tests) is complete, it should be considered ready for release, adhering to Semantic Versioning.
 *   **Pull Requests**: Keep PRs small and focused. One logical feature or bug fix per PR.
 
-## 3. Versioning & Release Strategy
+## 3. Development Protocols (Strict)
+
+### 🛡️ Quality Assurance
+*   **Backend**: `make test` must pass. All DB models must be compatible with both Postgres (Prod) and SQLite (Test).
+*   **Frontend**: `pnpm build` AND `pnpm type-check` must pass. Do not rely solely on IDE checks.
+*   **CI/CD**: Our CI runs these checks automatically. PRs with failing checks will be blocked.
+
+### 🏗️ Frontend Guidelines
+*   **Components**: Before using a generic UI component (e.g., `Dialog`, `Button`), verify it exists in `src/components/ui`. If not, create it first (following shadcn/ui patterns) in a separate commit.
+*   **State Management**: Use Zustand. Be careful with `persist` middleware typing in v5.
+*   **Imports**: Avoid default exports for core libraries if possible to simplify refactoring.
+
+### 🔧 Refactoring Safety
+*   **Blast Radius**: When changing a core type (e.g., DB Model) or API (e.g., `apiClient`), assume it breaks everything. Run a project-wide search (`grep` or IDE) to find usages.
+*   **Incremental**: Deprecate old APIs before removing them if the codebase is large.
+
+## 4. Versioning & Release Strategy
 
 *   We use **Semantic Versioning (SemVer)**: `vMajor.Minor.Patch`.
-*   **Pre-Release Checklist**: Before creating a git tag, you MUST update the version number in the following locations:
-    1.  `frontend/package.json` (version field)
-    2.  `Makefile` (if `VERSION` variable exists)
-    3.  `docs/` (if there are specific version references)
-    4.  `backend/cmd/main.go` (if version flag is implemented)
+*   **Pre-Release Checklist**: Before creating a git tag, you MUST update the version number in:
+    1.  `Makefile` (VERSION variable)
+    2.  `backend/cmd/main.go` (Version constant)
+    3.  `frontend/package.json` (version field)
 *   **Process**:
     1.  Update files.
     2.  Commit: `chore: bump version to vX.Y.Z`.
-    3.  Tag: `git tag vX.Y.Z`.
-    4.  Push: `git push origin vX.Y.Z`.
+    3.  Tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
+    4.  Push tags: `git push origin vX.Y.Z`.
 
-## 4. Coding Standards
+## 5. Coding Standards
 
-*   **Go**: Follow standard Go conventions (effective go). Run `golangci-lint` before committing.
-*   **Frontend**: Use functional components and Hooks. Run `pnpm lint`.
-*   **Tests**: TDD is encouraged. Ensure all tests pass before submitting.
+*   **Go**: Follow `Effective Go`. Use `testify` for assertions.
+*   **Frontend**: React Functional Components, Hooks, TypeScript (Strict).
+*   **i18n**: All user-facing text must be localized (`t('key')`).

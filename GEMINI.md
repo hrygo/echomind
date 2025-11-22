@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.6.4 (Alpha) | **Active Sprint**: Phase 5.3 - RAG Polish & Phase 6 Prep
+> **Stage**: v0.7.2 (Alpha) | **Active Sprint**: Phase 6.1 - Team Collaboration Foundation
 
 ---
 
@@ -14,19 +14,19 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.6.5 → v0.7.0)
-**Phase 5.3 - RAG Polish & Phase 6 Prep**
-- ✅ Performance: < 500ms search
-- ✅ Design: Team Collaboration architecture
+### ✅ Recent Completion (v0.7.0 → v0.7.2)
+**Phase 6.1 - Team Collaboration Foundation**
+- ✅ Multi-tenant Architecture (Org/Team Models)
+- ✅ Migration Strategy & Execution
+- ✅ Frontend Context Switcher & State Management
 
-### 🚧 Current Sprint (v0.7.1+)
-**Phase 6.1 - Team Collaboration Foundation** | [Plan](docs/sprints/week3_team_collab/sprint-plan.md)
-- Database Models (Org, Team, Member)
-- Multi-tenant Migration
-- Organization API & UI Switcher
+### 🚧 Current Sprint (Phase 6.2+)
+**Phase 6.2 - Shared Resources & Team Polish**
+- Shared Email Inboxes
+- Team Member Management UI
+- Advanced Permission System
 
 ### 🔮 Future (6-Month Plan)
-- **Phase 6** (2026.01-02): Team Collaboration
 - **Phase 7** (2026.03-04): Cross-Platform (Desktop, WeChat)
 - **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
 
@@ -34,24 +34,34 @@
 
 ## 3. The Golden Rules (Non-Negotiable)
 
-### Quality (Test-Driven)
-`make test` MUST pass before commit. Red → Green → Refactor.
+### 🛡️ Quality & Standards (Test-Driven)
+1. **CI Mandatory**: `make test` (Backend) AND `pnpm build` (Frontend) MUST pass before commit.
+   - Frontend must run `pnpm type-check` to catch strict type errors.
+2. **Mock First**: Use mocks for external dependencies (AI, DB) in unit tests to ensure speed and stability.
 
-### Delivery (Frequent & Versioned)
-1. **Commit Often**: Don't hoard changes
-2. **Tag Immediately**: After quality verification, release
-   - Minor features (v0.x.Y): Daily if tests pass
-   - Major features (v0.X.0): Milestone complete
-   - Fixes (v0.x.y): Immediate
-3. **Convention**: `feat:` | `fix:` | `docs:`
-4. **Versioning**: Update `Makefile`, `package.json`, `backend/cmd/main.go`
-5. **Principle**: "Done" = "Released & Tagged"
+### 🚀 Delivery (Frequent & Versioned)
+1. **Commit Often**: Don't hoard changes. Atomic commits.
+2. **Tag Immediately**: Release often.
+   - Minor features (v0.x.Y): Daily if tests pass.
+   - Fixes (v0.x.y): Immediate.
+3. **Convention**: `feat:` | `fix:` | `docs:` | `refactor:`
+4. **Versioning**: Update `Makefile`, `package.json`, `backend/cmd/main.go`.
 
-### Structure (Convention over Configuration)
-- Follow `internal/`, `pkg/` directory structure
-- Respect `backend/` vs `frontend/` boundary
-- Maintain naming conventions
+### 🏗️ Architecture & Code Standards
+1. **Refactoring Protocol (Blast Radius Control)**:
+   - **Incremental**: When changing core APIs (e.g., `apiClient`), keep the old export deprecated temporarily.
+   - **Search First**: Use `grep` or global search to identify ALL usage points before modifying types or exports.
+2. **Frontend Components**:
+   - **Check Existence**: Never assume a UI component (e.g., `Dialog`) exists. Check `src/components/ui` first.
+   - **Atomic UI**: New features needing new UI components must include the component code in the commit.
+3. **Database Schema**:
+   - **Type Safety**: Changing a model field (e.g., `UUID` to `*UUID`) breaks code. Compile backend immediately after model changes.
+   - **Compatibility**: Avoid DB-specific defaults (e.g., `gen_random_uuid()`) in GORM tags if they break SQLite tests. Generate IDs in application logic.
 
-### Internationalization (i18n)
+### 🌐 Internationalization (i18n)
 - **Bilingual UI**: All user-facing text MUST support both English (en) and Chinese (zh).
-- **No Hardcoding**: Never hardcode strings in components. Use `t('key')` and update locale files.
+- **No Hardcoding**: Use `t('key')`.
+
+### 🔧 Tooling Usage (AI Agent SOP)
+- **Precise Replacement**: When using `replace`, ensure `old_string` is unique and minimal. Avoid including long context that might have changed.
+- **Verify State**: If a tool fails, use `read_file` to verify the current file state before retrying.

@@ -60,6 +60,7 @@ jobs:
         run: |
           cd frontend
           pnpm lint
+          pnpm type-check
           pnpm test
 
   # 2. Build & Push Docker Images (Only on Push to Main)
