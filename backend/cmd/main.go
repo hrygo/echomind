@@ -20,7 +20,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const Version = "0.5.3"
+const Version = "0.5.4"
 
 func main() {
 	// Initialize Viper for configuration
@@ -63,11 +63,22 @@ func main() {
 		sugar.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// Enable pgvector extension
+	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS vector").Error; err != nil {
+		sugar.Fatalf("Failed to create vector extension: %v", err)
+	}
+
 	// AutoMigrate models
-	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}); err != nil {
+	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}); err != nil {
 		sugar.Fatalf("Failed to auto migrate database: %v", err)
 	}
 	sugar.Infof("Database migration completed")
+
+	// Create HNSW index for vector search optimization
+	// Note: vector_cosine_ops is for Cosine distance (default for text-embedding-3-small usually)
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS email_embeddings_vector_idx ON email_embeddings USING hnsw (vector vector_cosine_ops)").Error; err != nil {
+		sugar.Warnf("Failed to create HNSW index (might be expected if table is empty or index exists): %v", err)
+	}
 
 	// Initialize Asynq Client
 	redisAddr := vip.GetString("redis.addr")
