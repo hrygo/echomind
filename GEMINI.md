@@ -1,95 +1,72 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: AI-powered Email Decision System. "External Brain for Executive Communication."  
-> **Stage**: v0.6.4 (Alpha)  
-> **Active Sprint**: Phase 5.3 - RAG Polish & Phase 6 Prep
+> **Stage**: v0.6.4 (Alpha) | **Active Sprint**: Phase 5.3 - RAG Polish & Phase 6 Prep
 
 ---
 
 ## 1. Technology Stack
 
-### Backend
-- **Language**: Go 1.22+
-- **Web Framework**: Gin
-- **Database**: GORM (Postgres + pgvector)
-- **Async Jobs**: Asynq (Redis)
-- **Configuration**: Viper
-
-### Frontend
-- **Framework**: Next.js 16 (TypeScript)
-- **UI Library**: Tailwind CSS + Radix UI
-- **State Management**: Zustand
-- **HTTP Client**: Axios
+**Backend**: Go 1.22+ (Gin, GORM, Asynq) | Postgres + pgvector | Redis  
+**Frontend**: Next.js 16 (TypeScript, Tailwind CSS, Zustand)
 
 ---
 
 ## 2. Development Workflow
 
-### 🚀 Start Development
 ```bash
-make dev    # Starts Postgres, Redis, Backend, Worker, and Frontend
-make logs   # View all logs
-```
+# Start
+make dev    # All services (Postgres, Redis, Backend, Worker, Frontend)
+make logs   # View logs
 
-### 🧪 Verify Quality
-```bash
-make test                  # Backend unit/integration tests
-cd frontend && pnpm test   # Frontend component tests
+# Verify
+make test   # Backend + Frontend tests
 ```
-
-### 📦 Release Process
-1. Finish Feature/Fix
-2. Verify Tests: `make test`
-3. Bump Version: `Makefile`, `frontend/package.json`, `backend/cmd/main.go`
-4. Commit: `feat: ...` or `fix: ...`
-5. Tag: `git tag vX.Y.Z`
 
 ---
 
 ## 3. Roadmap Status
 
-### ✅ Completed (v0.1.0 → v0.6.4)
-- **Core Features**: IMAP Sync, Email Parsing, JWT Authentication
-- **AI Capabilities**: Summary, Sentiment, Classification, Contact Intelligence, Smart Reply
-- **Optimization**: Spam filtering to reduce AI usage
-- **User Interface**: Dashboard, Insights Graph, Account Settings
-- **RAG & Search**: Vector embeddings, semantic search, search UI (Phase 5.2)
+### ✅ Recent Completion (v0.6.0 → v0.6.4)
+**Phase 5.2 - RAG & Semantic Search** (2025-11-22)
+- Vector embeddings (pgvector + OpenAI text-embedding-3-small)
+- Semantic search API (`GET /api/v1/search`)
+- Search UI with relevance scores
 
-### 🚧 In Progress (Phase 5.3: v0.6.5 → v0.7.0)
-**Plan**: [docs/sprints/week2_rag_polish/sprint-plan.md](docs/sprints/week2_rag_polish/sprint-plan.md)
+### 🚧 Current Sprint (v0.6.5 → v0.7.0)
+**Phase 5.3 - RAG Polish & Phase 6 Prep** | [Plan](docs/sprints/week2_rag_polish/sprint-plan.md)
+- Performance: < 500ms search, monitoring
+- Testing: 80% coverage, E2E tests
+- UX: Search history, filters
+- Design: Team Collaboration architecture
 
-- **Performance**: Search optimization (< 500ms), monitoring, benchmarking
-- **Testing**: Integration tests, E2E tests, 80% coverage target
-- **UX Improvements**: Search history, filters, error handling
-- **Phase 6 Preparation**: Team Collaboration design, database schema planning
-
-### 🔮 Future Roadmap (6-Month Plan)
-- **Phase 6** (2026.01-02): Team Collaboration (Shared Labels, Organization)
-- **Phase 7** (2026.03-04): Cross-Platform (Desktop, WeChat Voice AI)
+### 🔮 Future (6-Month Plan)
+- **Phase 6** (2026.01-02): Team Collaboration
+- **Phase 7** (2026.03-04): Cross-Platform (Desktop, WeChat)
 - **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
 
 ---
 
 ## 4. The Golden Rules (Non-Negotiable)
 
-1. **Test-Driven Development**  
-   Red → Green → Refactor. `make test` MUST pass before commit.
+### Quality (Test-Driven)
+`make test` MUST pass before commit. Red → Green → Refactor.
 
-2. **Frequent Delivery**  
-   Commit often. Don't hoard changes.
+### Delivery (Frequent & Versioned)
+1. **Commit Often**: Don't hoard changes
+2. **Tag Immediately**: After quality verification, release
+   - Minor features (v0.x.Y): Daily if tests pass
+   - Major features (v0.X.0): Milestone complete
+   - Fixes (v0.x.y): Immediate
+3. **Convention**: `feat:` | `fix:` | `docs:`
+4. **Versioning**: Update `Makefile`, `package.json`, `backend/cmd/main.go`
+5. **Principle**: "Done" = "Released & Tagged"
 
-3. **Semantic Versioning**  
-   `vMajor.Minor.Patch`. Update `Makefile` & `package.json` before tagging.
-
-4. **Release Discipline**  
-   After quality verification, release immediately. Don't accumulate completed work.
-   - **Minor Features** (v0.x.Y): Tag after each day's work if tests pass
-   - **Major Features** (v0.X.0): Tag when phase milestone complete
-   - **Fixes** (v0.x.y): Tag immediately after verification
-   - **Convention**: `feat:` for features, `fix:` for bugs, `docs:` for documentation
-   - **Principle**: "Done" means "Released and Tagged"
+### Structure (Convention over Configuration)
+- Follow `internal/`, `pkg/` directory structure
+- Respect `backend/` vs `frontend/` boundary
+- Maintain naming conventions
 
 ---
 
-**Last Updated**: 2025-11-22  
-**Project**: EchoMind v0.6.4 (Alpha)
+**Last Updated**: 2025-11-22 | **Project**: EchoMind v0.6.4 (Alpha)
