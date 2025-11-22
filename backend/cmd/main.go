@@ -20,7 +20,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const Version = "0.6.0"
+const Version = "0.6.1"
 
 func main() {
 	// Initialize Viper for configuration

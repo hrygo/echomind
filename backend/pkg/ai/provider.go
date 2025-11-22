@@ -18,6 +18,15 @@ type AIProvider interface {
 	GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error)
 }
 
+// EmbeddingProvider defines the interface for generating vector embeddings.
+type EmbeddingProvider interface {
+	// Embed generates a vector for a single text.
+	Embed(ctx context.Context, text string) ([]float32, error)
+
+	// EmbedBatch generates vectors for multiple texts.
+	EmbedBatch(ctx context.Context, texts []string) ([][]float32, error)
+}
+
 type AnalysisResult struct {
 	Summary     string   `json:"summary"`
 	Category    string   `json:"category"`

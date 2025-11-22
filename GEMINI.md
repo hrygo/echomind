@@ -4,15 +4,8 @@
 > **Stage**: v0.6.0 (Alpha).
 > **Active Sprint**: Phase 5.2 - RAG & Semantic Search.
 
-## 1. The Golden Rules (Non-Negotiable)
 
-1.  **Frequent Delivery**: Commit often. Don't hoard changes.
-2.  **Semantic Versioning**: `vMajor.Minor.Patch`. Update `Makefile` & `package.json` before tagging.
-3.  **Test-Driven**: Red -> Green -> Refactor. `make test` MUST pass before commit.
-4.  **Convention over Configuration**: Follow existing directory structure (`internal/`, `pkg/`) and naming.
-5.  **Monorepo Discipline**: Respect the `backend/` vs `frontend/` boundary.
-
-## 2. Technology Stack
+## 1. Technology Stack
 
 *   **Backend**: Go 1.22+
     *   *Web*: Gin
@@ -24,7 +17,7 @@
     *   *State*: Zustand
     *   *Fetch*: Axios
 
-## 3. Development Workflow
+## 2. Development Workflow
 
 ### 🚀 Start
 *   `make dev`: Starts Postgres, Redis, Backend, Worker, and Frontend.
@@ -41,7 +34,7 @@
 4.  Commit: `feat: ...` or `fix: ...`.
 5.  Tag: `git tag vX.Y.Z`.
 
-## 4. Roadmap Status
+## 3. Roadmap Status
 
 ### ✅ Completed (v0.1.0 - v0.5.1)
 *   **Core**: IMAP Sync, Email Parsing, Auth (JWT).
@@ -59,3 +52,11 @@
 *   **Phase 6 (Jan-Feb)**: Team Collaboration (Shared Labels, Organization).
 *   **Phase 7 (Mar-Apr)**: Cross-Platform (Desktop, WeChat Voice AI).
 *   **Phase 8 (May+)**: Commercialization (Stripe, SSO).
+
+## 4. The Golden Rules (Non-Negotiable)
+
+1.  **Frequent Delivery**: Commit often. Don't hoard changes.
+2.  **Semantic Versioning**: `vMajor.Minor.Patch`. Update `Makefile` & `package.json` before tagging.
+3.  **Test-Driven**: Red -> Green -> Refactor. `make test` MUST pass before commit.
+4.  **Convention over Configuration**: Follow existing directory structure (`internal/`, `pkg/`) and naming.
+5.  **Monorepo Discipline**: Respect the `backend/` vs `frontend/` boundary.

@@ -86,7 +86,6 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 	}, nil
 }
 
-
 func (p *Provider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
 	systemPrompt := p.prompts["draft_reply"]
 	if systemPrompt == "" {
@@ -138,4 +137,43 @@ func cleanMarkdown(text string) string {
 		}
 	}
 	return strings.TrimSpace(cleaned)
+}
+
+// Embed generates a vector for a single text using text-embedding-3-small.
+func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
+	req := openai.EmbeddingRequest{
+		Input: []string{text},
+		Model: openai.SmallEmbedding3,
+	}
+
+	resp, err := p.client.CreateEmbeddings(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.Data) == 0 {
+		return nil, errors.New("no embedding data returned")
+	}
+
+	return resp.Data[0].Embedding, nil
+}
+
+// EmbedBatch generates vectors for multiple texts.
+func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
+	req := openai.EmbeddingRequest{
+		Input: texts,
+		Model: openai.SmallEmbedding3,
+	}
+
+	resp, err := p.client.CreateEmbeddings(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var embeddings [][]float32
+	for _, data := range resp.Data {
+		embeddings = append(embeddings, data.Embedding)
+	}
+
+	return embeddings, nil
 }
