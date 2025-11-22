@@ -119,7 +119,7 @@ func TestSyncEmails(t *testing.T) {
 
 	mockAccount := model.EmailAccount{
 		ID:                uuid.New(),
-		UserID:            userID,
+		UserID:            &userID,
 		Email:             "test@example.com",
 		ServerAddress:     "imap.test.com",
 		ServerPort:        993,
@@ -130,7 +130,7 @@ func TestSyncEmails(t *testing.T) {
 	db.Create(&mockAccount)
 
 	ctx := context.Background()
-	err = syncService.SyncEmails(ctx, userID)
+	err = syncService.SyncEmails(ctx, userID, nil, nil)
 	if err != nil {
 		t.Fatalf("SyncEmails failed: %v", err)
 	}

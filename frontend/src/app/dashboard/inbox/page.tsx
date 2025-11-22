@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
-import apiClient from "@/lib/api";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button"; // Assuming a global Button component with good styling
 
 
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         // For smart inbox, we might want a different API or a filter for existing emails
         url += `?filter=smart`;
       }
-      const response = await apiClient.get<Email[]>(url);
+      const response = await api.get<Email[]>(url);
       setEmails(response.data);
     } catch (err: unknown) {
       console.error("Error fetching emails:", err);
@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
     setSyncLoading(true);
     try {
-      await apiClient.post<{ message: string }>("/sync");
+      await api.post<{ message: string }>("/sync");
       alert("同步任务已启动");
       fetchEmails();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

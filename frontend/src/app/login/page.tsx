@@ -1,16 +1,33 @@
 'use client';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AxiosError } from 'axios';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useOrganizationStore } from '@/lib/store/organization';
 import { organizationApi } from '@/lib/api/organization';
+import { api } from '@/lib/api'; // Named import
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/Label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { AlertCircle } from 'lucide-react';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-// ... existing imports ...
+interface AuthErrorResponse {
+  error: string;
+}
 
+export default function LoginPage() {
+  const router = useRouter();
+  const { t } = useLanguage();
   const setAuth = useAuthStore((state) => state.setAuth);
   const setOrganizations = useOrganizationStore((state) => state.setOrganizations);
   const [email, setEmail] = useState('');
@@ -24,7 +41,7 @@ import { organizationApi } from '@/lib/api/organization';
     setIsLoading(true);
 
     try {
-      const response = await apiClient.post('/auth/login', {
+      const response = await api.post('/auth/login', {
         email,
         password,
       });

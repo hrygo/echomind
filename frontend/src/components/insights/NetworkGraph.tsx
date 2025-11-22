@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
-import apiClient from '@/lib/api';
+import { api } from '@/lib/api';
 
 interface Node {
   id: string;
@@ -50,7 +50,7 @@ export default function NetworkGraph() {
   useEffect(() => {
     async function fetchGraphData() {
       try {
-        const response = await apiClient.get<NetworkGraphData>('/insights/network');
+        const response = await api.get<NetworkGraphData>('/insights/network');
         setGraphData(response.data);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {

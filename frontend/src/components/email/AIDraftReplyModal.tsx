@@ -3,7 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import apiClient from '@/lib/api';
+import { api } from '@/lib/api';
 
 interface AIDraftReplyModalProps {
   emailContent: string;
@@ -22,7 +22,7 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
     setError(null);
     setDraftReply('');
     try {
-      const response = await apiClient.post('/ai/draft', { emailContent, userPrompt });
+      const response = await api.post('/ai/draft', { emailContent, userPrompt });
       setDraftReply(response.data.draft);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

@@ -96,7 +96,7 @@ func TestSyncHandler_Success(t *testing.T) {
 
 	mockAccount := model.EmailAccount{
 		ID:                uuid.New(),
-		UserID:            userID,
+		UserID:            &userID,
 		Email:             "test@example.com",
 		ServerAddress:     "imap.test.com",
 		ServerPort:        993,

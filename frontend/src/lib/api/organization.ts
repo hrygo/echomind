@@ -1,14 +1,5 @@
 import { api } from '../api';
-
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  owner_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
+import { Organization } from '@/lib/store/organization';
 export const organizationApi = {
   getOrganizations: async (): Promise<Organization[]> => {
     const response = await api.get<'' | Organization[]>(`/orgs`);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useOrganizationStore } from '@/lib/store/organization';
+import { useOrganizationStore, Organization } from '@/lib/store/organization';
 import { Button } from '@/components/ui/Button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
 import { PlusCircle, Check, ChevronsUpDown } from 'lucide-react';
@@ -12,7 +12,7 @@ export function OrgSwitcher() {
   const { organizations, currentOrgId, setCurrentOrg, addOrganization } = useOrganizationStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const currentOrg = organizations.find(org => org.id === currentOrgId);
+  const currentOrg = organizations.find((org: Organization) => org.id === currentOrgId);
 
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -29,7 +29,7 @@ export function OrgSwitcher() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-          {organizations.map((org) => (
+          {organizations.map((org: Organization) => (
             <DropdownMenuItem
               key={org.id}
               onSelect={() => setCurrentOrg(org.id)}

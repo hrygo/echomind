@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { User, Bell, Shield, CreditCard, Palette, Camera, RefreshCw, Mail, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import apiClient from "@/lib/api";
+import { api } from "@/lib/api";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
@@ -32,7 +32,7 @@ export default function SettingsPage() {
   const handleSync = async () => {
     setIsSyncing(true);
     try {
-      await apiClient.post("/sync");
+      await api.post("/sync");
       setLastSynced("Just now");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -49,7 +49,7 @@ export default function SettingsPage() {
 
   const handleSaveMailboxConfig = async () => {
     try {
-      await apiClient.post('/settings/account', {
+      await api.post('/settings/account', {
         email: mailboxConfig.email,
         server_address: mailboxConfig.imapServer,
         server_port: parseInt(mailboxConfig.imapPort),

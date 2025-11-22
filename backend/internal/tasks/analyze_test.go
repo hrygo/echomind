@@ -100,7 +100,7 @@ func TestUpdateContactStats_ExistingContact(t *testing.T) {
 	// Create initial contact
 	initialContact := model.Contact{
 		ID:               uuid.New(),
-		UserID:           userID,
+		UserID:           &userID,
 		Email:            emailAddress,
 		Name:             emailAddress,
 		InteractionCount: 1,

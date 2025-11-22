@@ -22,9 +22,10 @@ func TestContactModel(t *testing.T) {
 
 	// Test Create
 	now := time.Now()
+	newUserID := uuid.New()
 	contact := model.Contact{
 		ID:               uuid.New(),
-		UserID:           uuid.New(),
+		UserID:           &newUserID,
 		Email:            "test@example.com",
 		Name:             "Test User",
 		InteractionCount: 1,

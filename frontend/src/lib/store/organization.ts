@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, devtools } from 'zustand/middleware';
 
-interface Organization {
+export interface Organization {
   id: string;
   name: string;
   slug: string;
@@ -31,8 +31,9 @@ export const useOrganizationStore = create<OrganizationState>()(
         clearOrganizations: () => set({ organizations: [], currentOrgId: null }),
       }),
       {
-        name: 'organization-storage', // name of the item in localStorage
-        getStorage: () => localStorage,
+        name: 'organization-storage',
+        // @ts-ignore: localStorage is compatible but TypeScript struggles with the generic PersistStorage interface
+        storage: localStorage,
       }
     )
   )

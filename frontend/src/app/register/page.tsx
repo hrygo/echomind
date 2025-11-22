@@ -5,7 +5,7 @@ import { AxiosError } from 'axios';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import apiClient from '@/lib/api';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
@@ -47,7 +47,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await apiClient.post('/auth/register', {
+      await api.post('/auth/register', {
         name,
         email,
         password,

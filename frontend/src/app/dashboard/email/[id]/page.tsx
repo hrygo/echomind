@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import apiClient from "@/lib/api";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import AIDraftReplyModal from "@/components/email/AIDraftReplyModal";
 
@@ -34,7 +34,7 @@ export default function EmailDetailPage() {
     async function fetchEmail() {
       try {
         // Ensure `id` is treated as a string for UUID
-        const response = await apiClient.get<EmailDetail>(`/emails/${id}`);
+        const response = await api.get<EmailDetail>(`/emails/${id}`);
         setEmail(response.data);
       } catch (err: unknown) {
         console.error("Error fetching email:", err);
