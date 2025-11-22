@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.8.0 (Beta) | **Active Sprint**: Phase 6.2 - Actionable Intelligence
+> **Stage**: v0.9.0 (Beta) | **Active Sprint**: Phase 6.2 - Week 2: Smart Contexts
 
 ---
 
@@ -21,14 +21,24 @@
 - ✅ Mobile Strategy: Web Mobile Polish & Responsive UI
 - ✅ Internationalization (i18n): Full Bilingual Support
 
+### ✅ Recent Completion (v0.8.0 → v0.9.0)
+**Phase 6.2 - Week 1: Task Engine**
+- ✅ **Task Hub**: Internal Task System (Model, Service, API, Dashboard Integration)
+
 ### 🚧 Current Sprint (v0.9.0+)
-**Phase 6.2 - Actionable Intelligence** | [Plan](docs/sprints/v0.9.0_actionable_intelligence/plan.md)
+**Phase 6.2 - Week 2: Smart Contexts** | [Plan](docs/sprints/v0.9.0_actionable_intelligence/plan.md)
 - **Actionable Dashboard**: Interactive cards (Approve/Dismiss).
-- **Task Hub**: Internal Task System (`tasks` table created).
 - **Smart Contexts**: Project/Topic-based organization (`contexts` table planned).
 - **Generative Widgets**: Chat-rendered UI components.
 
 ### 🔮 Future (6-Month Plan)
+- **Phase 7** (2026.03-04): WeChat Integration (Official Account)
+- **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
+- **Phase 9** (TBD): Team Collaboration (重新评估优先级)
+
+---
+
+## 3. The Golden Rules (Non-Negotiable)
 - **Phase 7** (2026.03-04): WeChat Integration (Official Account)
 - **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
 - **Phase 9** (TBD): Team Collaboration (重新评估优先级)
