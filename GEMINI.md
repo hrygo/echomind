@@ -15,7 +15,7 @@
 ## 2. Roadmap Status
 
 ### ✅ Recent Completion (v0.6.0 → v0.6.4)
-**Phase 5.2 - RAG & Semantic Search** (2025-11-22)
+**Phase 5.2 - RAG & Semantic Search**
 - Vector embeddings (pgvector + OpenAI text-embedding-3-small)
 - Semantic search API (`GET /api/v1/search`)
 - Search UI with relevance scores
@@ -53,7 +53,3 @@
 - Follow `internal/`, `pkg/` directory structure
 - Respect `backend/` vs `frontend/` boundary
 - Maintain naming conventions
-
----
-
-**Last Updated**: 2025-11-22 | **Project**: EchoMind v0.6.4 (Alpha)
