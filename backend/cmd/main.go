@@ -129,14 +129,13 @@ func main() {
 	authHandler := handler.NewAuthHandler(userService)
 	insightHandler := handler.NewInsightHandler(insightService)
 	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
-	searchHandler := handler.NewSearchHandler(searchService)
+	searchHandler := handler.NewSearchHandler(searchService, sugar)
+	healthHandler := handler.NewHealthHandler(db)
 
 	// Register routes
 	api := r.Group("/api/v1")
 	{
-		api.GET("/ping", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "pong"})
-		})
+		api.GET("/health", healthHandler.HealthCheck)
 		// Auth Routes
 		api.POST("/auth/register", authHandler.Register)
 		api.POST("/auth/login", authHandler.Login)

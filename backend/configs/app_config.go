@@ -34,6 +34,7 @@ type RedisConfig struct {
 
 type AIConfig struct {
 	Provider string       `mapstructure:"provider"`
+	ChunkSize int         `mapstructure:"chunk_size"` // Max tokens per chunk
 	Deepseek DeepseekConfig `mapstructure:"deepseek"`
 	OpenAI   OpenAIConfig   `mapstructure:"openai"`
 	Gemini   GeminiConfig   `mapstructure:"gemini"`

@@ -44,7 +44,7 @@ type Summarizer interface {
 }
 
 // HandleEmailAnalyzeTask handles the email analysis task for a specific user.
-func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder ai.EmbeddingProvider) error {
+func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder ai.EmbeddingProvider, chunkSize int) error {
 	var p EmailAnalyzePayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
@@ -109,7 +109,7 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 	}
 
 	// 7. Generate and Save Embeddings
-	if err := processEmbedding(ctx, db, embedder, &email); err != nil {
+	if err := processEmbedding(ctx, db, embedder, &email, chunkSize); err != nil {
 		log.Printf("Warning: Failed to process embedding for email %s: %v", p.EmailID, err)
 		// We treat embedding failure as non-fatal for the analysis task, but log it.
 		// Ideally, this could be a separate task or retried.
@@ -179,7 +179,7 @@ func sentimentToFloat(sentiment string) float64 {
 }
 
 // processEmbedding generates and saves embeddings for an email.
-func processEmbedding(ctx context.Context, db *gorm.DB, embedder ai.EmbeddingProvider, email *model.Email) error {
+func processEmbedding(ctx context.Context, db *gorm.DB, embedder ai.EmbeddingProvider, email *model.Email, chunkSize int) error {
 	// 1. Prepare text
 	// Combine Subject and Body.
 	cleanBody := utils.StripHTML(email.BodyText)
@@ -190,9 +190,10 @@ func processEmbedding(ctx context.Context, db *gorm.DB, embedder ai.EmbeddingPro
 	fullText := fmt.Sprintf("Subject: %s\n\n%s", email.Subject, cleanBody)
 
 	// 2. Chunk text
-	// Use a reasonable max token limit (e.g., 512 or 1024 tokens ~ 2000-4000 chars)
-	// OpenAI text-embedding-3-small supports 8191 tokens, but smaller chunks are often better for retrieval.
-	chunker := utils.NewTextChunker(1000)
+	if chunkSize <= 0 {
+		chunkSize = 1000 // Default if not specified
+	}
+	chunker := utils.NewTextChunker(chunkSize)
 	chunks := chunker.Chunk(fullText)
 
 	if len(chunks) == 0 {

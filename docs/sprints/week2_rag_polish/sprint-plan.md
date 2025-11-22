@@ -29,32 +29,32 @@
 Optimize search performance and add observability.
 
 ### Morning: Performance Optimization
-- [ ] **Benchmark Current Performance**
-    - [ ] Create `backend/internal/service/search_bench_test.go`
-    - [ ] Test with 1k, 10k, 100k emails
-    - [ ] Document baseline metrics
-- [ ] **Optimize Chunking Strategy**
-    - [ ] Experiment with chunk sizes (500, 1000, 2000 chars)
-    - [ ] Measure embedding generation time
-    - [ ] Update `TextChunker` defaults if needed
-- [ ] **Database Query Optimization**
-    - [ ] Add `EXPLAIN ANALYZE` for search queries
-    - [ ] Tune HNSW index parameters (`m`, `ef_construction`)
-    - [ ] Consider materialized views for metadata
+- [x] **Benchmark Current Performance**
+    - [x] Create `backend/internal/service/search_bench_test.go`
+    - [x] Test with 1k, 10k, 100k emails
+    - [x] Document baseline metrics
+- [x] **Optimize Chunking Strategy**
+    - [x] Experiment with chunk sizes (500, 1000, 2000 chars)
+    - [x] Measure embedding generation time
+    - [x] Update `TextChunker` defaults if needed
+- [x] **Database Query Optimization**
+    - [x] Add `EXPLAIN ANALYZE` for search queries
+    - [x] Tune HNSW index parameters (`m`, `ef_construction`)
+    - [x] Consider materialized views for metadata
 
 ### Afternoon: Monitoring & Logging
-- [ ] **Add Metrics**
-    - [ ] Search latency histogram
-    - [ ] Embedding generation duration
-    - [ ] Vector DB query time
-    - [ ] Cache hit rate (if implemented)
-- [ ] **Structured Logging**
-    - [ ] Update search handlers with request IDs
-    - [ ] Log search queries for analytics
-    - [ ] Add error categorization
-- [ ] **Health Checks**
-    - [ ] Add `/health` endpoint for search service
-    - [ ] Verify pgvector extension status
+- [x] **Add Metrics**
+    - [x] Search latency histogram
+    - [x] Embedding generation duration
+    - [x] Vector DB query time
+    - [x] Cache hit rate (if implemented)
+- [x] **Structured Logging**
+    - [x] Update search handlers with request IDs
+    - [x] Log search queries for analytics
+    - [x] Add error categorization
+- [x] **Health Checks**
+    - [x] Add `/health` endpoint for search service
+    - [x] Verify pgvector extension status
 
 **Deliverable**: v0.6.5 with performance improvements and monitoring
 
@@ -66,30 +66,30 @@ Optimize search performance and add observability.
 Comprehensive testing coverage for RAG features.
 
 ### Morning: Backend Integration Tests
-- [ ] **Search API Tests**
-    - [ ] Create `backend/internal/handler/search_test.go`
-    - [ ] Test authentication (401 errors)
-    - [ ] Test query validation (empty, too long)
-    - [ ] Test limit parameter edge cases
-- [ ] **Service Layer Tests**
-    - [ ] Create `backend/internal/service/search_test.go`
-    - [ ] Mock embedding provider
-    - [ ] Mock database queries
-    - [ ] Test ranking and scoring logic
-- [ ] **Worker Tests**
-    - [ ] Update `analyze_test.go` for embedding scenarios
-    - [ ] Test embedding failure handling
-    - [ ] Test reindex command
+- [x] **Search API Tests**
+    - [x] Create `backend/internal/handler/search_test.go`
+    - [x] Test authentication (401 errors)
+    - [x] Test query validation (empty, too long)
+    - [x] Test limit parameter edge cases
+- [x] **Service Layer Tests**
+    - [x] Create `backend/internal/service/search_test.go`
+    - [x] Mock embedding provider
+    - [x] Mock database queries
+    - [x] Test ranking and scoring logic
+- [x] **Worker Tests**
+    - [x] Update `analyze_test.go` for embedding scenarios
+    - [x] Test embedding failure handling
+    - [x] Test reindex command
 
 ### Afternoon: Frontend E2E Tests
-- [ ] **Setup E2E Framework**
-    - [ ] Install Playwright or Cypress
-    - [ ] Configure test database
-- [ ] **Search Flow Tests**
-    - [ ] Test search input interaction
-    - [ ] Test results display
-    - [ ] Test result navigation
-    - [ ] Test loading and error states
+- [x] **Setup E2E Framework**
+    - [x] Install Playwright or Cypress
+    - [x] Configure test database
+- [x] **Search Flow Tests**
+    - [x] Test search input interaction
+    - [x] Test results display
+    - [x] Test result navigation
+    - [x] Test loading and error states
 - [ ] **Accessibility Tests**
     - [ ] Keyboard navigation
     - [ ] Screen reader compatibility

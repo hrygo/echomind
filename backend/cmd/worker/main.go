@@ -95,6 +95,9 @@ func main() {
 	// Mux
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeEmailAnalyze, func(ctx context.Context, t *asynq.Task) error {
+		// Get chunk size from config
+		chunkSize := vip.GetInt("ai.chunk_size")
+
 		// aiProvider implements both AIProvider (for summary) and EmbeddingProvider (for vectors)
 		// assuming we are using OpenAI provider which implements both.
 		// If we were using Gemini for summary, we might need a separate provider for embeddings if Gemini doesn't support it yet in our code.
@@ -109,10 +112,10 @@ func main() {
 			// We should probably enforce it in factory or use a specific embedding provider.
 			// For Day 2/3, we implemented OpenAI provider which has both.
 			logger.Error("AI provider does not implement EmbeddingProvider")
-			return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, nil) // This might panic if we don't handle nil in tasks
+			return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, nil, chunkSize) // This might panic if we don't handle nil in tasks
 		}
 
-		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, embedder)
+		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, embedder, chunkSize)
 	})
 
 	if err := srv.Run(mux); err != nil {

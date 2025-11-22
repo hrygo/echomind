@@ -162,7 +162,7 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder)
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, 1000)
 	assert.NoError(t, err)
 
 	// Verify email was updated
@@ -218,7 +218,7 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder)
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, 1000)
 	assert.NoError(t, err)
 
 	// Verify email was updated as spam

@@ -17,6 +17,7 @@ redis:
 
 ai:
   provider: "deepseek" # Options: deepseek, openai, gemini
+  chunk_size: 1000 # Max tokens per chunk (1 token ~= 4 chars). Recommended: 500-1000
   
   deepseek:
     api_key: "YOUR_DEEPSEEK_KEY"
