@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.7.0-beta] - 2025-11-22
+
+### Added
+- **Semantic Search (RAG)**: Full-text search powered by OpenAI embeddings and pgvector for semantic understanding.
+- **Search Filters**: Added support for filtering by Sender, Start Date, and End Date in the Search API.
+- **Search History**: Frontend implementation of recent search history with suggestions.
+- **Relevance Scoring**: Search results now include a relevance score (0-1) to indicate match quality.
+- **Performance**: Optimized search latency to <500ms for standard queries.
+- **Team Collaboration Design**: Completed architectural design for Phase 6 (Organizations, Teams).
+
+### Changed
+- **API**: Updated `/api/v1/search` to accept `sender`, `start_date`, and `end_date` parameters.
+- **Backend**: Integrated `pgvector-go` for efficient vector similarity search.
+- **UX**: Improved empty states and loading indicators for search results.
+
 ## [v0.5.3] - 2025-11-22
 
 ### Fixed
