@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.7.2 (Alpha) | **Active Sprint**: Phase 6.0 - Personal Intelligence Deep-Dive
+> **Stage**: v0.7.3 (Alpha) | **Active Sprint**: Phase 6.0 - Personal Intelligence Deep-Dive
 
 ---
 

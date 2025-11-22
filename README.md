@@ -5,7 +5,7 @@
 
 EchoMind is a Personal Neural Interface designed for executives, managers, and dealmakers. It acts as an AI cognitive layer on top of your existing communication streams (Email, Calendar), transforming unstructured noise into structured insights, actionable tasks, and strategic intelligence.
 
-> **Current Status**: v0.6.4 (Alpha) - Phase 5.3 RAG Polish
+> **Current Status**: v0.7.3 (Alpha) - Phase 6.0 Personal Intelligence
 
 ## 🚀 Core Capabilities
 
