@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.8.0] - 2025-11-23
+
+### Added
+- **Smart Actions**: AI now extracts actionable items (Calendar Events, Tasks) from emails and presents them as interactive buttons in the email detail view.
+- **AI Chat Copilot**: A contextual AI assistant available via a right-side drawer, supporting streaming responses and Markdown rendering.
+- **Responsive Design**: Complete mobile adaptation.
+  - **Header**: "Mobile Collapse, Desktop Expand" search bar strategy.
+  - **Sidebar**: Implemented as a swipeable Bottom Sheet/Drawer on mobile.
+- **Unified UI**: Standardized `Input` components across the entire application for consistent look and feel.
+- **Internationalization**: Full i18n support for the new Chat interface, Insights page, and Smart Actions (English/Chinese).
+
+### Changed
+- **Header UX**: Removed the standalone Search Filter component in favor of a streamlined search experience.
+- **Visuals**: Enhanced transparency effects in UI overlays and optimized font readability in Settings.
+
+### Fixed
+- **Stability**: Fixed database connection issues related to configuration mismatches.
+- **Bug**: Resolved SSE stream parsing errors in the Chat interface.
+- **Accessibility**: Fixed Radix UI accessibility warnings in mobile components.
+
 ## [v0.7.2] - 2025-11-22
 
 ### Added
