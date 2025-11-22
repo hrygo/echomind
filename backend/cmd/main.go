@@ -14,13 +14,14 @@ import (
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/pkg/ai"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-const Version = "0.6.2"
+const Version = "0.6.3"
 
 func main() {
 	// Initialize Viper for configuration
@@ -114,6 +115,13 @@ func main() {
 	insightService := service.NewInsightService(db)
 	aiDraftService := service.NewAIDraftService(aiProvider)
 	syncService := service.NewSyncService(db, &service.DefaultIMAPClient{}, defaultFetcher, asynqClient, contactService, accountService, &appConfig, sugar)
+
+	// Cast aiProvider to EmbeddingProvider for search
+	embedder, ok := aiProvider.(ai.EmbeddingProvider)
+	if !ok {
+		sugar.Fatal("AI provider does not implement EmbeddingProvider")
+	}
+	searchService := service.NewSearchService(db, embedder)
 	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService)
@@ -121,6 +129,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(userService)
 	insightHandler := handler.NewInsightHandler(insightService)
 	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
+	searchHandler := handler.NewSearchHandler(searchService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -142,6 +151,7 @@ func main() {
 			protected.GET("/emails/:id", emailHandler.GetEmail)
 			protected.GET("/insights/network", insightHandler.GetNetworkGraph)
 			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
+			protected.GET("/search", searchHandler.Search)
 		}
 	}
 
