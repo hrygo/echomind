@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.7.2] - 2025-11-22
+
+### Added
+- **Organization & Team Models**: Implemented backend models and migration logic for multi-tenancy (Organizations, Teams, Members).
+- **Organization API**: Added CRUD endpoints for organizations (`POST /orgs`, `GET /orgs`).
+- **Frontend UI**: Added Organization Switcher and Create Organization Modal.
+- **State Management**: Implemented `useOrganizationStore` with Zustand for managing organization context.
+
+### Fixed
+- **Frontend Build**: Resolved multiple build errors related to UI components (`Dialog`, `DropdownMenu`) and API imports.
+- **Type Safety**: Fixed TypeScript errors in `Zustand` persist configuration and component props.
+
 ## [v0.7.0-beta] - 2025-11-22
 
 ### Added
