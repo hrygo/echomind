@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/hrygo/echomind/pkg/ai"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -105,7 +106,6 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 	}, nil
 }
 
-
 func (p *Provider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
 	systemPrompt := p.prompts["draft_reply"]
 	if systemPrompt == "" {
@@ -126,6 +126,54 @@ func (p *Provider) generateContent(ctx context.Context, systemPrompt, userConten
 	}
 
 	return extractText(resp), nil
+}
+
+func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- string) error {
+	defer close(ch)
+
+	model := p.client.GenerativeModel(p.model)
+	cs := model.StartChat()
+
+	// Convert history (excluding the last message which is the new prompt)
+	if len(messages) > 1 {
+		var history []*genai.Content
+		for _, msg := range messages[:len(messages)-1] {
+			role := "user"
+			if msg.Role == "assistant" {
+				role = "model"
+			} else if msg.Role == "system" {
+				// Gemini doesn't support system messages in history directly in the same way,
+				// usually set as SystemInstruction on the model.
+				// For simplicity here, we might skip or prepend to next user message.
+				// But since we set SystemInstruction in other methods, let's assume system prompt is handled via config if needed.
+				// Here we just handle user/model turn.
+				continue
+			}
+			history = append(history, &genai.Content{
+				Parts: []genai.Part{genai.Text(msg.Content)},
+				Role:  role,
+			})
+		}
+		cs.History = history
+	}
+
+	lastMsg := messages[len(messages)-1]
+	iter := cs.SendMessageStream(ctx, genai.Text(lastMsg.Content))
+
+	for {
+		resp, err := iter.Next()
+		if errors.Is(err, iterator.Done) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		txt := extractText(resp)
+		if txt != "" {
+			ch <- txt
+		}
+	}
 }
 
 func extractText(resp *genai.GenerateContentResponse) string {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"strings"
 
 	"github.com/hrygo/echomind/pkg/ai"
@@ -133,6 +134,44 @@ func (p *Provider) chatCompletion(ctx context.Context, systemPrompt, userContent
 	}
 
 	return resp.Choices[0].Message.Content, nil
+}
+
+func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- string) error {
+	defer close(ch)
+
+	var openaiMessages []openai.ChatCompletionMessage
+	for _, msg := range messages {
+		openaiMessages = append(openaiMessages, openai.ChatCompletionMessage{
+			Role:    msg.Role,
+			Content: msg.Content,
+		})
+	}
+
+	req := openai.ChatCompletionRequest{
+		Model:    p.model,
+		Messages: openaiMessages,
+		Stream:   true,
+	}
+
+	stream, err := p.client.CreateChatCompletionStream(ctx, req)
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+
+	for {
+		response, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		if len(response.Choices) > 0 {
+			ch <- response.Choices[0].Delta.Content
+		}
+	}
 }
 
 func cleanMarkdown(text string) string {

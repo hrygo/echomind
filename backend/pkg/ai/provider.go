@@ -16,6 +16,9 @@ type AIProvider interface {
 
 	// GenerateDraftReply generates a draft email reply based on the original email content and a user prompt.
 	GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error)
+
+	// StreamChat streams the chat response token by token.
+	StreamChat(ctx context.Context, messages []Message, ch chan<- string) error
 }
 
 // EmbeddingProvider defines the interface for generating vector embeddings.
@@ -25,6 +28,11 @@ type EmbeddingProvider interface {
 
 	// EmbedBatch generates vectors for multiple texts.
 	EmbedBatch(ctx context.Context, texts []string) ([][]float32, error)
+}
+
+type Message struct {
+	Role    string `json:"role"` // "system", "user", "assistant"
+	Content string `json:"content"`
 }
 
 type AnalysisResult struct {

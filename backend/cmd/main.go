@@ -22,7 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const Version = "0.7.3"
+const Version = "0.7.4"
 
 func main() {
 	// Initialize Viper for configuration
@@ -130,6 +130,7 @@ func main() {
 		sugar.Fatal("AI provider does not implement EmbeddingProvider")
 	}
 	searchService := service.NewSearchService(db, embedder)
+	chatService := service.NewChatService(aiProvider, searchService)
 	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService)
@@ -140,6 +141,7 @@ func main() {
 	searchHandler := handler.NewSearchHandler(searchService, sugar)
 	healthHandler := handler.NewHealthHandler(db)
 	orgHandler := handler.NewOrganizationHandler(organizationService)
+	chatHandler := handler.NewChatHandler(chatService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -167,6 +169,7 @@ func main() {
 			protected.GET("/insights/network", insightHandler.GetNetworkGraph)
 			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
 			protected.GET("/search", searchHandler.Search)
+			protected.POST("/chat/stream", chatHandler.StreamChat)
 		}
 	}
 

@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.7.3 (Alpha) | **Active Sprint**: Phase 6.0 - Personal Intelligence Deep-Dive
+> **Stage**: v0.7.4 (Alpha) | **Active Sprint**: Phase 6.0 - Personal Intelligence Deep-Dive
 
 ---
 
@@ -23,7 +23,7 @@
 ### 🚧 Current Sprint (v0.8.0+)
 **Phase 6.0 - Personal Intelligence Deep-Dive** | [Plan](docs/sprints/week4_personal_intelligence/sprint-plan.md)
 - ✅ RAG Repair: Fixed missing text content in embeddings (v0.7.3)
-- AI Chat Interface (Copilot)
+- ✅ AI Chat Interface (Copilot) (v0.7.4)
 - Mobile Strategy: Web Mobile Polish & WeChat Prep
 - Smart Actions (Actionable AI)
 

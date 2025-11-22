@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Bell, Settings, LogOut, Globe, Filter } from "lucide-react";
+import { Search, Bell, Settings, LogOut, Globe, Filter, Sparkles } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { searchEmails, SearchResult } from "@/lib/api";
 import { SearchResults } from "./SearchResults";
 import { SearchHistory } from "./SearchHistory";
 import { SearchFilters } from "./SearchFilters";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
+import { useChatStore } from "@/lib/store/chat";
 
 export function Header() {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -22,6 +23,7 @@ export function Header() {
     const [filters, setFilters] = useState({ sender: '', startDate: '', endDate: '' });
     const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
     const { language, setLanguage, t } = useLanguage();
+    const { toggleOpen } = useChatStore();
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
@@ -92,15 +94,14 @@ export function Header() {
                         placeholder={t('common.searchPlaceholder')}
                     />
                 </div>
-                
+
                 <div className="relative">
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`p-2.5 rounded-xl transition-colors ${
-                            showFilters || filters.sender || filters.startDate || filters.endDate
-                                ? 'bg-blue-50 text-blue-600 border border-blue-100' 
-                                : 'bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200'
-                        }`}
+                        className={`p-2.5 rounded-xl transition-colors ${showFilters || filters.sender || filters.startDate || filters.endDate
+                            ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                            : 'bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200'
+                            }`}
                         title="Search Filters"
                     >
                         <Filter className="w-4 h-4" />
@@ -143,6 +144,14 @@ export function Header() {
                     title="Switch Language"
                 >
                     <Globe className="w-5 h-5" />
+                </button>
+
+                <button
+                    onClick={toggleOpen}
+                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                    title="AI Copilot"
+                >
+                    <Sparkles className="w-5 h-5" />
                 </button>
 
                 <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">

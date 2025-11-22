@@ -31,7 +31,7 @@ func getIntegrationDB(t *testing.T) *gorm.DB {
 		t.Logf("Skipping integration test: failed to connect to DB: %v", err)
 		return nil
 	}
-	
+
 	// Check connectivity
 	sqlDB, err := db.DB()
 	if err != nil || sqlDB.Ping() != nil {
@@ -51,13 +51,13 @@ func TestSearchService_Search_Integration(t *testing.T) {
 	// Cleanup & Setup
 	// Ensure vector extension
 	db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
-	
+
 	// Ensure schema
 	err := db.AutoMigrate(&model.Email{}, &model.EmailEmbedding{})
 	assert.NoError(t, err)
 
 	userID := uuid.New()
-	
+
 	// Cleanup
 	defer func() {
 		db.Exec("DELETE FROM email_embeddings WHERE email_id IN (SELECT id FROM emails WHERE user_id = ?)", userID)
@@ -84,9 +84,9 @@ func TestSearchService_Search_Integration(t *testing.T) {
 	// We simulate this by inserting a vector and querying with a similar one.
 
 	// Create specific vector
-	embeddingVec := make([]float32, 1536)
+	embeddingVec := make([]float32, 768)
 	embeddingVec[0] = 1.0
-	
+
 	embedding := model.EmailEmbedding{
 		EmailID: emailID,
 		Vector:  pgvector.NewVector(embeddingVec),
@@ -97,7 +97,7 @@ func TestSearchService_Search_Integration(t *testing.T) {
 	// Mock Embedder that returns the SAME vector for the query
 	// This ensures distance is 0 (Score 1.0)
 	fixedEmbedder := &MockFixedEmbedder{Vector: embeddingVec}
-	
+
 	svc := service.NewSearchService(db, fixedEmbedder)
 
 	// Test Search

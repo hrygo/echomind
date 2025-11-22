@@ -32,6 +32,11 @@ func (m *MockAIProvider) GenerateDraftReply(ctx context.Context, emailContent, u
 	return "Mock Draft Reply", nil
 }
 
+func (m *MockAIProvider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- string) error {
+	close(ch)
+	return nil
+}
+
 func TestSummaryService_GenerateSummary(t *testing.T) {
 	var mockProvider ai.AIProvider = &MockAIProvider{}
 	svc := service.NewSummaryService(mockProvider)

@@ -60,6 +60,7 @@
 
 ## 📝 版本历史
 
+- **v0.7.4** (2025-11-22): ✅ AI Chat Interface (Copilot) with Streaming Response
 - **v0.7.3** (2025-11-22): ✅ Fix Embedding Dimension (1536->768)
 - **v0.7.2** (2025-11-22): ✅ Team Foundation & Fixes
 - **v0.7.0-beta** (2025-11-22): ✅ RAG Polish
