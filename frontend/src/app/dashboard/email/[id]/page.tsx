@@ -7,6 +7,8 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import AIDraftReplyModal from "@/components/email/AIDraftReplyModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { createTask } from "@/lib/api/tasks"; // Import the new task API
+import { useTaskStore } from "@/store/task"; // Import the task store
 
 interface SmartAction {
   type: string;
@@ -36,6 +38,7 @@ export default function EmailDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useLanguage();
+  const { addTask } = useTaskStore(); // Use addTask from the store
 
   useEffect(() => {
     if (!id) return;
@@ -64,6 +67,29 @@ export default function EmailDetailPage() {
     if (action.type === 'calendar_event') return t('emailDetail.addToCalendar');
     if (action.type === 'create_task') return t('emailDetail.createTask');
     return action.label;
+  };
+
+  const handleSmartAction = async (action: SmartAction) => {
+    if (action.type === 'create_task') {
+      try {
+        const newTask = await createTask({
+          title: action.data.title || t('emailDetail.createTaskDefault'), // Fallback title
+          description: `From email: ${email?.Subject || ''}`,
+          source_email_id: email?.ID,
+          due_date: action.data.deadline, // Use 'deadline' for due_date
+        });
+        addTask(newTask); // Add task to Zustand store
+        alert(t('emailDetail.taskCreatedSuccess')); // Use i18n for success message
+      } catch (err: any) {
+        console.error("Failed to create task:", err);
+        alert(t('emailDetail.taskCreatedError')); // Use i18n for error message
+      }
+    } else if (action.type === 'calendar_event') {
+      // For calendar events, still use alert for now as per plan
+      alert(`Executing action: ${getActionLabel(action)}\nData: ${JSON.stringify(action.data, null, 2)}`);
+    } else {
+      alert(`Unknown action type: ${action.type}`);
+    }
   };
 
   if (loading) return <div className="p-8">{t('common.loading')}</div>;
@@ -124,7 +150,7 @@ export default function EmailDetailPage() {
                 {email.SmartActions.map((action, idx) => (
                   <button
                     key={idx}
-                    onClick={() => alert(`Executing action: ${getActionLabel(action)}\nData: ${JSON.stringify(action.data, null, 2)}`)}
+                    onClick={() => handleSmartAction(action)}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-xs font-medium transition-colors shadow-sm"
                   >
                     {action.type === 'calendar_event' ? '📅' : '✅'}

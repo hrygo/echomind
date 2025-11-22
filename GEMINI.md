@@ -14,13 +14,6 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.7.4 → v0.8.0)
-**Phase 6.0 - Personal Intelligence Deep-Dive**
-- ✅ AI Chat Interface (Copilot) & Streaming Response
-- ✅ Smart Actions (Actionable AI) - *Email to Task/Calendar*
-- ✅ Mobile Strategy: Web Mobile Polish & Responsive UI
-- ✅ Internationalization (i18n): Full Bilingual Support
-
 ### ✅ Recent Completion (v0.8.0 → v0.9.0)
 **Phase 6.2 - Week 1: Task Engine**
 - ✅ **Task Hub**: Internal Task System (Model, Service, API, Dashboard Integration)
@@ -38,12 +31,6 @@
 
 ---
 
-## 3. The Golden Rules (Non-Negotiable)
-- **Phase 7** (2026.03-04): WeChat Integration (Official Account)
-- **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
-- **Phase 9** (TBD): Team Collaboration (重新评估优先级)
-
----
 
 ## 3. The Golden Rules (Non-Negotiable)
 

@@ -239,7 +239,10 @@
         "aiInsights": "AI 智能洞察",
         "backToInbox": "返回收件箱",
         "generateDraft": "生成 AI 回复草稿",
-        "from": "发件人："
+        "from": "发件人：",
+        "taskCreatedSuccess": "任务创建成功！",
+        "taskCreatedError": "任务创建失败。",
+        "createTaskDefault": "来自邮件的新任务"
     },
     "auth": {
         "signInTitle": "登录 EchoMind",

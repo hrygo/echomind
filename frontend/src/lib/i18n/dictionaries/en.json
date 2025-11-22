@@ -239,7 +239,10 @@
         "aiInsights": "AI Insights",
         "backToInbox": "Back to Inbox",
         "generateDraft": "Generate AI Draft Reply",
-        "from": "From:"
+        "from": "From:",
+        "taskCreatedSuccess": "Task created successfully!",
+        "taskCreatedError": "Failed to create task.",
+        "createTaskDefault": "New Task from Email"
     },
     "auth": {
         "signInTitle": "Sign in to EchoMind",
