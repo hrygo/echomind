@@ -16,8 +16,8 @@ redis:
   db: 0
 
 ai:
-  provider: "deepseek" # Options: deepseek, openai, gemini
-  embedding_provider: "openai" # Options: openai (Recommended for 1536 dim), deepseek (if supported), gemini
+  provider: "deepseek" # Options: deepseek, openai, gemini, mock
+  embedding_provider: "openai" # Options: openai, deepseek (if supported), gemini, mock
   embedding_model: "text-embedding-3-small" # Model for embeddings
   chunk_size: 1000 # Max tokens per chunk (1 token ~= 4 chars). Recommended: 500-1000
 

@@ -14,6 +14,7 @@ export function Header() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
     const [showResults, setShowResults] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
     const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
@@ -34,6 +35,7 @@ export function Header() {
 
         addToHistory(query);
         setIsSearching(true);
+        setSearchError(null);
         setShowResults(true);
 
         try {
@@ -41,6 +43,7 @@ export function Header() {
             setSearchResults(response.results);
         } catch (error) {
             console.error("Search failed:", error);
+            setSearchError("Failed to search emails. Please try again.");
             setSearchResults([]);
         } finally {
             setIsSearching(false);
@@ -90,6 +93,7 @@ export function Header() {
                     <SearchResults
                         results={searchResults}
                         isLoading={isSearching}
+                        error={searchError}
                         query={searchQuery}
                         onClose={handleCloseResults}
                     />

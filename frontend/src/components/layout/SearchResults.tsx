@@ -7,11 +7,12 @@ import { useRouter } from "next/navigation";
 interface SearchResultsProps {
     results: SearchResult[];
     isLoading: boolean;
+    error: string | null;
     query: string;
     onClose: () => void;
 }
 
-export function SearchResults({ results, isLoading, query, onClose }: SearchResultsProps) {
+export function SearchResults({ results, isLoading, error, query, onClose }: SearchResultsProps) {
     const router = useRouter();
 
     const handleResultClick = (emailId: string) => {
@@ -38,6 +39,20 @@ export function SearchResults({ results, isLoading, query, onClose }: SearchResu
                 <div className="p-8 text-center">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                     <p className="mt-3 text-sm text-slate-500">Searching...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-red-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
+                <div className="p-8 text-center">
+                    <div className="text-red-500 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    </div>
+                    <p className="text-sm font-medium text-slate-800">Search Failed</p>
+                    <p className="text-xs text-slate-500 mt-1">{error}</p>
                 </div>
             </div>
         );

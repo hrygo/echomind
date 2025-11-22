@@ -8,6 +8,7 @@ import (
 	"github.com/hrygo/echomind/pkg/ai"
 	"github.com/hrygo/echomind/pkg/ai/deepseek"
 	"github.com/hrygo/echomind/pkg/ai/gemini"
+	"github.com/hrygo/echomind/pkg/ai/mock"
 	"github.com/hrygo/echomind/pkg/ai/openai"
 )
 
@@ -34,6 +35,8 @@ func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 		}
 	case "deepseek":
 		mainProvider = deepseek.NewProvider(cfg.Deepseek.APIKey, cfg.Deepseek.Model, cfg.Deepseek.BaseURL, prompts)
+	case "mock":
+		mainProvider = mock.NewProvider()
 	default:
 		return nil, fmt.Errorf("unsupported AI provider: %s", cfg.Provider)
 	}
@@ -80,6 +83,8 @@ func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 	case "deepseek":
 		// If user explicitly requests DeepSeek embeddings
 		embedder = deepseek.NewProvider(cfg.Deepseek.APIKey, embeddingModel, cfg.Deepseek.BaseURL, nil)
+	case "mock":
+		embedder = mock.NewProvider()
 	default:
 		// If main provider implements embedding, use it (fallback logic)
 		if e, ok := mainProvider.(ai.EmbeddingProvider); ok {
