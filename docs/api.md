@@ -53,6 +53,29 @@ Performs a semantic search over the user's emails.
 
 ---
 
+## Organization API
+
+### `POST /orgs`
+Create a new organization.
+
+**Body:**
+```json
+{
+  "name": "My New Organization"
+}
+```
+
+### `GET /orgs`
+List all organizations the authenticated user belongs to.
+
+### `GET /orgs/:id`
+Get details of a specific organization.
+
+### `GET /orgs/:id/members`
+List members of an organization.
+
+---
+
 ## Other Endpoints
 
 ### `GET /health`

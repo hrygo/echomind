@@ -13,8 +13,12 @@ type Contact struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	UserID           uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_email"`
-	Email            string `gorm:"not null;uniqueIndex:idx_user_email"`
+	UserID           *uuid.UUID `gorm:"type:uuid;index"` // Nullable if owned by team or org
+	OrganizationID   *uuid.UUID `gorm:"type:uuid;index"` // If set, available to whole org
+	TeamID           *uuid.UUID `gorm:"type:uuid;index"` // If set, available to team
+	IsPrivate        bool       `gorm:"default:true"`      // true: user-owned, false: shared
+	
+	Email            string `gorm:"not null"`
 	Name             string
 	InteractionCount int       `gorm:"default:0;not null"`
 	LastInteractedAt time.Time

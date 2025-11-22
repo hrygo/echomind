@@ -7,4 +7,6 @@ type EmailAccountInput struct {
 	ServerPort    int    `json:"server_port" binding:"required,min=1,max=65535"`
 	Username      string `json:"username" binding:"required"`
 	Password      string `json:"password" binding:"required"` // Raw password from user
+	TeamID        *string `json:"team_id"` // Optional, UUID as string
+	OrganizationID *string `json:"organization_id"` // Optional, UUID as string
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -70,7 +71,7 @@ func main() {
 	}
 
 	// AutoMigrate models
-	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}); err != nil {
+	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}, &model.Organization{}, &model.OrganizationMember{}, &model.Team{}, &model.TeamMember{}); err != nil {
 		sugar.Fatalf("Failed to auto migrate database: %v", err)
 	}
 	sugar.Infof("Database migration completed")
@@ -108,13 +109,20 @@ func main() {
 		sugar.Fatalf("Failed to create AI provider: %v", err)
 	}
 
-	userService := service.NewUserService(db, appConfig.Server.JWT)
+	organizationService := service.NewOrganizationService(db)
+	userService := service.NewUserService(db, appConfig.Server.JWT, organizationService)
 	emailService := service.NewEmailService(db)
 	contactService := service.NewContactService(db)
 	accountService := service.NewAccountService(db, &appConfig.Security)
 	insightService := service.NewInsightService(db)
 	aiDraftService := service.NewAIDraftService(aiProvider)
 	syncService := service.NewSyncService(db, &service.DefaultIMAPClient{}, defaultFetcher, asynqClient, contactService, accountService, &appConfig, sugar)
+
+	// Run Organization Migration (Ensure existing users have an org)
+	if err := organizationService.EnsureAllUsersHaveOrganization(context.Background()); err != nil {
+		sugar.Errorf("Failed to migrate organizations: %v", err)
+		// We don't fatal here to avoid blocking startup in case of minor issues, but in production this should be monitored
+	}
 
 	// Cast aiProvider to EmbeddingProvider for search
 	embedder, ok := aiProvider.(ai.EmbeddingProvider)
@@ -131,6 +139,7 @@ func main() {
 	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
 	searchHandler := handler.NewSearchHandler(searchService, sugar)
 	healthHandler := handler.NewHealthHandler(db)
+	orgHandler := handler.NewOrganizationHandler(organizationService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -143,6 +152,12 @@ func main() {
 		// Protected routes (require JWT authentication)
 		protected := api.Group("/").Use(middleware.AuthMiddleware(appConfig.Server.JWT))
 		{
+			// Organization Routes
+			protected.POST("/orgs", orgHandler.CreateOrganization)
+			protected.GET("/orgs", orgHandler.ListOrganizations)
+			protected.GET("/orgs/:id", orgHandler.GetOrganization)
+			protected.GET("/orgs/:id/members", orgHandler.GetMembers)
+
 			protected.POST("/settings/account", accountHandler.ConnectAndSaveAccount)
 			protected.GET("/settings/account", accountHandler.GetAccountStatus)
 			protected.POST("/sync", syncHandler.SyncEmails)

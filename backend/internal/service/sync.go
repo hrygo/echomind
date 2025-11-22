@@ -94,14 +94,27 @@ func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, as
 }
 
 // SyncEmails fetches emails for a specific user, saves them, and enqueues analysis tasks.
-func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID) error {
-	// 1. Get user's email account configuration
-	account, err := s.accountService.GetAccountByUserID(ctx, userID)
+func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *uuid.UUID, organizationID *uuid.UUID) error {
+	// 1. Get user's email account configuration (or team/org account)
+	var account model.EmailAccount
+	query := s.db.WithContext(ctx).Model(&model.EmailAccount{})
+
+	if organizationID != nil {
+		query = query.Where("organization_id = ?", *organizationID)
+	} else if teamID != nil {
+		query = query.Where("team_id = ?", *teamID)
+	} else {
+		// Fallback to user-specific account if no team/org is provided
+		query = query.Where("user_id = ?", userID)
+	}
+
+	err := query.First(&account).Error
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(err.Error(), "record not found") {
 			return ErrAccountNotConfigured
 		}
-		log.Printf("Error fetching email account for user %s: %v", userID, err)
+		log.Printf("Error fetching email account for user %s, team %v, org %v: %v", userID, teamID, organizationID, err)
 		return fmt.Errorf("failed to retrieve email account: %w", err)
 	}
 

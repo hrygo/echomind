@@ -14,7 +14,9 @@ type EmailAccount struct {
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt `gorm:"index"`
 
-	UserID            uuid.UUID `gorm:"type:uuid;not null;uniqueIndex"`
+	UserID            *uuid.UUID `gorm:"type:uuid;index"` // Nullable if owned by team or org
+	TeamID            *uuid.UUID `gorm:"type:uuid;index"` // New field
+	OrganizationID    *uuid.UUID `gorm:"type:uuid;index"` // New field (for org-wide accounts)
 	
 	Email             string    `gorm:"not null"`          // The email address (display/login if different from username)
 	ServerAddress     string    `gorm:"not null"`          // e.g., imap.gmail.com

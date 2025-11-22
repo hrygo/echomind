@@ -135,7 +135,7 @@ func updateContactStats(ctx context.Context, db *gorm.DB, userID uuid.UUID, emai
 			// Contact not found, create a new one
 			contact = model.Contact{
 				ID:               uuid.New(),
-				UserID:           userID,
+				UserID:           &userID,
 				Email:            emailAddress,
 				Name:             emailAddress, // Default name to email address
 				InteractionCount: 1,

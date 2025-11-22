@@ -20,15 +20,17 @@ var ( // Define custom errors
 
 // UserService handles user-related business logic.
 type UserService struct {
-	db     *gorm.DB
-	jwtCfg configs.JWTConfig
+	db         *gorm.DB
+	jwtCfg     configs.JWTConfig
+	orgService *OrganizationService
 }
 
 // NewUserService creates a new UserService.
-func NewUserService(db *gorm.DB, jwtCfg configs.JWTConfig) *UserService {
+func NewUserService(db *gorm.DB, jwtCfg configs.JWTConfig, orgService *OrganizationService) *UserService {
 	return &UserService{
-		db:     db,
-		jwtCfg: jwtCfg,
+		db:         db,
+		jwtCfg:     jwtCfg,
+		orgService: orgService,
 	}
 }
 
@@ -54,7 +56,21 @@ func (s *UserService) RegisterUser(ctx context.Context, email, password, name st
 		UpdatedAt:    time.Now(),
 	}
 
-	if err := s.db.WithContext(ctx).Create(user).Error; err != nil {
+	// Use Transaction to ensure User and Org are created together
+	err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(user).Error; err != nil {
+			return err
+		}
+
+		// Create default organization
+		// Note: We use the *service method* but passing the transaction context would be ideal.
+		// However, s.orgService.CreatePersonalOrganization starts its own transaction.
+		// Nested transactions are supported by GORM (SavePoints).
+		_, err := s.orgService.CreatePersonalOrganization(ctx, user)
+		return err
+	})
+
+	if err != nil {
 		return nil, err
 	}
 

@@ -21,6 +21,10 @@ import {
 
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
+import { Header } from "@/components/layout/Header";
+import { OrgSwitcher } from "./OrgSwitcher";
+import AuthGuard from '@/components/auth/AuthGuard';
+
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,6 +77,9 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      {/* Org Switcher */}
+      <OrgSwitcher />
 
       {/* Scrollable Navigation Area */}
       <div className="flex-1 flex flex-col overflow-y-auto py-4 custom-scrollbar">

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,21 @@ func (h *SyncHandler) SyncEmails(c *gin.Context) {
 		return
 	}
 
-	err := h.syncService.SyncEmails(c.Request.Context(), userID)
+	var teamID *uuid.UUID
+	if teamIDStr := c.Query("team_id"); teamIDStr != "" {
+		if id, err := uuid.Parse(teamIDStr); err == nil {
+			teamID = &id
+		}
+	}
+
+	var organizationID *uuid.UUID
+	if orgIDStr := c.Query("organization_id"); orgIDStr != "" {
+		if id, err := uuid.Parse(orgIDStr); err == nil {
+			organizationID = &id
+		}
+	}
+
+	err := h.syncService.SyncEmails(c.Request.Context(), userID, teamID, organizationID)
 	if err != nil {
 		if errors.Is(err, service.ErrAccountNotConfigured) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Please configure your email account in Settings first."})

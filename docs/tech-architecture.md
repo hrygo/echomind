@@ -113,3 +113,21 @@
 
 详细 API 文档请参考: [docs/api.md](api.md)
 
+## 8. Multi-Tenancy Architecture (v0.7.0+)
+
+EchoMind 支持多租户架构，允许用户创建和管理组织（Organization）和团队（Team）。
+
+*   **Models**:
+    *   `Organization`: 最高层级单元，拥有资源和成员。
+    *   `OrganizationMember`: 关联用户与组织，包含角色（Owner, Admin, Member）。
+    *   `Team`: 组织内的子组，可拥有特定的资源（如共享邮箱）。
+    *   `TeamMember`: 关联用户与团队。
+*   **Resource Ownership**:
+    *   资源（如 `EmailAccount`, `Contact`）现在支持三种所有权模式：
+        1.  **Personal**: `UserID` 不为空，`TeamID`/`OrgID` 为空。
+        2.  **Organization**: `OrganizationID` 不为空，`TeamID`/`UserID` 为空。
+        3.  **Team**: `TeamID` 不为空，`UserID` 为空。
+*   **Context Switching**:
+    *   API 请求通过 Header `X-Organization-ID` 传递当前上下文。
+    *   前端使用 Zustand store 管理当前选中的组织。
+

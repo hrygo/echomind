@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/auth';
+import { useOrganizationStore } from '@/lib/store/organization';
 
 const apiClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || '/api/v1',
@@ -14,6 +15,12 @@ apiClient.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        const currentOrgId = useOrganizationStore.getState().currentOrgId;
+        if (currentOrgId) {
+            config.headers['X-Organization-ID'] = currentOrgId;
+        }
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -24,12 +31,16 @@ apiClient.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             useAuthStore.getState().logout();
+            useOrganizationStore.getState().clearOrganizations();
             // Optional: Redirect to login page if not handled by AuthGuard
             // window.location.href = '/login'; 
         }
         return Promise.reject(error);
     }
 );
+
+// API Functions (Remaining existing functions, but export apiClient as `api` for consistency)
+export const api = apiClient;
 
 // Types
 export interface SearchResult {
@@ -60,10 +71,9 @@ export const searchEmails = async (query: string, filters: SearchFilters = {}, l
     if (filters.startDate) params.start_date = filters.startDate;
     if (filters.endDate) params.end_date = filters.endDate;
 
-    const response = await apiClient.get<SearchResponse>('/search', {
+    const response = await api.get<SearchResponse>('/search', {
         params,
     });
     return response.data;
 };
 
-export default apiClient;

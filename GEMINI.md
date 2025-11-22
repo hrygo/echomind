@@ -14,18 +14,16 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.6.0 → v0.6.4)
-**Phase 5.2 - RAG & Semantic Search**
-- Vector embeddings (pgvector + OpenAI text-embedding-3-small)
-- Semantic search API (`GET /api/v1/search`)
-- Search UI with relevance scores
+### ✅ Recent Completion (v0.6.5 → v0.7.0)
+**Phase 5.3 - RAG Polish & Phase 6 Prep**
+- ✅ Performance: < 500ms search
+- ✅ Design: Team Collaboration architecture
 
-### 🚧 Current Sprint (v0.6.5 → v0.7.0)
-**Phase 5.3 - RAG Polish & Phase 6 Prep** | [Plan](docs/sprints/week2_rag_polish/sprint-plan.md)
-- ✅ Performance: < 500ms search (Benchmarked)
-- ✅ Testing: Backend Integration & Frontend E2E Tests added
-- ✅ UX: Search history, filters, i18n
-- ✅ Design: Team Collaboration architecture (Completed)
+### 🚧 Current Sprint (v0.7.1+)
+**Phase 6.1 - Team Collaboration Foundation** | [Plan](docs/sprints/week3_team_collab/sprint-plan.md)
+- Database Models (Org, Team, Member)
+- Multi-tenant Migration
+- Organization API & UI Switcher
 
 ### 🔮 Future (6-Month Plan)
 - **Phase 6** (2026.01-02): Team Collaboration

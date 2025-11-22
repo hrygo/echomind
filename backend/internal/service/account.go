@@ -49,7 +49,7 @@ func (s *AccountService) ConnectAndSaveAccount(ctx context.Context, userID uuid.
 
 	// 3. Prepare EmailAccount model
 	account := model.EmailAccount{
-		UserID:            userID,
+		UserID:            &userID, // Default to user-owned
 		Email:             input.Email,
 		ServerAddress:     input.ServerAddress,
 		ServerPort:        input.ServerPort,
@@ -58,6 +58,21 @@ func (s *AccountService) ConnectAndSaveAccount(ctx context.Context, userID uuid.
 		IsConnected:       true,
 		LastSyncAt:        nil, // Will be set on first successful sync
 		ErrorMessage:      "",
+	}
+
+	// If TeamID or OrganizationID is provided, override UserID
+	if input.TeamID != nil {
+		if teamUUID, err := uuid.Parse(*input.TeamID); err == nil {
+			account.TeamID = &teamUUID
+			account.UserID = nil // If team owned, not user owned
+		}
+	}
+	if input.OrganizationID != nil {
+		if orgUUID, err := uuid.Parse(*input.OrganizationID); err == nil {
+			account.OrganizationID = &orgUUID
+			account.UserID = nil // If organization owned, not user owned
+			account.TeamID = nil // If organization owned, not team owned
+		}
 	}
 
 	// 4. Upsert (Create or Update) the account
@@ -87,6 +102,7 @@ func (s *AccountService) ConnectAndSaveAccount(ctx context.Context, userID uuid.
 func (s *AccountService) GetAccountByUserID(ctx context.Context, userID uuid.UUID) (*model.EmailAccount, error) {
 	var account model.EmailAccount
 	if err := s.db.WithContext(ctx).Where("user_id = ?", userID).First(&account).Error; err != nil {
+		// Note: This only fetches user-owned accounts. Team/Org owned accounts will require a different query.
 		return nil, fmt.Errorf("email account not found for user %s: %w", userID, err)
 	}
 	return &account, nil

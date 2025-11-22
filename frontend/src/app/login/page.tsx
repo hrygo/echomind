@@ -6,30 +6,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import apiClient from '@/lib/api';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card';
-import { AlertCircle } from 'lucide-react';
-import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useOrganizationStore } from '@/lib/store/organization';
+import { organizationApi } from '@/lib/api/organization';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface AuthErrorResponse {
-  error: string;
-}
+// ... existing imports ...
 
-export default function LoginPage() {
-  const router = useRouter();
-  const { t } = useLanguage();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const setOrganizations = useOrganizationStore((state) => state.setOrganizations);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -48,6 +31,11 @@ export default function LoginPage() {
 
       const { token, user } = response.data;
       setAuth(token, user);
+
+      // Fetch organizations after successful login
+      const orgs = await organizationApi.getOrganizations();
+      setOrganizations(orgs);
+
       router.push('/dashboard'); // Redirect to dashboard after login
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
