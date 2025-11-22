@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { AlertCircle } from 'lucide-react';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface AuthErrorResponse {
@@ -27,6 +28,7 @@ interface AuthErrorResponse {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,7 +52,7 @@ export default function LoginPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
-        err.response?.data?.error || 'Invalid email or password. Please try again.'
+        err.response?.data?.error || t('auth.invalidCredentials')
       );
     } finally {
       setIsLoading(false);
@@ -62,10 +64,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Sign in to EchoMind
+            {t('auth.signInTitle')}
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            {t('auth.signInDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,7 +79,7 @@ export default function LoginPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.emailLabel')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -89,7 +91,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -100,18 +102,18 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" isLoading={isLoading}>
-              Sign In
+              {t('auth.signInButton')}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link
               href="/register"
               className="font-medium text-primary hover:underline"
             >
-              Sign up
+              {t('auth.signUpLink')}
             </Link>
           </p>
         </CardFooter>

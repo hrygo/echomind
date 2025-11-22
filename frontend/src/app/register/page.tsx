@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/Card';
 import { AlertCircle } from 'lucide-react';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface AuthErrorResponse {
@@ -26,6 +27,7 @@ interface AuthErrorResponse {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,7 +40,7 @@ export default function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -55,7 +57,7 @@ export default function RegisterPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
-        err.response?.data?.error || 'Registration failed. Please try again.'
+        err.response?.data?.error || t('auth.registrationFailed')
       );
     } finally {
       setIsLoading(false);
@@ -67,10 +69,10 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Create an account
+            {t('auth.signUpTitle')}
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your email below to create your account
+            {t('auth.signUpDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,7 +84,7 @@ export default function RegisterPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t('auth.nameLabel')}</Label>
               <Input
                 id="name"
                 type="text"
@@ -94,7 +96,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.emailLabel')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -106,7 +108,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -117,7 +119,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t('auth.confirmPasswordLabel')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -128,18 +130,18 @@ export default function RegisterPage() {
               />
             </div>
             <Button type="submit" className="w-full" isLoading={isLoading}>
-              Create account
+              {t('auth.signUpButton')}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Link
               href="/login"
               className="font-medium text-primary hover:underline"
             >
-              Sign in
+              {t('auth.signInLink')}
             </Link>
           </p>
         </CardFooter>

@@ -108,7 +108,13 @@
         "low": "Low",
         "review": "Review",
         "reply": "Reply",
-        "none": "None"
+        "none": "None",
+        "radarBuyingIntent": "Buying Intent",
+        "radarPartnership": "Partnership",
+        "radarHiring": "Hiring",
+        "radarMeeting": "Meeting Request",
+        "radarReferral": "Referral",
+        "radarFollowUp": "Follow-up"
     },
     "settings": {
         "title": "Settings Center",
@@ -146,5 +152,24 @@
         "smtpPort": "SMTP Port",
         "configureMailbox": "Configure Mailbox",
         "mailboxConfigDesc": "Configure IMAP/SMTP server information for email synchronization"
+    },
+    "auth": {
+        "signInTitle": "Sign in to EchoMind",
+        "signInDesc": "Enter your email and password to access your account",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "signInButton": "Sign In",
+        "noAccount": "Don't have an account?",
+        "signUpLink": "Sign up",
+        "invalidCredentials": "Invalid email or password. Please try again.",
+        "signUpTitle": "Create an Account",
+        "signUpDesc": "Enter your information to create your account",
+        "nameLabel": "Full Name",
+        "confirmPasswordLabel": "Confirm Password",
+        "signUpButton": "Create Account",
+        "alreadyHaveAccount": "Already have an account?",
+        "signInLink": "Sign in",
+        "passwordMismatch": "Passwords do not match",
+        "registrationFailed": "Registration failed. Please try again."
     }
 }
