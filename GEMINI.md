@@ -1,6 +1,6 @@
 # 🛡️ EchoMind Project Context
 
-> **Vision**: AI-powered Email Decision System. "External Brain for Executive Communication."  
+> **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
 > **Stage**: v0.6.4 (Alpha) | **Active Sprint**: Phase 5.3 - RAG Polish & Phase 6 Prep
 
 ---
