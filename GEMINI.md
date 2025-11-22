@@ -72,20 +72,22 @@ cd frontend && pnpm test   # Frontend component tests
 
 ## 4. The Golden Rules (Non-Negotiable)
 
-1. **Frequent Delivery**  
-   Commit often. Don't hoard changes.
-
-2. **Semantic Versioning**  
-   `vMajor.Minor.Patch`. Update `Makefile` & `package.json` before tagging.
-
-3. **Test-Driven Development**  
+1. **Test-Driven Development**  
    Red → Green → Refactor. `make test` MUST pass before commit.
 
-4. **Convention over Configuration**  
-   Follow existing directory structure (`internal/`, `pkg/`) and naming conventions.
+2. **Frequent Delivery**  
+   Commit often. Don't hoard changes.
 
-5. **Monorepo Discipline**  
-   Respect the `backend/` vs `frontend/` boundary.
+3. **Semantic Versioning**  
+   `vMajor.Minor.Patch`. Update `Makefile` & `package.json` before tagging.
+
+4. **Release Discipline**  
+   After quality verification, release immediately. Don't accumulate completed work.
+   - **Minor Features** (v0.x.Y): Tag after each day's work if tests pass
+   - **Major Features** (v0.X.0): Tag when phase milestone complete
+   - **Fixes** (v0.x.y): Tag immediately after verification
+   - **Convention**: `feat:` for features, `fix:` for bugs, `docs:` for documentation
+   - **Principle**: "Done" means "Released and Tagged"
 
 ---
 
