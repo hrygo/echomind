@@ -1,118 +1,92 @@
 # EchoMind
 
-**Your external brain for email.**
+**The Neural Interface for Executive Work.**
+*(重塑决策直觉)*
 
-EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI cognitive layer on top of traditional email services. It reads, understands, classifies, and summarizes emails, transforming unstructured communication into structured insights and tasks for executives, managers, and dealmakers.
+EchoMind is a Personal Neural Interface designed for executives, managers, and dealmakers. It acts as an AI cognitive layer on top of your existing communication streams (Email, Calendar), transforming unstructured noise into structured insights, actionable tasks, and strategic intelligence.
 
-## 🚀 Features (Current Alpha v0.6.4)
+> **Current Status**: v0.6.4 (Alpha) - Phase 5.3 RAG Polish
 
-*   **🔍 Semantic Search (NEW in v0.6.0)**:
-    *   **Natural Language Search**: Find emails using conversational queries like "budget meeting with Alice".
-    *   **Vector Embeddings**: Powered by OpenAI text-embedding-3-small and pgvector.
-    *   **Instant Results**: Search UI integrated in header with relevance scores.
-*   **AI Command Center**:
-    *   **AI Morning Briefing**: Personalized daily summary of risks and tasks.
-    *   **Smart Feed**: Priority email stream with risk analysis and suggested actions.
-    *   **Intent Radar**: Visual distribution of business signals (Buying, Hiring, Partnership).
-*   **Multi-Model AI Support**: Switch between DeepSeek, OpenAI, and Gemini via configuration.
-*   **Intelligent Summary**: Generates concise 3-sentence summaries of emails.
-*   **Smart Reply**: AI-generated draft replies based on context and user intent.
-*   **Relationship Intelligence**: Visual network graph of your email connections and interaction frequency.
-*   **Action Center**: Interactive task list extracted from emails with priority filtering.
-*   **Sentiment Radar**: Analyzes email sentiment (Positive/Negative/Neutral) and urgency (High/Medium/Low).
-*   **Async Processing**: Robust background job processing with Redis & Asynq.
-*   **Spam Filtering**: Rule-based filtering to skip AI analysis for spam emails, optimizing costs.
+## 🚀 Core Capabilities
+
+EchoMind doesn't just organize your email; it understands it.
+
+### 🧠 The Cognitive Engine (RAG + AI)
+*   **Semantic Search (RAG)**: Ask natural language questions like "What was the budget decision for Project Alpha?" and get answers grounded in your email history. Powered by `pgvector` and OpenAI embeddings.
+*   **Smart Briefing**: Daily "God Mode" executive summary of risks, decisions, and high-priority items.
+*   **Intent Radar**: Automatically identifies and visualizes business signals (Buying, Hiring, Partnership) and urgency levels.
+*   **Multi-Model Intelligence**: seamlessly switches between **DeepSeek**, **OpenAI**, and **Gemini** based on task complexity (cost/performance optimized).
+
+### ⚡ The Neural Interface
+*   **AI Command Center**: A dashboard that prioritizes attention, not just chronology.
+*   **Relationship Graph**: Visualizes your network strength and "sleeping" connections.
+*   **Action Center**: Extracts implied tasks ("I'll send that by Tuesday") and tracks them to completion.
+*   **Sentiment Analysis**: Detects conflict and urgency (e.g., "Angry Customer", "Urgent Request") before you even open the mail.
 
 ## 📚 Documentation
 
-*   **[Product Requirements (PRD)](docs/prd.md)**: Detailed product vision, user personas, and functional requirements.
-*   **[System Design](docs/product-design.md)**: High-level system architecture, module breakdown, and UI design.
-*   **[Technical Architecture](docs/tech-architecture.md)**: Database schema, API design, and AI pipeline implementation details.
-*   **[Roadmap](docs/product-roadmap.md)**: Development phases and future plans.
-*   **[Contributing Guide](CONTRIBUTING.md)**: Development workflow, commit standards, and release process.
+*   **[Product Vision (PRD)](docs/prd.md)**: The "Why" and "What" - User personas and strategic value.
+*   **[System Architecture](docs/tech-architecture.md)**: The "How" - Database schema, RAG pipeline, and API design.
+*   **[Design System](docs/product-design.md)**: UI/UX principles and component breakdown.
+*   **[Roadmap](docs/product-roadmap.md)**: Future plans including Team Collaboration and Mobile apps.
 
 ## 🛠️ Tech Stack
 
-*   **Backend**: Go (Gin, GORM, Viper, Asynq)
-*   **Frontend**: Next.js 16 (React, Tailwind CSS)
-*   **Database**: PostgreSQL with pgvector extension
-*   **Cache/Queue**: Redis
-*   **AI Integration**: Official SDKs for OpenAI, Gemini, and DeepSeek (via Adapter).
-*   **Vector Search**: pgvector with HNSW indexing for semantic search.
+Built for performance, privacy, and scalability.
+
+*   **Backend**: Go 1.22+ (Gin, GORM, Asynq, Viper)
+*   **Frontend**: Next.js 16 (App Router, Zustand, Tailwind CSS)
+*   **Database**: PostgreSQL + `pgvector` (Vector Search)
+*   **Infrastructure**: Docker Compose, Redis (Queue/Cache)
+*   **AI/ML**: OpenAI / DeepSeek / Gemini SDKs, LangChain concepts
 
 ## 🏁 Getting Started
 
 ### 1. Prerequisites
 *   Go (1.22+)
-*   Node.js (20+)
-*   pnpm (install with `npm install -g pnpm`)
-*   Docker & Docker Compose (for PostgreSQL and Redis)
+*   Node.js (20+) & pnpm
+*   Docker & Docker Compose
 
-### 2. Setup
-
-Clone the repository:
+### 2. Quick Start
 
 ```bash
+# Clone the repo
 git clone https://github.com/your-username/echomind.git
 cd echomind
+
+# Initialize environment
 make init
 ```
 
 ### 3. Configuration
 
-**Local Development (Secure):**
+1.  **Secure Config**: Copy `backend/configs/config.example.yaml` to `backend/configs/config.yaml`.
+2.  **Set Secrets**: Update `config.yaml` with your Database credentials and AI API Keys (OpenAI/DeepSeek).
 
-1.  **Create Config File**: Copy the example configuration. This file is git-ignored to prevent secret leaks.
-    ```bash
-    cp backend/configs/config.example.yaml backend/configs/config.yaml
-    ```
-2.  **Update Credentials**: Edit `backend/configs/config.yaml` and replace the placeholders with your actual values:
-    *   `server.jwt.secret`: Set a secure random string.
-    *   `database`: Update `user` and `password` if you changed them in `deploy/docker-compose.yml`.
-    *   `ai`: Add your API keys (e.g., `YOUR_DEEPSEEK_KEY`).
+### 4. Run Locally
+Start the entire stack (DB, Backend, Worker, Frontend) with one command:
 
-**Production / CI/CD:**
-
-*   **Environment Variables**: The application supports overriding any config via environment variables with the `ECHOMIND_` prefix (e.g., `ECHOMIND_SERVER_JWT_SECRET`, `ECHOMIND_AI_DEEPSEEK_API_KEY`).
-*   **Docker Compose**: The `deploy/docker-compose.prod.yml` uses environment variables for sensitive data. Note: Use `docker compose` (Docker Compose v2 CLI) instead of the deprecated `docker-compose` standalone command.
-
-### 4. Run the App
-**One-Click Start:**
 ```bash
 make dev
 ```
-This will start the database, redis, backend server, worker, and frontend in a single terminal. Press `Ctrl+C` to stop.
 
-**Stop All Services:**
-```bash
-make stop
-```
+Visit `http://localhost:3000` to access the Neural Interface.
 
-Open `http://localhost:3000` to view the dashboard.
+## 🧪 Quality Assurance
 
-## 🧪 Testing
-
-Run backend unit and integration tests:
-```bash
-make test
-```
-
-Run frontend tests:
-```bash
-cd frontend && pnpm test
-```
+*   **Backend Tests**: `make test`
+*   **Frontend Tests**: `cd frontend && pnpm test`
 
 ## 📂 Project Structure
 
 ```text
 /echomind
-├── backend/           # Go API & Worker
-│   ├── cmd/           # Entry points
-│   ├── configs/       # Configuration files
-│   ├── internal/      # Private application logic
-│   └── pkg/           # Public libraries (AI providers, IMAP)
-├── frontend/          # Next.js Web App
-├── deploy/            # Docker Compose & DevOps
-├── docs/              # Project Documentation
-└── scripts/           # Utilities
+├── backend/           # Go API, RAG Engine & Async Workers
+│   ├── cmd/           # Entry points (server, worker, reindexer)
+│   ├── internal/      # Core domain logic (Clean Architecture)
+│   └── pkg/           # Shared libraries (AI Providers, IMAP)
+├── frontend/          # Next.js 16 Web Application
+├── deploy/            # Docker & Deployment configs
+├── docs/              # Architecture & Product specs
+└── scripts/           # Dev utilities
 ```
