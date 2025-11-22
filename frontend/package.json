@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,6 +11,7 @@
     "test": "jest --watchAll=false"
   },
   "dependencies": {
+    "@radix-ui/react-checkbox": "^1.0.5",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.8",

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.9.0] - 2025-11-23
+
+### Added
+- **Task Engine (Phase 6.2)**:
+  - **Task System**: Full backend support for Tasks (Model, Service, API) with status and priority management.
+  - **Dashboard Integration**: New `TaskWidget` on the Manager Dashboard to view and manage active tasks.
+  - **Smart Action Integration**: "Create Task" button in email details now directly creates tasks in the system.
+  - **Optimistic UI**: Instant feedback when toggling task status.
+
+### Changed
+- **Database**: Added `tasks` table.
+
 ## [v0.8.0] - 2025-11-23
 
 ### Added

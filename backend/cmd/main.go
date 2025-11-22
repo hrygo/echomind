@@ -22,7 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const Version = "0.8.0"
+const Version = "0.9.0"
 
 func main() {
 	// Initialize Viper for configuration
@@ -131,6 +131,8 @@ func main() {
 	}
 	searchService := service.NewSearchService(db, embedder)
 	chatService := service.NewChatService(aiProvider, searchService)
+	taskService := service.NewTaskService(db)
+
 	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService)
@@ -142,6 +144,7 @@ func main() {
 	healthHandler := handler.NewHealthHandler(db)
 	orgHandler := handler.NewOrganizationHandler(organizationService)
 	chatHandler := handler.NewChatHandler(chatService)
+	taskHandler := handler.NewTaskHandler(taskService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -170,6 +173,13 @@ func main() {
 			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
 			protected.GET("/search", searchHandler.Search)
 			protected.POST("/chat/completions", chatHandler.StreamChat)
+
+			// Task Routes
+			protected.POST("/tasks", taskHandler.CreateTask)
+			protected.GET("/tasks", taskHandler.ListTasks)
+			protected.PATCH("/tasks/:id", taskHandler.UpdateTask)
+			protected.PATCH("/tasks/:id/status", taskHandler.UpdateTaskStatus)
+			protected.DELETE("/tasks/:id", taskHandler.DeleteTask)
 		}
 	}
 
