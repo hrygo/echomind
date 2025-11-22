@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.7.4 (Alpha) | **Active Sprint**: Phase 6.0 - Personal Intelligence Deep-Dive
+> **Stage**: v0.8.0 (Beta) | **Active Sprint**: Phase 6.2 - Actionable Intelligence
 
 ---
 
@@ -14,18 +14,19 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.7.0 → v0.7.2)
-**Phase 6.1 - Team Collaboration Foundation (On Hold)**
-- ✅ Multi-tenant Architecture (Org/Team Models) - *基础设施已就绪，但功能开发暂停*
-- ✅ Migration Strategy & Execution - *基础设施已就绪，但功能开发暂停*
-- ✅ Frontend Context Switcher & State Management - *基础设施已就绪，但功能开发暂停*
+### ✅ Recent Completion (v0.7.4 → v0.8.0)
+**Phase 6.0 - Personal Intelligence Deep-Dive**
+- ✅ AI Chat Interface (Copilot) & Streaming Response
+- ✅ Smart Actions (Actionable AI) - *Email to Task/Calendar*
+- ✅ Mobile Strategy: Web Mobile Polish & Responsive UI
+- ✅ Internationalization (i18n): Full Bilingual Support
 
-### 🚧 Current Sprint (v0.8.0+)
-**Phase 6.0 - Personal Intelligence Deep-Dive** | [Plan](docs/sprints/week4_personal_intelligence/sprint-plan.md)
-- ✅ RAG Repair: Fixed missing text content in embeddings (v0.7.3)
-- ✅ AI Chat Interface (Copilot) (v0.7.4)
-- Mobile Strategy: Web Mobile Polish & WeChat Prep
-- Smart Actions (Actionable AI)
+### 🚧 Current Sprint (v0.9.0+)
+**Phase 6.2 - Actionable Intelligence** | [Plan](docs/sprints/v0.9.0_actionable_intelligence/plan.md)
+- **Actionable Dashboard**: Interactive cards (Approve/Dismiss).
+- **Task Hub**: Internal Task System (`tasks` table created).
+- **Smart Contexts**: Project/Topic-based organization (`contexts` table planned).
+- **Generative Widgets**: Chat-rendered UI components.
 
 ### 🔮 Future (6-Month Plan)
 - **Phase 7** (2026.03-04): WeChat Integration (Official Account)

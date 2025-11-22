@@ -53,11 +53,15 @@
 *   **Spam Filter**: Rule-based filter (`internal/spam`) to pre-screen emails before AI processing.
 *   **AI Engine**: 
     *   **Architecture**: Adapter Pattern & Factory Pattern.
-    *   **Interface**: `pkg/ai/AIProvider` (Methods: `Summarize`, `Classify`, `AnalyzeSentiment`).
+    *   **Interface**: `pkg/ai/AIProvider` (Methods: `Summarize`, `Classify`, `AnalyzeSentiment`, `StreamChat`).
     *   **Implementations**: 
         *   `openai`: Uses `go-openai` SDK.
         *   `gemini`: Uses `generative-ai-go` SDK.
         *   `deepseek`: Adapts `openai` implementation with custom BaseURL.
+    *   **Chat & Streaming (v0.8.0+)**:
+        *   **SSE (Server-Sent Events)**: Real-time text streaming for Chat Copilot using standard HTTP `text/event-stream`.
+        *   **Context Aware**: Backend injects relevant RAG context into system prompts before streaming.
+        *   **Smart Actions**: Structured output parsing from AI responses to generate interactive UI elements (JSON-based).
     *   **RAG Support (v0.6.0+)**:
         *   **Embeddings**: OpenAI `text-embedding-3-small` or compatible.
         *   **Vector DB**: **pgvector** (Postgres extension) for storing email embeddings (No external vector DB required).
@@ -133,14 +137,17 @@ EchoMind 支持多租户架构，允许用户创建和管理组织（Organizatio
 
 ## 9. Client Strategy (Multi-Platform)
 
- EchoMind 采用 **"Web First, Mobile via WeChat"** 的客户端策略。
+ EchoMind 采用 **"Web First, Mobile Adaptive"** 的策略。
 
 *   **Web (Primary)**:
     *   **Stack**: Next.js (React), Tailwind CSS.
     *   **Features**: 全功能 Dashboard，大屏数据可视化，复杂任务管理。
-    *   **Mobile Web**: 响应式设计 (Responsive Design)，提供基础的移动端浏览器访问能力。
+    *   **Mobile Web (v0.8.0+)**: 深度优化的响应式设计。
+        *   **Collapsible Navigation**: 侧边栏在移动端变为抽屉式 (Drawer/Sheet)。
+        *   **Adaptive Header**: 搜索栏在移动端折叠，点击展开。
+        *   **Touch Optimized**: 增大点击区域，优化手势交互。
 *   **Mobile (Secondary)**:
-    *   **WeChat Official Account (微信公众号)**: 唯一的官方移动端入口。
+    *   **WeChat Official Account (微信公众号 - Phase 7)**: 作为通知推送和轻量级语音交互入口。
     *   **Interaction**: 基于对话的交互 (Chat UI)，接收通知，简单查询。
     *   **Native App / Mini Program**: 目前 **不在规划中 (Out of Scope)**。
 *   **Desktop**:

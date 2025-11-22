@@ -5,23 +5,24 @@
 
 EchoMind is a Personal Neural Interface designed for executives, managers, and dealmakers. It acts as an AI cognitive layer on top of your existing communication streams (Email, Calendar), transforming unstructured noise into structured insights, actionable tasks, and strategic intelligence.
 
-> **Current Status**: v0.7.3 (Alpha) - Phase 6.0 Personal Intelligence
+> **Current Status**: v0.8.0 (Beta) - Phase 6.0 Personal Intelligence Complete
 
 ## 🚀 Core Capabilities
 
 EchoMind doesn't just organize your email; it understands it.
 
 ### 🧠 The Cognitive Engine (RAG + AI)
-*   **Semantic Search (RAG)**: Ask natural language questions like "What was the budget decision for Project Alpha?" and get answers grounded in your email history. Powered by `pgvector` and OpenAI embeddings.
-*   **Smart Briefing**: Daily "God Mode" executive summary of risks, decisions, and high-priority items.
-*   **Intent Radar**: Automatically identifies and visualizes business signals (Buying, Hiring, Partnership) and urgency levels.
-*   **Multi-Model Intelligence**: seamlessly switches between **DeepSeek**, **OpenAI**, and **Gemini** based on task complexity (cost/performance optimized).
+*   **AI Chat Copilot**: A conversational assistant that answers questions about your work context ("What did Alice say about the budget?"), powered by RAG and streaming responses.
+*   **Semantic Search**: Ask natural language questions and get answers grounded in your email history.
+*   **Smart Actions**: Automatically detects actionable items (meetings, tasks) in emails and provides one-click buttons to add them to your calendar or todo list.
+*   **Intent Radar**: Visualizes business signals (Buying, Hiring, Partnership) and urgency levels.
+*   **Multi-Model Intelligence**: Switches between DeepSeek, OpenAI, and Gemini for cost/performance optimization.
 
 ### ⚡ The Neural Interface
+*   **Mobile First**: A fully responsive design with a "Collapse-to-Expand" search bar and swipeable drawers, optimized for executives on the go.
 *   **AI Command Center**: A dashboard that prioritizes attention, not just chronology.
 *   **Relationship Graph**: Visualizes your network strength and "sleeping" connections.
-*   **Action Center**: Extracts implied tasks ("I'll send that by Tuesday") and tracks them to completion.
-*   **Sentiment Analysis**: Detects conflict and urgency (e.g., "Angry Customer", "Urgent Request") before you even open the mail.
+*   **Action Center**: Extracts implied tasks and tracks them to completion.
 
 ## 📚 Documentation
 

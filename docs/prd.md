@@ -2,7 +2,7 @@
 
 | 项目名称 | EchoMind |
 | :--- | :--- |
-| **版本状态** | **v0.7.0 (Alpha)** |
+| **版本状态** | **v0.8.0 (Beta)** |
 | **文档状态** | **正式发布** |
 | **产品负责人** | Product Team |
 | **核心 Slogan** | **EchoMind: The Neural Interface for Executive Work.** <br> (重塑决策直觉。) |
@@ -61,26 +61,24 @@ EchoMind 服务于那些 **"Time-Poor, Influence-High" (时间匮乏，影响力
     *   **混合检索 (Hybrid Search)**：结合关键词匹配 (BM25) 与向量相似度，确保专有名词搜索的准确性。
     *   **多模态解析**：识别附件文档（PDF/Word）及图片中的关键信息。
 
-### 2.3 用户界面：神经中枢 (Neural Interface - v0.7.0+)
+### 2.3 用户界面：神经中枢 (Neural Interface - v0.8.0+)
 **核心理念**: 从 "Client" (客户端) 进化为 "Surface" (智能画布)。摒弃传统的文件夹列表，采用 **AI Native** 的 **Source-Canvas-Detail** 布局。
 
 #### A. 布局架构 (The Fluid Canvas)
 *   **左侧栏 (Context Manager)**:
     *   **动态关注点**: 自动聚合 "High Priority", "Pending Reply"。
     *   **用户上下文**: 用户勾选 "Project Alpha" 或 "Key Person: John"，AI 回答范围即锁定在该上下文内。
-    *   **源数据 (Sources)**: 附件文档、提取的结构化数据。
 *   **主画布 (Intelligence Canvas)**:
     *   **Briefing Mode (晨报模式)**: 默认视图。类似于 Notion/Pinterest 的卡片流。根据用户角色自动渲染不同的 "Briefing Templates" (e.g., 高管看风险，销售看机会)。
-    *   **Studio Mode (工作室模式)**: 问答视图。类似于 NotebookLM。用户提问，AI 实时生成回答，并支持流式输出和多模态组件渲染。
-*   **右侧栏 (Grounding Panel)**:
-    *   **事实锚点**: 当用户点击 AI 回答中的引用脚注 `[1]` 时，右侧滑出原始邮件/文档，并高亮引用的具体段落，确保 "Trust but Verify"。
+    *   **Studio Mode (工作室模式)**: 问答视图。通过 AI Copilot 实现。用户提问，AI 实时生成回答，并支持流式输出和多模态组件渲染。
+*   **右侧栏 (AI Copilot & Grounding)**:
+    *   **AI Chat Copilot**: 右侧滑出的对话助手，支持基于 RAG 的多轮问答。
+    *   **Smart Actions**: 邮件详情页自动提取的行动项（如“添加到日历”、“创建任务”），提供一键执行。
 
 #### B. 生成式 UI 组件 (Generative Widgets)
 系统根据意图自动渲染最佳交互组件，而非固定表单：
-*   **Calendar Grid**: 当意图为 `scheduling` 时渲染。
-*   **Network Graph**: 当意图为 `relationship` 时渲染。
-*   **Approval Card**: 当意图为 `decision` 时渲染，提供大号 `[批准]` / `[驳回]` 按钮。
-*   **Rich Editor**: 当意图为 `draft` 时渲染，预填充草稿。
+*   **Network Graph**: 当意图为 `relationship` 时渲染，展示人脉网络。
+*   **Smart Action Buttons**: 在邮件详情中动态渲染行动按钮。
 
 #### D. 微信公众号 (WeChat Connect) - "随身第二大脑"
 **定位**：EchoMind 的移动端对话式操作系统 (Conversational OS)，不仅仅是通知，更是核心交互界面。遵循 **"Lazy Intelligence" (懒人智能)** 哲学：零摩擦，高上下文。

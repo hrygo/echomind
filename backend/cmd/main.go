@@ -71,7 +71,7 @@ func main() {
 	}
 
 	// AutoMigrate models
-	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}, &model.Organization{}, &model.OrganizationMember{}, &model.Team{}, &model.TeamMember{}); err != nil {
+	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}, &model.Organization{}, &model.OrganizationMember{}, &model.Team{}, &model.TeamMember{}, &model.Task{}); err != nil {
 		sugar.Fatalf("Failed to auto migrate database: %v", err)
 	}
 	sugar.Infof("Database migration completed")

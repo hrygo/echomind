@@ -16,18 +16,32 @@
 *   **架构升级**: 多租户 (Org/Team) 数据库模型与迁移完成。
 *   **工程质量**: 完善 E2E 测试与 CI 流程。
 
-## 🚧 Phase 6.0: Personal Intelligence Deep-Dive (Current Sprint)
+## ✅ Phase 6.0: Personal Intelligence Deep-Dive - COMPLETED
 **时间**: 2025.12 (Month 2)
 **版本**: v0.8.0
+**状态**: ✅ 已完成 (2025-11-23)
 **目标**: 深化个人 AI 体验，聚焦 Web 端交互与微信生态。
 
 *   **AI Copilot (Web)**
-    *   [ ] **Chat Sidebar**: 右侧边栏对话框，支持自然语言查信。
-    *   [ ] **Smart Actions**: 基于 AI 分析的快捷操作 ("添加到待办", "草拟回复")。
+    *   ✅ **Chat Sidebar**: 右侧边栏对话框，支持自然语言查信。
+    *   ✅ **Smart Actions**: 基于 AI 分析的快捷操作 ("添加到待办", "草拟回复")。
 *   **移动端策略 (Mobile Strategy)**
-    *   [ ] **Web Mobile Polish**: 优化手机浏览器上的 Dashboard 阅读体验。
-    *   [ ] **WeChat Integration**: 唯一的官方移动端入口（微信公众号）。
-    *   *注：原生 App / 小程序计划待定 (TBD)，优先资源投入 Web 与微信。*
+    *   ✅ **Web Mobile Polish**: 优化手机浏览器上的 Dashboard 阅读体验。
+
+## 🚧 Phase 6.2: Actionable Intelligence (Current Sprint)
+**时间**: 2025.12 - 2026.01 (Month 3)
+**版本**: v0.9.0
+**目标**: 从“被动阅读”到“主动决策”。实现可交互的 Dashboard 和任务闭环。
+
+*   **Dashboard Upgrade**
+    *   [ ] **Actionable Cards**: 卡片支持直接 [Approve] / [Dismiss] / [Reply]。
+    *   [ ] **Optimistic UI**: 操作即时反馈，支持撤销。
+*   **Task Hub (任务中枢)**
+    *   [ ] **Internal Task System**: 构建轻量级任务表，支持从邮件生成。
+    *   [ ] **Task Management UI**: Dashboard 任务列表视图。
+*   **Smart Contexts (智能上下文)**
+    *   [ ] **Context Management**: 定义项目/话题上下文。
+    *   [ ] **Context-Aware RAG**: 基于当前上下文过滤搜索和对话。
 
 ## 🗓️ Phase 7: WeChat Connect (Conversational OS)
 **时间**: 2026.01 - 2026.02 (Month 3-4)
@@ -60,6 +74,7 @@
 
 ## 📝 版本历史
 
+- **v0.8.0** (2025-11-23): ✅ Smart Actions, AI Copilot, Mobile-First UI, i18n
 - **v0.7.4** (2025-11-22): ✅ AI Chat Interface (Copilot) with Streaming Response
 - **v0.7.3** (2025-11-22): ✅ Fix Embedding Dimension (1536->768)
 - **v0.7.2** (2025-11-22): ✅ Team Foundation & Fixes
