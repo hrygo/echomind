@@ -4,8 +4,12 @@
 
 EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI cognitive layer on top of traditional email services. It reads, understands, classifies, and summarizes emails, transforming unstructured communication into structured insights and tasks for executives, managers, and dealmakers.
 
-## 🚀 Features (Current Beta v0.5.3)
+## 🚀 Features (Current Alpha v0.6.4)
 
+*   **🔍 Semantic Search (NEW in v0.6.0)**:
+    *   **Natural Language Search**: Find emails using conversational queries like "budget meeting with Alice".
+    *   **Vector Embeddings**: Powered by OpenAI text-embedding-3-small and pgvector.
+    *   **Instant Results**: Search UI integrated in header with relevance scores.
 *   **AI Command Center**:
     *   **AI Morning Briefing**: Personalized daily summary of risks and tasks.
     *   **Smart Feed**: Priority email stream with risk analysis and suggested actions.
@@ -31,9 +35,10 @@ EchoMind is a SaaS-level Intelligent Email Decision System that acts as an AI co
 
 *   **Backend**: Go (Gin, GORM, Viper, Asynq)
 *   **Frontend**: Next.js 16 (React, Tailwind CSS)
-*   **Database**: PostgreSQL
+*   **Database**: PostgreSQL with pgvector extension
 *   **Cache/Queue**: Redis
 *   **AI Integration**: Official SDKs for OpenAI, Gemini, and DeepSeek (via Adapter).
+*   **Vector Search**: pgvector with HNSW indexing for semantic search.
 
 ## 🏁 Getting Started
 
