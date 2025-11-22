@@ -1,7 +1,7 @@
 .PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs
 
 # Version
-VERSION := 0.7.2
+VERSION := 0.7.3
 
 # Variables
 REPO_OWNER ?= your-username
@@ -31,6 +31,7 @@ help:
 	@echo "    make run-worker    - Build and Start Worker"
 	@echo "    make run-frontend  - Start Frontend"
 	@echo "    make build         - Build backend binaries"
+	@echo "    make reindex       - Reindex all emails (generate embeddings)"
 	@echo ""
 	@echo "  Observability:"
 	@echo "    make status        - Check status"
@@ -126,6 +127,10 @@ run-worker: ensure-log-dir build
 run-frontend: ensure-log-dir
 	@echo "Starting frontend..."
 	@nohup pnpm --prefix frontend dev > $(FRONTEND_LOG) 2>&1 & echo "✅ Frontend started."
+
+reindex:
+	@echo "Reindexing emails..."
+	@cd backend && go run cmd/reindex/main.go
 
 # Observability
 status:

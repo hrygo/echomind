@@ -131,3 +131,18 @@ EchoMind 支持多租户架构，允许用户创建和管理组织（Organizatio
     *   API 请求通过 Header `X-Organization-ID` 传递当前上下文。
     *   前端使用 Zustand store 管理当前选中的组织。
 
+## 9. Client Strategy (Multi-Platform)
+
+ EchoMind 采用 **"Web First, Mobile via WeChat"** 的客户端策略。
+
+*   **Web (Primary)**:
+    *   **Stack**: Next.js (React), Tailwind CSS.
+    *   **Features**: 全功能 Dashboard，大屏数据可视化，复杂任务管理。
+    *   **Mobile Web**: 响应式设计 (Responsive Design)，提供基础的移动端浏览器访问能力。
+*   **Mobile (Secondary)**:
+    *   **WeChat Official Account (微信公众号)**: 唯一的官方移动端入口。
+    *   **Interaction**: 基于对话的交互 (Chat UI)，接收通知，简单查询。
+    *   **Native App / Mini Program**: 目前 **不在规划中 (Out of Scope)**。
+*   **Desktop**:
+    *   目前直接使用 Web 端。未来可能通过 Electron 封装。
+

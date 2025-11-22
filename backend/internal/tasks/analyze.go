@@ -13,8 +13,6 @@ import (
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/spam"
 	"github.com/hrygo/echomind/pkg/ai"
-	"github.com/hrygo/echomind/pkg/utils"
-	"github.com/pgvector/pgvector-go"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -43,8 +41,13 @@ type Summarizer interface {
 	AnalyzeSentiment(ctx context.Context, text string) (ai.SentimentResult, error)
 }
 
+// EmbeddingGenerator defines the interface for generating and saving embeddings.
+type EmbeddingGenerator interface {
+	GenerateAndSaveEmbedding(ctx context.Context, email *model.Email, chunkSize int) error
+}
+
 // HandleEmailAnalyzeTask handles the email analysis task for a specific user.
-func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder ai.EmbeddingProvider, chunkSize int) error {
+func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder EmbeddingGenerator, chunkSize int) error {
 	var p EmailAnalyzePayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
@@ -109,7 +112,7 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 	}
 
 	// 7. Generate and Save Embeddings
-	if err := processEmbedding(ctx, db, embedder, &email, chunkSize); err != nil {
+	if err := embedder.GenerateAndSaveEmbedding(ctx, &email, chunkSize); err != nil {
 		log.Printf("Warning: Failed to process embedding for email %s: %v", p.EmailID, err)
 		// We treat embedding failure as non-fatal for the analysis task, but log it.
 		// Ideally, this could be a separate task or retried.
@@ -176,60 +179,4 @@ func sentimentToFloat(sentiment string) float64 {
 	default:
 		return 0.0 // Default to neutral if sentiment is unknown
 	}
-}
-
-// processEmbedding generates and saves embeddings for an email.
-func processEmbedding(ctx context.Context, db *gorm.DB, embedder ai.EmbeddingProvider, email *model.Email, chunkSize int) error {
-	// 1. Prepare text
-	// Combine Subject and Body.
-	cleanBody := utils.StripHTML(email.BodyText)
-	if cleanBody == "" {
-		cleanBody = email.Snippet
-	}
-
-	fullText := fmt.Sprintf("Subject: %s\n\n%s", email.Subject, cleanBody)
-
-	// 2. Chunk text
-	if chunkSize <= 0 {
-		chunkSize = 1000 // Default if not specified
-	}
-	chunker := utils.NewTextChunker(chunkSize)
-	chunks := chunker.Chunk(fullText)
-
-	if len(chunks) == 0 {
-		return nil
-	}
-
-	// 3. Generate Embeddings
-	vectors, err := embedder.EmbedBatch(ctx, chunks)
-	if err != nil {
-		return fmt.Errorf("failed to generate embeddings: %w", err)
-	}
-
-	if len(vectors) != len(chunks) {
-		return fmt.Errorf("mismatch between chunks (%d) and vectors (%d)", len(chunks), len(vectors))
-	}
-
-	// 4. Save to DB
-	// Delete existing embeddings for this email first (to avoid duplicates on re-analysis)
-	if err := db.WithContext(ctx).Where("email_id = ?", email.ID).Delete(&model.EmailEmbedding{}).Error; err != nil {
-		return fmt.Errorf("failed to delete old embeddings: %w", err)
-	}
-
-	var embeddings []model.EmailEmbedding
-	for _, vec := range vectors {
-		embeddings = append(embeddings, model.EmailEmbedding{
-			EmailID: email.ID,
-			Vector:  pgvector.NewVector(vec),
-		})
-	}
-
-	if len(embeddings) > 0 {
-		if err := db.WithContext(ctx).Create(&embeddings).Error; err != nil {
-			return fmt.Errorf("failed to save embeddings: %w", err)
-		}
-	}
-
-	log.Printf("Saved %d embeddings for email %s", len(embeddings), email.ID)
-	return nil
 }

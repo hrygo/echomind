@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.7.2 (Alpha) | **Active Sprint**: Phase 6.1 - Team Collaboration Foundation
+> **Stage**: v0.7.2 (Alpha) | **Active Sprint**: Phase 6.0 - Personal Intelligence Deep-Dive
 
 ---
 
@@ -15,20 +15,22 @@
 ## 2. Roadmap Status
 
 ### ✅ Recent Completion (v0.7.0 → v0.7.2)
-**Phase 6.1 - Team Collaboration Foundation**
-- ✅ Multi-tenant Architecture (Org/Team Models)
-- ✅ Migration Strategy & Execution
-- ✅ Frontend Context Switcher & State Management
+**Phase 6.1 - Team Collaboration Foundation (On Hold)**
+- ✅ Multi-tenant Architecture (Org/Team Models) - *基础设施已就绪，但功能开发暂停*
+- ✅ Migration Strategy & Execution - *基础设施已就绪，但功能开发暂停*
+- ✅ Frontend Context Switcher & State Management - *基础设施已就绪，但功能开发暂停*
 
-### 🚧 Current Sprint (Phase 6.2+)
-**Phase 6.2 - Shared Resources & Team Polish**
-- Shared Email Inboxes
-- Team Member Management UI
-- Advanced Permission System
+### 🚧 Current Sprint (v0.8.0+)
+**Phase 6.0 - Personal Intelligence Deep-Dive** | [Plan](docs/sprints/week4_personal_intelligence/sprint-plan.md)
+- ✅ RAG Repair: Fixed missing text content in embeddings (v0.7.3)
+- AI Chat Interface (Copilot)
+- Mobile Strategy: Web Mobile Polish & WeChat Prep
+- Smart Actions (Actionable AI)
 
 ### 🔮 Future (6-Month Plan)
-- **Phase 7** (2026.03-04): Cross-Platform (Desktop, WeChat)
+- **Phase 7** (2026.03-04): WeChat Integration (Official Account)
 - **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
+- **Phase 9** (TBD): Team Collaboration (重新评估优先级)
 
 ---
 
@@ -63,5 +65,5 @@
 - **No Hardcoding**: Use `t('key')`.
 
 ### 🔧 Tooling Usage (AI Agent SOP)
-- **Precise Replacement**: When using `replace`, ensure `old_string` is unique and minimal. Avoid including long context that might have changed.
-- **Verify State**: If a tool fails, use `read_file` to verify the current file state before retrying.
+- **Precise Replacement**: When using `replace`, ensure `old_string` 是唯一且最小的，避免包含可能已更改的长上下文。
+- **Verify State**: 如果工具失败，使用 `read_file` 验证当前文件状态，然后再重试。

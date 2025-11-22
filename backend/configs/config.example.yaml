@@ -8,34 +8,98 @@ database:
   dsn: "host=localhost user=YOUR_DB_USER password=YOUR_DB_PASSWORD dbname=echomind_db port=5432 sslmode=disable"
 
 security:
-  encryption_key: "YOUR_32_BYTE_HEX_AES_KEY" # IMPORTANT: Change this to a random 32-byte (64-char hex) string in production!
+  encryption_key: "YOUR_ENCRYPTION_KEY_64_CHARS_HEX" # IMPORTANT: Change this to a random 32-byte (64-char hex) string in production!
 
 redis:
   addr: "localhost:6380"
   password: "YOUR_REDIS_PASSWORD"
   db: 0
 
+# ==============================================================================
+# AI Service Configuration (AI 服务配置)
+# ==============================================================================
 ai:
-  provider: "deepseek" # Options: deepseek, openai, gemini, mock
-  embedding_provider: "openai" # Options: openai, deepseek (if supported), gemini, mock
-  embedding_model: "text-embedding-3-small" # Model for embeddings
-  chunk_size: 1000 # Max tokens per chunk (1 token ~= 4 chars). Recommended: 500-1000
+  # ---------------------------------------------------------------------------
+  # 1. Service Routing (路由层)
+  # ---------------------------------------------------------------------------
+  # Designate which provider handles specific capabilities.
+  # 指定由哪个注册的 Provider 负责具体的任务。
+  active_services:
+    chat: "deepseek"         # Responsible for Summarize, Classify, Draft Reply
+    embedding: "gemini_flash"   # Responsible for Vector Embeddings (RAG)
 
-  deepseek:
-    api_key: "YOUR_DEEPSEEK_KEY"
-    model: "deepseek-chat" # Options: deepseek-chat, deepseek-coder
-    base_url: "https://api.deepseek.com/v1"
+  chunk_size: 1000 # Max tokens per chunk for RAG processing.
 
-  openai:
-    api_key: "YOUR_OPENAI_KEY"
-    model: "gpt-4o" # Options: gpt-4o, gpt-4-turbo, gpt-3.5-turbo
-    base_url: "" # Optional, for proxies or compatible services
+  # ---------------------------------------------------------------------------
+  # 2. Provider Registry (能力注册表)
+  # ---------------------------------------------------------------------------
+  # Register any OpenAI-compatible or Google Gemini provider here.
+  # No code changes required to add new vendors.
+  providers:
+    
+    # [Use Case: Cost-Effective & Smart]
+    # DeepSeek via OpenAI Protocol
+    deepseek:
+      protocol: "openai"
+      settings:
+        base_url: "https://api.deepseek.com/v1"
+        api_key: "${DEEPSEEK_API_KEY}"
+        model: "deepseek-chat"
 
-  gemini:
-    api_key: "YOUR_GEMINI_KEY"
-    model: "gemini-2.5-flash" # Options: gemini-2.5-flash, gemini-2.5-pro, gemini-3.0-pro
+    # [Use Case: Industry Standard]
+    # Official OpenAI
+    openai_small:
+      protocol: "openai"
+      settings:
+        api_key: "${OPENAI_API_KEY}"
+        # This provider supports both Chat and Embedding
+        model: "gpt-4o-mini"
+        embedding_model: "text-embedding-3-small"
 
+    # [Use Case: Multimodal Native]
+    # Google Gemini
+    gemini_flash:
+      protocol: "gemini"
+      settings:
+        api_key: "${GEMINI_API_KEY}"
+        model: "gemini-2.5-flash"
+        embedding_model: "text-embedding-004"
+
+    # [Use Case: Local Privacy / Offline]
+    # Ollama (running locally)
+    # Requires: `ollama run llama3` and `ollama run nomic-embed-text`
+    local_ollama:
+      protocol: "openai"
+      settings:
+        base_url: "http://localhost:11434/v1"
+        api_key: "ollama" # Any string works
+        model: "llama3"
+        embedding_model: "nomic-embed-text"
+
+    # [Use Case: Other OpenAI-Compatible Vendors]
+    # Example: Moonshot / Kimi, SiliconFlow, Groq
+    moonshot_kimi:
+      protocol: "openai"
+      settings:
+        base_url: "https://api.moonshot.cn/v1"
+        api_key: "${MOONSHOT_API_KEY}"
+        model: "moonshot-v1-8k"
+
+    # [Use Case: Testing]
+    mock:
+      protocol: "mock"
+      settings: {}
+
+  # ---------------------------------------------------------------------------
+  # 3. Prompt Templates (提示词模板)
+  # ---------------------------------------------------------------------------
+  # Guidelines for modifying prompts:
+  # 1. Output JSON strictly where requested.
+  # 2. Do not change the JSON keys (summary, category, etc.) as the backend parses them.
   prompts:
+    
+    # Input: Email Content (Text)
+    # Output: JSON Structure
     summary: |
       你是一位专业的行政助理。你的目标是分析以下邮件，并返回一个结构化的 JSON 对象，包含以下字段：
       - "summary": 用中文简明扼要地总结邮件内容（3句话以内），突出关键行动、决策或信息。
@@ -53,8 +117,17 @@ ai:
         "action_items": ["跟进项目X", "安排与Y团队的会议"]
       }
       ```
+
+    # Input: Email Content (Text)
+    # Output: String (Category Name)
     classify: "将以下邮件归类为以下之一：'Work', 'Newsletter', 'Notification', 'Personal', 'Spam'。仅返回类别名称（英文）。"
+
+    # Input: Email Content (Text)
+    # Output: JSON Structure
     sentiment: '分析以下邮件的情感和紧急程度。返回 JSON 格式结果：{"sentiment": "Positive" | "Neutral" | "Negative", "urgency": "High" | "Medium" | "Low"}。'
+
+    # Input: Original Email + User Prompt
+    # Output: String (Draft Email Body)
     draft_reply: |
       你是一位高效的职业经理人。请根据原始邮件内容和用户的简短提示，用中文起草一封专业、得体且切中要点的回复邮件。
       保持语气专业、友好。如果用户提示很简略，请根据上下文合理补充。

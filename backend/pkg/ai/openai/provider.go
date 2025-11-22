@@ -11,20 +11,32 @@ import (
 )
 
 type Provider struct {
-	client  *openai.Client
-	model   string
-	prompts map[string]string
+	client         *openai.Client
+	model          string
+	embeddingModel string
+	prompts        map[string]string
 }
 
-func NewProvider(apiKey, model, baseURL string, prompts map[string]string) *Provider {
+func NewProvider(settings map[string]interface{}, prompts map[string]string) *Provider {
+	apiKey, _ := settings["api_key"].(string)
+	model, _ := settings["model"].(string)
+	baseURL, _ := settings["base_url"].(string)
+	embeddingModel, _ := settings["embedding_model"].(string)
+
+	// Default embedding model if not specified
+	if embeddingModel == "" {
+		embeddingModel = string(openai.SmallEmbedding3)
+	}
+
 	config := openai.DefaultConfig(apiKey)
 	if baseURL != "" {
 		config.BaseURL = baseURL
 	}
 	return &Provider{
-		client:  openai.NewClientWithConfig(config),
-		model:   model,
-		prompts: prompts,
+		client:         openai.NewClientWithConfig(config),
+		model:          model,
+		embeddingModel: embeddingModel,
+		prompts:        prompts,
 	}
 }
 

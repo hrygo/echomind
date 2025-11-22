@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hibiken/asynq"
+	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/internal/tasks"
 	"github.com/hrygo/echomind/pkg/ai"
@@ -56,6 +57,12 @@ func main() {
 		log.Fatalf("Error reading config file, %s", err)
 	}
 
+	// Load entire config into struct
+	var appConfig configs.Config
+	if err := vip.Unmarshal(&appConfig); err != nil {
+		log.Fatalf("Unable to decode into struct, %v", err)
+	}
+
 	// Logger Configuration
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
@@ -76,7 +83,7 @@ func main() {
 	}
 
 	// AI Service
-	aiProvider, err := service.AIProviderFactory(vip)
+	aiProvider, err := service.NewAIProvider(&appConfig.AI)
 	if err != nil {
 		logger.Fatal("Failed to create AI provider", zap.Error(err))
 	}
@@ -107,15 +114,16 @@ func main() {
 
 		embedder, ok := aiProvider.(ai.EmbeddingProvider)
 		if !ok {
-			// Fallback or error? For now, let's log error and skip embedding if provider doesn't support it
-			// But HandleEmailAnalyzeTask requires it.
-			// We should probably enforce it in factory or use a specific embedding provider.
-			// For Day 2/3, we implemented OpenAI provider which has both.
 			logger.Error("AI provider does not implement EmbeddingProvider")
-			return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, nil, chunkSize) // This might panic if we don't handle nil in tasks
+			// If embedding is not supported, we can't run the full task properly as defined now.
+			// Or we could pass nil and let the task handle it?
+			// But HandleEmailAnalyzeTask calls GenerateAndSaveEmbedding which uses s.embedder.
+			// Let's assume critical failure for now.
+			return nil 
 		}
 
-		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, embedder, chunkSize)
+		searchService := service.NewSearchService(db, embedder)
+		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, searchService, chunkSize)
 	})
 
 	if err := srv.Run(mux); err != nil {

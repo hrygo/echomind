@@ -33,36 +33,24 @@ type RedisConfig struct {
 }
 
 type AIConfig struct {
-	Provider          string         `mapstructure:"provider"`
-	EmbeddingProvider string         `mapstructure:"embedding_provider"` // New: Separate provider for embeddings
-	EmbeddingModel    string         `mapstructure:"embedding_model"`    // New: Separate model for embeddings
-	ChunkSize         int            `mapstructure:"chunk_size"`         // Max tokens per chunk
-	Deepseek          DeepseekConfig `mapstructure:"deepseek"`
-	OpenAI            OpenAIConfig   `mapstructure:"openai"`
-	Gemini            GeminiConfig   `mapstructure:"gemini"`
-	Prompts           PromptConfig   `mapstructure:"prompts"`
+	ActiveServices ServiceRoute              `mapstructure:"active_services"`
+	Providers      map[string]ProviderConfig `mapstructure:"providers"`
+	Prompts        PromptConfig              `mapstructure:"prompts"`
 }
 
-type DeepseekConfig struct {
-	APIKey  string `mapstructure:"api_key"`
-	Model   string `mapstructure:"model"`
-	BaseURL string `mapstructure:"base_url"`
+type ServiceRoute struct {
+	Chat      string `mapstructure:"chat"`
+	Embedding string `mapstructure:"embedding"`
 }
 
-type OpenAIConfig struct {
-	APIKey  string `mapstructure:"api_key"`
-	Model   string `mapstructure:"model"`
-	BaseURL string `mapstructure:"base_url"`
-}
-
-type GeminiConfig struct {
-	APIKey string `mapstructure:"api_key"`
-	Model  string `mapstructure:"model"`
+type ProviderConfig struct {
+	Protocol string                 `mapstructure:"protocol"` // "openai" | "gemini"
+	Settings map[string]interface{} `mapstructure:"settings"`
 }
 
 type PromptConfig struct {
-	Summary   string `mapstructure:"summary"`
-	Classify  string `mapstructure:"classify"`
+	Summary    string `mapstructure:"summary"`
+	Classify   string `mapstructure:"classify"`
 	Sentiment  string `mapstructure:"sentiment"`
 	DraftReply string `mapstructure:"draft_reply"`
 }

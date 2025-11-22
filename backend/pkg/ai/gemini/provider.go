@@ -13,20 +13,26 @@ import (
 )
 
 type Provider struct {
-	client  *genai.Client
-	model   string
-	prompts map[string]string
+	client         *genai.Client
+	model          string
+	embeddingModel string
+	prompts        map[string]string
 }
 
-func NewProvider(ctx context.Context, apiKey, modelName string, prompts map[string]string) (*Provider, error) {
+func NewProvider(ctx context.Context, settings map[string]interface{}, prompts map[string]string) (*Provider, error) {
+	apiKey, _ := settings["api_key"].(string)
+	modelName, _ := settings["model"].(string)
+	embeddingModelName, _ := settings["embedding_model"].(string)
+
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return nil, err
 	}
 	return &Provider{
-		client:  client,
-		model:   modelName,
-		prompts: prompts,
+		client:         client,
+		model:          modelName,
+		embeddingModel: embeddingModelName,
+		prompts:        prompts,
 	}, nil
 }
 
@@ -154,7 +160,7 @@ func cleanMarkdown(text string) string {
 
 // Embed generates a vector for a single text.
 func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
-	em := p.client.EmbeddingModel(p.model)
+	em := p.client.EmbeddingModel(p.embeddingModel)
 	res, err := em.EmbedContent(ctx, genai.Text(text))
 	if err != nil {
 		return nil, err
@@ -164,7 +170,7 @@ func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
 
 // EmbedBatch generates vectors for multiple texts.
 func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
-	em := p.client.EmbeddingModel(p.model)
+	em := p.client.EmbeddingModel(p.embeddingModel)
 	batch := em.NewBatch()
 	for _, text := range texts {
 		batch.AddContent(genai.Text(text))

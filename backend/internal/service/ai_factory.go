@@ -6,7 +6,6 @@ import (
 
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/pkg/ai"
-	"github.com/hrygo/echomind/pkg/ai/deepseek"
 	"github.com/hrygo/echomind/pkg/ai/gemini"
 	"github.com/hrygo/echomind/pkg/ai/mock"
 	"github.com/hrygo/echomind/pkg/ai/openai"
@@ -22,82 +21,82 @@ type CompositeProvider struct {
 func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 	prompts := toPromptMap(cfg.Prompts)
 	var mainProvider ai.AIProvider
+	var embeddingProvider ai.EmbeddingProvider
 	var err error
 
-	// 1. Initialize Main Provider (Chat/Summary)
-	switch cfg.Provider {
-	case "openai":
-		mainProvider = openai.NewProvider(cfg.OpenAI.APIKey, cfg.OpenAI.Model, cfg.OpenAI.BaseURL, prompts)
-	case "gemini":
-		mainProvider, err = gemini.NewProvider(context.Background(), cfg.Gemini.APIKey, cfg.Gemini.Model, prompts)
-		if err != nil {
-			return nil, err
+	// Helper to create provider by name
+	createProvider := func(name string) (interface{}, error) {
+		// Handle "mock" special case
+		if name == "mock" {
+			return mock.NewProvider(), nil
 		}
-	case "deepseek":
-		mainProvider = deepseek.NewProvider(cfg.Deepseek.APIKey, cfg.Deepseek.Model, cfg.Deepseek.BaseURL, prompts)
-	case "mock":
-		mainProvider = mock.NewProvider()
-	default:
-		return nil, fmt.Errorf("unsupported AI provider: %s", cfg.Provider)
+
+		pConfig, ok := cfg.Providers[name]
+		if !ok {
+			return nil, fmt.Errorf("provider configuration not found: %s", name)
+		}
+
+		switch pConfig.Protocol {
+		case "openai":
+			return openai.NewProvider(pConfig.Settings, prompts), nil
+		case "gemini":
+			return gemini.NewProvider(context.Background(), pConfig.Settings, prompts)
+		default:
+			return nil, fmt.Errorf("unsupported protocol: %s", pConfig.Protocol)
+		}
+	}
+
+	// 1. Initialize Chat Provider
+	chatProviderName := cfg.ActiveServices.Chat
+	if chatProviderName == "" {
+		chatProviderName = "mock" // Default fallback
+	}
+	
+	chatP, err := createProvider(chatProviderName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create chat provider '%s': %w", chatProviderName, err)
+	}
+	
+	if p, ok := chatP.(ai.AIProvider); ok {
+		mainProvider = p
+	} else {
+		return nil, fmt.Errorf("provider '%s' does not implement AIProvider", chatProviderName)
 	}
 
 	// 2. Initialize Embedding Provider
-	// Default to main provider if not specified, unless main is DeepSeek (fallback to OpenAI for embeddings)
-	embeddingProviderName := cfg.EmbeddingProvider
-	if embeddingProviderName == "" {
-		if cfg.Provider == "deepseek" {
-			embeddingProviderName = "openai" // DeepSeek doesn't support embeddings yet, force OpenAI
-		} else {
-			embeddingProviderName = cfg.Provider
-		}
+	embedProviderName := cfg.ActiveServices.Embedding
+	if embedProviderName == "" {
+		embedProviderName = chatProviderName // Fallback to same provider
 	}
 
-	var embedder ai.EmbeddingProvider
+	// Optimization: If chat and embedding use same provider name, reuse instance if it implements both
+	if embedProviderName == chatProviderName {
+		if p, ok := chatP.(ai.EmbeddingProvider); ok {
+			embeddingProvider = p
+		} else {
+			// Configured same provider but it doesn't support embeddings? 
+			// Try re-instantiating (maybe it needs different settings? unlikely but safe)
+			// Actually, let's just error or fallback to mock? 
+			// Better to try creating it again or logging warning. 
+			// For now, let's assume if it's the same name, it SHOULD support it, or we try creating it.
+		}
+	}
 	
-	// Determine embedding model (fallback to default if not specified)
-	embeddingModel := cfg.EmbeddingModel
-	if embeddingModel == "" {
-		if embeddingProviderName == "openai" {
-			embeddingModel = "text-embedding-3-small"
-		} else if embeddingProviderName == "gemini" {
-			embeddingModel = "text-embedding-004" // Common gemini embedding model
-		}
-	}
-
-	switch embeddingProviderName {
-	case "openai":
-		// Re-use OpenAI config for embeddings, but allow overriding model
-		embedder = openai.NewProvider(cfg.OpenAI.APIKey, embeddingModel, cfg.OpenAI.BaseURL, nil)
-	case "gemini":
-		// Re-use Gemini config
-		gp, err := gemini.NewProvider(context.Background(), cfg.Gemini.APIKey, embeddingModel, nil)
+	if embeddingProvider == nil {
+		embedP, err := createProvider(embedProviderName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create gemini embedder: %w", err)
+			return nil, fmt.Errorf("failed to create embedding provider '%s': %w", embedProviderName, err)
 		}
-		var asInterface interface{} = gp
-		var ok bool
-		embedder, ok = asInterface.(ai.EmbeddingProvider)
-		if !ok {
-			return nil, fmt.Errorf("gemini provider does not support embeddings")
-		}
-	case "deepseek":
-		// If user explicitly requests DeepSeek embeddings
-		embedder = deepseek.NewProvider(cfg.Deepseek.APIKey, embeddingModel, cfg.Deepseek.BaseURL, nil)
-	case "mock":
-		embedder = mock.NewProvider()
-	default:
-		// If main provider implements embedding, use it (fallback logic)
-		if e, ok := mainProvider.(ai.EmbeddingProvider); ok {
-			embedder = e
+		if p, ok := embedP.(ai.EmbeddingProvider); ok {
+			embeddingProvider = p
 		} else {
-			// Fallback to OpenAI if not specified and main doesn't support
-			embedder = openai.NewProvider(cfg.OpenAI.APIKey, "text-embedding-3-small", cfg.OpenAI.BaseURL, nil)
+			return nil, fmt.Errorf("provider '%s' does not implement EmbeddingProvider", embedProviderName)
 		}
 	}
 
 	return &CompositeProvider{
 		AIProvider:        mainProvider,
-		EmbeddingProvider: embedder,
+		EmbeddingProvider: embeddingProvider,
 	}, nil
 }
 

@@ -10,7 +10,8 @@ import (
 type EmailEmbedding struct {
 	ID        uint            `gorm:"primaryKey" json:"id"`
 	EmailID   uuid.UUID       `gorm:"type:uuid;not null;index" json:"email_id"`
-	Vector    pgvector.Vector `gorm:"type:vector(1536)" json:"vector"` // 1536 for OpenAI text-embedding-3-small
+	Content   string          `gorm:"type:text" json:"content"`       // The actual text chunk
+	Vector    pgvector.Vector `gorm:"type:vector(768)" json:"vector"` // 768 for Gemini text-embedding-004
 	CreatedAt time.Time       `json:"created_at"`
 
 	// Associations

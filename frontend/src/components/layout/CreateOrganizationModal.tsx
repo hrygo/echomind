@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { organizationApi } from '@/lib/api/organization';
+import { Organization } from '@/lib/store/organization';
 
 interface CreateOrganizationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onOrganizationCreated: (org: any) => void; // TODO: Use actual Organization type
+  onOrganizationCreated: (org: Organization) => void;
 }
 
 export function CreateOrganizationModal({ isOpen, onClose, onOrganizationCreated }: CreateOrganizationModalProps) {
@@ -25,6 +26,7 @@ export function CreateOrganizationModal({ isOpen, onClose, onOrganizationCreated
     try {
       const newOrg = await organizationApi.createOrganization(orgName);
       onOrganizationCreated(newOrg);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to create organization.');
     } finally {

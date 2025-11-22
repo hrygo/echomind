@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/utils"
 	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
 )
@@ -55,7 +57,7 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 		SELECT 
 			e.id as email_id,
 			e.subject,
-			e.snippet,
+			ee.content as snippet,
 			e.sender,
 			e.date,
 			1 - (ee.vector <=> ?) as score
@@ -90,4 +92,60 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 	}
 
 	return results, nil
+}
+
+// GenerateAndSaveEmbedding generates and saves embeddings for an email.
+func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *model.Email, chunkSize int) error {
+	// 1. Prepare text
+	// Combine Subject and Body.
+	cleanBody := utils.StripHTML(email.BodyText)
+	if cleanBody == "" {
+		cleanBody = email.Snippet
+	}
+
+	fullText := fmt.Sprintf("Subject: %s\n\n%s", email.Subject, cleanBody)
+
+	// 2. Chunk text
+	if chunkSize <= 0 {
+		chunkSize = 1000 // Default if not specified
+	}
+	chunker := utils.NewTextChunker(chunkSize)
+	chunks := chunker.Chunk(fullText)
+
+	if len(chunks) == 0 {
+		return nil
+	}
+
+	// 3. Generate Embeddings
+	vectors, err := s.embedder.EmbedBatch(ctx, chunks)
+	if err != nil {
+		return fmt.Errorf("failed to generate embeddings: %w", err)
+	}
+
+	if len(vectors) != len(chunks) {
+		return fmt.Errorf("mismatch between chunks (%d) and vectors (%d)", len(chunks), len(vectors))
+	}
+
+	// 4. Save to DB
+	// Delete existing embeddings for this email first (to avoid duplicates on re-analysis)
+	if err := s.db.WithContext(ctx).Where("email_id = ?", email.ID).Delete(&model.EmailEmbedding{}).Error; err != nil {
+		return fmt.Errorf("failed to delete old embeddings: %w", err)
+	}
+
+	var embeddings []model.EmailEmbedding
+	for i, vec := range vectors {
+		embeddings = append(embeddings, model.EmailEmbedding{
+			EmailID: email.ID,
+			Content: chunks[i], // Store the actual text chunk
+			Vector:  pgvector.NewVector(vec),
+		})
+	}
+
+	if len(embeddings) > 0 {
+		if err := s.db.WithContext(ctx).Create(&embeddings).Error; err != nil {
+			return fmt.Errorf("failed to save embeddings: %w", err)
+		}
+	}
+
+	return nil
 }

@@ -32,7 +32,7 @@ export const useOrganizationStore = create<OrganizationState>()(
       }),
       {
         name: 'organization-storage',
-        // @ts-ignore: localStorage is compatible but TypeScript struggles with the generic PersistStorage interface
+        // @ts-expect-error: localStorage is compatible but TypeScript struggles with the generic PersistStorage interface
         storage: localStorage,
       }
     )

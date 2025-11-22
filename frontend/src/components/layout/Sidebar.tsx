@@ -19,11 +19,8 @@ import {
   Zap
 } from 'lucide-react';
 
-import { useLanguage } from "@/lib/i18n/LanguageContext";
-
-import { Header } from "@/components/layout/Header";
 import { OrgSwitcher } from "./OrgSwitcher";
-import AuthGuard from '@/components/auth/AuthGuard';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -78,8 +75,9 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Org Switcher */}
+      {/* Org Switcher - Hidden for Personal Intelligence Phase
       <OrgSwitcher />
+      */}
 
       {/* Scrollable Navigation Area */}
       <div className="flex-1 flex flex-col overflow-y-auto py-4 custom-scrollbar">

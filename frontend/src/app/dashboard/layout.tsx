@@ -9,9 +9,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <LanguageProvider>
-      <AuthGuard>
-        <div className="flex h-screen bg-slate-50">
+    <AuthGuard>
+      <div className="flex h-screen bg-slate-50">
           <Sidebar />
           <main className="flex-1 flex flex-col overflow-hidden relative ml-64">
             <Header />
@@ -26,6 +25,5 @@ export default function DashboardLayout({
           </main>
         </div>
       </AuthGuard>
-    </LanguageProvider>
   );
 }

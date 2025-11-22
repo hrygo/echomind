@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthGuard from "@/components/auth/AuthGuard";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 
 export const metadata: Metadata = {
   title: "EchoMind",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-gray-100 text-gray-900 antialiased">
-        <AuthGuard>{children}</AuthGuard>
+        <LanguageProvider>
+          <AuthGuard>{children}</AuthGuard>
+        </LanguageProvider>
       </body>
     </html>
   );

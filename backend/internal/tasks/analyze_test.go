@@ -33,28 +33,15 @@ func (m *MockSummarizer) AnalyzeSentiment(ctx context.Context, text string) (ai.
 	return m.SentimentResult, m.SentimentError
 }
 
-// MockEmbeddingProvider implements EmbeddingProvider for testing.
-type MockEmbeddingProvider struct {
-	EmbedResult      []float32
-	EmbedBatchResult [][]float32
-	EmbedError       error
+// MockEmbeddingGenerator implements EmbeddingGenerator for testing.
+type MockEmbeddingGenerator struct {
+	GenerateError error
+	CallCount     int
 }
 
-func (m *MockEmbeddingProvider) Embed(ctx context.Context, text string) ([]float32, error) {
-	return m.EmbedResult, m.EmbedError
-}
-
-func (m *MockEmbeddingProvider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
-	// Return dummy embeddings for each text
-	if m.EmbedBatchResult != nil {
-		return m.EmbedBatchResult, m.EmbedError
-	}
-	// Default behavior: return empty vectors of correct length
-	var result [][]float32
-	for range texts {
-		result = append(result, []float32{0.1, 0.2, 0.3})
-	}
-	return result, m.EmbedError
+func (m *MockEmbeddingGenerator) GenerateAndSaveEmbedding(ctx context.Context, email *model.Email, chunkSize int) error {
+	m.CallCount++
+	return m.GenerateError
 }
 
 func setupTestDB(t *testing.T) *gorm.DB {
@@ -155,7 +142,7 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 		},
 	}
 
-	mockEmbedder := &MockEmbeddingProvider{}
+	mockEmbedder := &MockEmbeddingGenerator{}
 
 	// Create the task payload
 	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
@@ -181,11 +168,8 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 	assert.Equal(t, 1.0, contact.AvgSentiment)
 	assert.WithinDuration(t, emailDate, contact.LastInteractedAt, time.Second)
 
-	// Verify embeddings were saved
-	var embeddings []model.EmailEmbedding
-	err = db.Where("email_id = ?", emailID).Find(&embeddings).Error
-	assert.NoError(t, err)
-	assert.NotEmpty(t, embeddings)
+	// Verify embedder was called
+	assert.Equal(t, 1, mockEmbedder.CallCount)
 }
 
 func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
@@ -211,7 +195,7 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 
 	// Mock the summarizer
 	mockSummarizer := &MockSummarizer{}
-	mockEmbedder := &MockEmbeddingProvider{}
+	mockEmbedder := &MockEmbeddingGenerator{}
 
 	// Create the task payload
 	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
@@ -231,4 +215,7 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 
 	// Verify Summarizer was NOT called
 	assert.Equal(t, 0, mockSummarizer.CallCount)
+	
+	// Verify Embedder was NOT called (spam check comes first)
+	assert.Equal(t, 0, mockEmbedder.CallCount)
 }
