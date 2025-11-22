@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -67,15 +68,21 @@ func (h *ChatHandler) StreamChat(c *gin.Context) {
 			if !ok {
 				// Channel closed, check for errors
 				if err := <-errCh; err != nil {
-					c.SSEvent("error", err.Error())
+					// Send error as JSON in data field
+					c.Writer.Write([]byte(fmt.Sprintf("data: {\"error\":\"%s\"}\n\n", err.Error())))
+				} else {
+					// Send DONE signal
+					c.Writer.Write([]byte("data: [DONE]\n\n"))
 				}
 				return false
 			}
-			c.SSEvent("message", msg)
+			// Send message content as JSON in data field
+			c.Writer.Write([]byte(fmt.Sprintf("data: {\"content\":\"%s\"}\n\n", msg)))
+			c.Writer.Flush()
 			return true
 		case err := <-errCh:
 			if err != nil {
-				c.SSEvent("error", err.Error())
+				c.Writer.Write([]byte(fmt.Sprintf("data: {\"error\":\"%s\"}\n\n", err.Error())))
 			}
 			return false
 		}

@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat';
+import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
 
 export function ChatSidebar() {
     const { isOpen, toggleOpen, messages, addMessage, isLoading, setLoading, updateLastMessage } = useChatStore();
@@ -35,17 +37,22 @@ export function ChatSidebar() {
             // We send the full history for context
             const apiMessages = [...messages, { role: 'user', content: userMessage }];
 
+            // Get token from auth store
+            const token = useAuthStore.getState().token;
+
             const response = await fetch('http://localhost:8080/api/v1/chat/stream', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored here
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({ messages: apiMessages }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to send message');
+                const errorText = await response.text();
+                console.error('Chat API Error:', response.status, response.statusText, errorText);
+                throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
             }
 
             const reader = response.body?.getReader();
@@ -53,20 +60,64 @@ export function ChatSidebar() {
             let assistantMessage = '';
 
             if (reader) {
+                let buffer = '';
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+
+                    // Keep the last line in buffer if it's incomplete (doesn't end with \n)
+                    // But split removes the separator, so we check if buffer ended with \n
+                    // Actually, a safer way is to process all complete lines and keep the remainder.
+                    buffer = lines.pop() || '';
 
                     for (const line of lines) {
+                        if (line.trim() === '') continue;
                         if (line.startsWith('data: ')) {
                             const data = line.slice(6);
-                            if (data === '[DONE]') break; // OpenAI style, though our backend sends raw text mostly
-                            // Our backend sends: c.SSEvent("message", msg) -> data: msg\n\n
-                            // So 'data' is the content.
-                            assistantMessage += data;
+                            if (data === '[DONE]') break;
+
+                            try {
+                                const parsed = JSON.parse(data);
+                                if (parsed.content) {
+                                    console.log('Parsed content:', parsed.content);
+                                    assistantMessage += parsed.content;
+                                }
+                            } catch (e) {
+                                console.warn('JSON parse failed, fallback:', data);
+                                // Fallback: treat as raw text if not JSON
+                                // Only append if it doesn't look like a broken JSON
+                                if (!data.trim().startsWith('{')) {
+                                    assistantMessage += data;
+                                }
+                            }
+                            console.log('Updating message:', assistantMessage.length);
+                            updateLastMessage(assistantMessage);
+                        }
+                    }
+                }
+
+                // Process any remaining buffer
+                if (buffer.trim()) {
+                    const lines = buffer.split('\n');
+                    for (const line of lines) {
+                        if (line.trim() === '') continue;
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data === '[DONE]') break;
+
+                            try {
+                                const parsed = JSON.parse(data);
+                                if (parsed.content) {
+                                    assistantMessage += parsed.content;
+                                }
+                            } catch (e) {
+                                if (!data.trim().startsWith('{')) {
+                                    assistantMessage += data;
+                                }
+                            }
                             updateLastMessage(assistantMessage);
                         }
                     }
@@ -124,7 +175,9 @@ export function ChatSidebar() {
                                     : "bg-white text-gray-800 border border-gray-100 rounded-bl-none"
                             )}
                         >
-                            <div className="whitespace-pre-wrap">{msg.content}</div>
+                            <div className="prose prose-sm max-w-none dark:prose-invert">
+                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -146,7 +199,7 @@ export function ChatSidebar() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Ask anything..."
-                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-900 placeholder:text-gray-500"
                         disabled={isLoading}
                     />
                     <button
