@@ -33,15 +33,40 @@ func (m *MockSummarizer) AnalyzeSentiment(ctx context.Context, text string) (ai.
 	return m.SentimentResult, m.SentimentError
 }
 
+// MockEmbeddingProvider implements EmbeddingProvider for testing.
+type MockEmbeddingProvider struct {
+	EmbedResult      []float32
+	EmbedBatchResult [][]float32
+	EmbedError       error
+}
+
+func (m *MockEmbeddingProvider) Embed(ctx context.Context, text string) ([]float32, error) {
+	return m.EmbedResult, m.EmbedError
+}
+
+func (m *MockEmbeddingProvider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
+	// Return dummy embeddings for each text
+	if m.EmbedBatchResult != nil {
+		return m.EmbedBatchResult, m.EmbedError
+	}
+	// Default behavior: return empty vectors of correct length
+	var result [][]float32
+	for range texts {
+		result = append(result, []float32{0.1, 0.2, 0.3})
+	}
+	return result, m.EmbedError
+}
+
 func setupTestDB(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}
-	        if err := db.AutoMigrate(&model.Email{}, &model.Contact{}); err != nil {
-	                                t.Fatalf("Failed to auto migrate database: %v", err)
-	                        }
-	                        return db}
+	if err := db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailEmbedding{}); err != nil {
+		t.Fatalf("Failed to auto migrate database: %v", err)
+	}
+	return db
+}
 
 func TestUpdateContactStats_NewContact(t *testing.T) {
 	db := setupTestDB(t)
@@ -130,12 +155,14 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 		},
 	}
 
+	mockEmbedder := &MockEmbeddingProvider{}
+
 	// Create the task payload
 	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer)
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder)
 	assert.NoError(t, err)
 
 	// Verify email was updated
@@ -153,6 +180,12 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 	assert.Equal(t, 1, contact.InteractionCount)
 	assert.Equal(t, 1.0, contact.AvgSentiment)
 	assert.WithinDuration(t, emailDate, contact.LastInteractedAt, time.Second)
+
+	// Verify embeddings were saved
+	var embeddings []model.EmailEmbedding
+	err = db.Where("email_id = ?", emailID).Find(&embeddings).Error
+	assert.NoError(t, err)
+	assert.NotEmpty(t, embeddings)
 }
 
 func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
@@ -178,13 +211,14 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 
 	// Mock the summarizer
 	mockSummarizer := &MockSummarizer{}
+	mockEmbedder := &MockEmbeddingProvider{}
 
 	// Create the task payload
 	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer)
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder)
 	assert.NoError(t, err)
 
 	// Verify email was updated as spam

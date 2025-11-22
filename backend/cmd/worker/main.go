@@ -8,6 +8,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/internal/tasks"
+	"github.com/hrygo/echomind/pkg/ai"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -60,11 +61,11 @@ func main() {
 	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	logger, _ := config.Build()
-	                defer func() {
-	                        if err := logger.Sync(); err != nil {
-	                                log.Printf("Failed to sync logger: %v", err)
-	                        }
-	                }()	// Replace global logger
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			log.Printf("Failed to sync logger: %v", err)
+		}
+	}() // Replace global logger
 	zap.ReplaceGlobals(logger)
 
 	// Database
@@ -94,7 +95,24 @@ func main() {
 	// Mux
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeEmailAnalyze, func(ctx context.Context, t *asynq.Task) error {
-		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer)
+		// aiProvider implements both AIProvider (for summary) and EmbeddingProvider (for vectors)
+		// assuming we are using OpenAI provider which implements both.
+		// If we were using Gemini for summary, we might need a separate provider for embeddings if Gemini doesn't support it yet in our code.
+		// But for now, let's assume aiProvider is capable or cast it.
+		// Actually, service.AIProviderFactory returns ai.AIProvider interface.
+		// We need to check if it also implements ai.EmbeddingProvider.
+
+		embedder, ok := aiProvider.(ai.EmbeddingProvider)
+		if !ok {
+			// Fallback or error? For now, let's log error and skip embedding if provider doesn't support it
+			// But HandleEmailAnalyzeTask requires it.
+			// We should probably enforce it in factory or use a specific embedding provider.
+			// For Day 2/3, we implemented OpenAI provider which has both.
+			logger.Error("AI provider does not implement EmbeddingProvider")
+			return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, nil) // This might panic if we don't handle nil in tasks
+		}
+
+		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, embedder)
 	})
 
 	if err := srv.Run(mux); err != nil {

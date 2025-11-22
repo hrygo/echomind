@@ -1,7 +1,7 @@
 .PHONY: init install run-backend run-worker run-frontend docker-up stop restart dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs
 
 # Version
-VERSION := 0.6.1
+VERSION := 0.6.2
 
 # Variables
 REPO_OWNER ?= your-username
@@ -123,6 +123,10 @@ run-worker: ensure-log-dir build
 	@echo "Starting worker in background, logging to $(WORKER_LOG)..."
 	@pkill -f "bin/worker" || true
 	@cd backend && nohup ../bin/worker > ../$(WORKER_LOG) 2>&1 & echo "✅ Worker started (PID: $$!)."
+
+reindex: build
+	@echo "Running reindex..."
+	@cd backend && go run ./cmd/reindex/main.go
 
 run-frontend: ensure-log-dir
 	@echo "Starting frontend development server in background, logging to $(FRONTEND_LOG)..."
