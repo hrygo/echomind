@@ -15,6 +15,12 @@ export function DealmakerView() {
       { subject: t('dashboard.radarFollowUp'), A: 65, fullMark: 150 },
     ];
 
+    const opportunities = [
+        { id: 1, title: "Enterprise License Inquiry", company: "TechCorp", value: "$50k", confidence: 92, type: "buying" },
+        { id: 2, title: "Strategic Partnership Q1", company: "Innovate Inc", value: "Strategic", confidence: 85, type: "partnership" },
+        { id: 3, title: "Team Expansion Discussion", company: "GlobalSoft", value: "10 Seats", confidence: 78, type: "buying" },
+    ];
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Radar Chart Section */}
