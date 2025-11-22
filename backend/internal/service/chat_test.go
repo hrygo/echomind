@@ -35,52 +35,39 @@ func (m *MockAIProvider) GenerateDraftReply(ctx context.Context, emailContent, u
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockAIProvider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- string) error {
+func (m *MockAIProvider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- ai.ChatCompletionChunk) error {
 	args := m.Called(ctx, messages, ch)
 	return args.Error(0)
 }
 
 func TestChatService_StreamChat(t *testing.T) {
 	mockAI := new(MockAIProvider)
-	// We can mock SearchService too, but for simplicity let's pass nil or a mock if needed.
-	// Since SearchService struct doesn't implement an interface in the current code (it's a struct),
-	// we might need to refactor SearchService to an interface or just pass nil if we don't test RAG here.
-	// However, ChatService uses *SearchService.
-	// For this test, let's assume SearchService can be nil or we just test the flow where search fails or returns empty.
-	// But ChatService calls s.searchService.Search. If s.searchService is nil, it will panic.
-	// So we need a real SearchService or refactor to interface.
-	// Given the constraints, let's skip RAG part testing or mock the SearchService if possible.
-	// Since we can't easily mock a struct method without an interface, let's create a ChatService with a nil SearchService
-	// AND modify ChatService to handle nil SearchService gracefully, OR we just test the AI part.
-
-	// Actually, let's modify ChatService to check for nil SearchService to make it testable without DB.
-	chatService := NewChatService(mockAI, nil)
+	chatService := NewChatService(mockAI, nil) // SearchService can be nil for this test
 
 	ctx := context.Background()
 	userID := uuid.New()
 	messages := []ai.Message{{Role: "user", Content: "Hello"}}
-	ch := make(chan string, 10)
+	ch := make(chan ai.ChatCompletionChunk, 10)
 
 	// Expect StreamChat to be called
 	mockAI.On("StreamChat", mock.Anything, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 		// Get the channel from arguments
-		chArg := args.Get(2).(chan<- string)
-		chArg <- "Hello"
-		chArg <- " World"
+		chArg := args.Get(2).(chan<- ai.ChatCompletionChunk)
+		// Send mock chunks
+		chArg <- ai.ChatCompletionChunk{ID: "1", Choices: []ai.Choice{{Index: 0, Delta: ai.DeltaContent{Content: "Hello"}}}}
+		chArg <- ai.ChatCompletionChunk{ID: "2", Choices: []ai.Choice{{Index: 0, Delta: ai.DeltaContent{Content: " World"}}}}
 		close(chArg)
 	})
-
-	// We need to modify ChatService to handle nil SearchService first for this test to pass without panic.
-	// Or we can try to instantiate a SearchService with a mock DB? That's too complex for now.
-	// Let's modify ChatService to be robust.
 
 	err := chatService.StreamChat(ctx, userID, messages, ch)
 	assert.NoError(t, err)
 
 	// Collect output
 	var output string
-	for msg := range ch {
-		output += msg
+	for chunk := range ch {
+		if len(chunk.Choices) > 0 {
+			output += chunk.Choices[0].Delta.Content
+		}
 	}
 	assert.Equal(t, "Hello World", output)
 	mockAI.AssertExpectations(t)

@@ -59,17 +59,8 @@ export interface SearchResponse {
 }
 
 // API Functions
-export interface SearchFilters {
-    sender?: string;
-    startDate?: string;
-    endDate?: string;
-}
-
-export const searchEmails = async (query: string, filters: SearchFilters = {}, limit: number = 10): Promise<SearchResponse> => {
+export const searchEmails = async (query: string, limit: number = 10): Promise<SearchResponse> => {
     const params: Record<string, string | number> = { q: query, limit };
-    if (filters.sender) params.sender = filters.sender;
-    if (filters.startDate) params.start_date = filters.startDate;
-    if (filters.endDate) params.end_date = filters.endDate;
 
     const response = await api.get<SearchResponse>('/search', {
         params,

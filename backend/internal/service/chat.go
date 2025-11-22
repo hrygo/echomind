@@ -21,7 +21,7 @@ func NewChatService(aiProvider ai.AIProvider, searchService *SearchService) *Cha
 	}
 }
 
-func (s *ChatService) StreamChat(ctx context.Context, userID uuid.UUID, messages []ai.Message, ch chan<- string) error {
+func (s *ChatService) StreamChat(ctx context.Context, userID uuid.UUID, messages []ai.Message, ch chan<- ai.ChatCompletionChunk) error {
 	// 1. Extract the last user message
 	if len(messages) == 0 {
 		return fmt.Errorf("no messages provided")

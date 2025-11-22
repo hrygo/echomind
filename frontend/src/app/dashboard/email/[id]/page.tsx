@@ -6,6 +6,13 @@ import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import AIDraftReplyModal from "@/components/email/AIDraftReplyModal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+
+interface SmartAction {
+  type: string;
+  label: string;
+  data: Record<string, string>;
+}
 
 interface EmailDetail {
   ID: string; // Changed from number to string (UUID)
@@ -18,6 +25,7 @@ interface EmailDetail {
   Urgency: string;
   Category: string; // New field from AI analysis
   ActionItems: string[]; // New field from AI analysis
+  SmartActions?: SmartAction[];
 }
 
 export default function EmailDetailPage() {
@@ -27,6 +35,7 @@ export default function EmailDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!id) return;
@@ -51,14 +60,20 @@ export default function EmailDetailPage() {
     fetchEmail();
   }, [id]);
 
-  if (loading) return <div className="p-8">Loading...</div>;
-  if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
-  if (!email) return <div className="p-8">Email not found</div>;
+  const getActionLabel = (action: SmartAction) => {
+    if (action.type === 'calendar_event') return t('emailDetail.addToCalendar');
+    if (action.type === 'create_task') return t('emailDetail.createTask');
+    return action.label;
+  };
+
+  if (loading) return <div className="p-8">{t('common.loading')}</div>;
+  if (error) return <div className="p-8 text-red-500">{t('common.error')}: {error}</div>;
+  if (!email) return <div className="p-8">{t('common.noResults')}</div>;
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <Link href="/dashboard" className="text-blue-600 hover:underline">&larr; Back to Inbox</Link>
+        <Link href="/dashboard" className="text-blue-600 hover:underline">&larr; {t('emailDetail.backToInbox')}</Link>
       </div>
 
       {/* AI Insight Card */}
@@ -66,7 +81,7 @@ export default function EmailDetailPage() {
         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-lg p-6 mb-8 shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-lg font-semibold text-indigo-900 flex items-center gap-2">
-              ✨ AI Insights
+              ✨ {t('emailDetail.aiInsights')}
             </h2>
             <div className="flex gap-2">
               {/* Sentiment Badge */}
@@ -89,12 +104,12 @@ export default function EmailDetailPage() {
             </div>
           </div>
           <div className="text-indigo-800">
-            <p className="font-medium mb-1">Summary:</p>
+            <p className="font-medium mb-1">{t('emailDetail.summary')}:</p>
             <p className="mb-4">{email.Summary}</p>
 
             {email.ActionItems && email.ActionItems.length > 0 && (
               <div className="mt-4">
-                <p className="font-medium mb-1">Action Items:</p>
+                <p className="font-medium mb-1">{t('emailDetail.actionItems')}:</p>
                 <ul className="list-disc list-inside space-y-1">
                   {email.ActionItems.map((item, index) => (
                     <li key={index}>{item}</li>
@@ -102,9 +117,25 @@ export default function EmailDetailPage() {
                 </ul>
               </div>
             )}
+
+            {/* Smart Actions */}
+            {email.SmartActions && email.SmartActions.length > 0 && (
+              <div className="mt-4 border-t border-indigo-100 pt-4 flex flex-wrap gap-2">
+                {email.SmartActions.map((action, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => alert(`Executing action: ${getActionLabel(action)}\nData: ${JSON.stringify(action.data, null, 2)}`)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-xs font-medium transition-colors shadow-sm"
+                  >
+                    {action.type === 'calendar_event' ? '📅' : '✅'}
+                    {getActionLabel(action)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="mt-4 text-right">
-            <Button onClick={() => setIsModalOpen(true)}>Generate AI Draft Reply</Button>
+            <Button onClick={() => setIsModalOpen(true)}>{t('emailDetail.generateDraft')}</Button>
           </div>
         </div>
       )}
@@ -114,7 +145,7 @@ export default function EmailDetailPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">{email.Subject}</h1>
         <div className="flex justify-between items-center text-sm text-gray-500 mb-8 border-b pb-4">
           <div>
-            <span className="font-medium text-gray-900">From:</span> {email.Sender}
+            <span className="font-medium text-gray-900">{t('emailDetail.from')}</span> {email.Sender}
           </div>
           <div>{new Date(email.Date).toLocaleString()}</div>
         </div>

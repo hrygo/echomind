@@ -169,7 +169,7 @@ func main() {
 			protected.GET("/insights/network", insightHandler.GetNetworkGraph)
 			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
 			protected.GET("/search", searchHandler.Search)
-			protected.POST("/chat/stream", chatHandler.StreamChat)
+			protected.POST("/chat/completions", chatHandler.StreamChat)
 		}
 	}
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface Node {
   id: string;
@@ -28,6 +29,7 @@ export default function NetworkGraph() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const { t } = useLanguage();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ export default function NetworkGraph() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Failed to fetch network graph:", err);
-        setError(err.response?.data?.error || err.message || 'Failed to fetch network graph.');
+        setError(err.response?.data?.error || err.message || t('insights.loadingGraphError')); // Assuming we add this key
       } finally {
         setLoading(false);
         // Wait for next tick to ensure graph is rendered with data
@@ -72,15 +74,15 @@ export default function NetworkGraph() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">Loading network graph...</div>;
+    return <div className="flex items-center justify-center h-64 text-gray-500">{t('insights.loadingGraph')}</div>;
   }
 
   if (error) {
-    return <div className="flex items-center justify-center h-64 text-red-500">Error: {error}</div>;
+    return <div className="flex items-center justify-center h-64 text-red-500">{t('common.error')}: {error}</div>;
   }
 
   if (!graphData || graphData.nodes.length === 0) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">No network data available.</div>;
+    return <div className="flex items-center justify-center h-64 text-gray-500">{t('insights.noGraphData')}</div>;
   }
 
   const nodeColor = (node: Node) => {
@@ -90,7 +92,16 @@ export default function NetworkGraph() {
     return 'grey';
   };
 
-  const nodeLabel = (node: Node) => `${node.label} (Interactions: ${node.interactionCount}, Sentiment: ${node.avgSentiment.toFixed(2)})`;
+  const getSentimentLabel = (sentimentValue: number) => {
+    if (sentimentValue > 0.3) return t('insights.positive');
+    if (sentimentValue < -0.3) return t('insights.negative');
+    return t('insights.neutral');
+  };
+
+  const nodeLabel = (node: Node) => `
+    ${node.label} 
+    (${t('insights.interactions')}: ${node.interactionCount},
+    ${t('insights.sentiment')}: ${getSentimentLabel(node.avgSentiment)} (${node.avgSentiment.toFixed(2)}))`;
 
   return (
     <div ref={containerRef} className="w-full h-full bg-slate-50/50 overflow-hidden">

@@ -17,8 +17,8 @@ type AIProvider interface {
 	// GenerateDraftReply generates a draft email reply based on the original email content and a user prompt.
 	GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error)
 
-	// StreamChat streams the chat response token by token.
-	StreamChat(ctx context.Context, messages []Message, ch chan<- string) error
+	// StreamChat streams the chat response token by token as structured chunks.
+	StreamChat(ctx context.Context, messages []Message, ch chan<- ChatCompletionChunk) error
 }
 
 // EmbeddingProvider defines the interface for generating vector embeddings.
@@ -35,12 +35,34 @@ type Message struct {
 	Content string `json:"content"`
 }
 
+// ChatCompletionChunk represents a chunk of the streamed chat completion response.
+type ChatCompletionChunk struct {
+	ID      string  `json:"id"`
+	Choices []Choice `json:"choices"`
+}
+
+type DeltaContent struct {
+	Content string `json:"content"`
+}
+
+type Choice struct {
+	Index int `json:"index"`
+	Delta DeltaContent `json:"delta"`
+}
+
 type AnalysisResult struct {
-	Summary     string   `json:"summary"`
-	Category    string   `json:"category"`
-	Sentiment   string   `json:"sentiment"`
-	Urgency     string   `json:"urgency"`
-	ActionItems []string `json:"action_items"`
+	Summary      string        `json:"summary"`
+	Category     string        `json:"category"`
+	Sentiment    string        `json:"sentiment"`
+	Urgency      string        `json:"urgency"`
+	ActionItems  []string      `json:"action_items"`
+	SmartActions []SmartAction `json:"smart_actions"`
+}
+
+type SmartAction struct {
+	Type  string            `json:"type"`  // "calendar_event", "create_task"
+	Label string            `json:"label"` // Display text for the button
+	Data  map[string]string `json:"data"`  // Context data (title, date, etc.)
 }
 
 type SentimentResult struct {

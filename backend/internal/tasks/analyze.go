@@ -97,6 +97,7 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 	email.Sentiment = analysis.Sentiment
 	email.Urgency = analysis.Urgency
 	email.ActionItems = datatypes.JSON(jsonRaw(analysis.ActionItems))
+	email.SmartActions = datatypes.JSON(jsonRaw(analysis.SmartActions))
 
 	// 5. Update Email, ensure it belongs to the user
 	if err := db.WithContext(ctx).Where("user_id = ?", p.UserID).Save(&email).Error; err != nil {

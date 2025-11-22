@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -51,7 +52,7 @@ func (h *ChatHandler) StreamChat(c *gin.Context) {
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
 	// Create a channel to receive stream
-	ch := make(chan string)
+	ch := make(chan ai.ChatCompletionChunk)
 	errCh := make(chan error)
 
 	go func() {
@@ -64,25 +65,34 @@ func (h *ChatHandler) StreamChat(c *gin.Context) {
 
 	c.Stream(func(w io.Writer) bool {
 		select {
-		case msg, ok := <-ch:
+		case chunk, ok := <-ch:
 			if !ok {
 				// Channel closed, check for errors
 				if err := <-errCh; err != nil {
 					// Send error as JSON in data field
-					c.Writer.Write([]byte(fmt.Sprintf("data: {\"error\":\"%s\"}\n\n", err.Error())))
+					jsonError, _ := json.Marshal(gin.H{"error": err.Error()})
+					c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
 				} else {
 					// Send DONE signal
 					c.Writer.Write([]byte("data: [DONE]\n\n"))
 				}
 				return false
 			}
-			// Send message content as JSON in data field
-			c.Writer.Write([]byte(fmt.Sprintf("data: {\"content\":\"%s\"}\n\n", msg)))
+			// Send chunk as JSON in data field
+			jsonChunk, err := json.Marshal(chunk)
+			if err != nil {
+				// If marshaling fails, send an error
+				jsonError, _ := json.Marshal(gin.H{"error": err.Error()})
+				c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
+				return false
+			}
+			c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonChunk)))
 			c.Writer.Flush()
 			return true
 		case err := <-errCh:
 			if err != nil {
-				c.Writer.Write([]byte(fmt.Sprintf("data: {\"error\":\"%s\"}\n\n", err.Error())))
+				jsonError, _ := json.Marshal(gin.H{"error": err.Error()})
+				c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
 			}
 			return false
 		}

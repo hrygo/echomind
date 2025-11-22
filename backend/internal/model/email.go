@@ -26,6 +26,7 @@ type Email struct {
 	Summary     string         `gorm:"type:text"`  // AI Generated Summary
 	Category    string         `gorm:"size:50"`    // Work, Newsletter, Personal, etc.
 	Sentiment   string         `gorm:"size:50"`    // Positive, Neutral, Negative
-	Urgency     string         `gorm:"size:50"`    // High, Medium, Low
-	ActionItems datatypes.JSON `gorm:"type:jsonb"` // Extracted tasks
+	Urgency      string         `gorm:"size:50"`    // High, Medium, Low
+	ActionItems  datatypes.JSON `gorm:"type:jsonb"` // Extracted tasks
+	SmartActions datatypes.JSON `gorm:"type:jsonb"` // Structured smart actions
 }

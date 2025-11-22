@@ -19,10 +19,11 @@ import {
   Zap
 } from 'lucide-react';
 
+import { cn } from "@/lib/utils";
 import { OrgSwitcher } from "./OrgSwitcher";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get('category');
@@ -61,7 +62,10 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-100 min-h-screen flex flex-col shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-40 fixed left-0 top-0 h-full">
+    <aside className={cn(
+      "w-64 bg-white border-r border-slate-100 min-h-screen flex flex-col shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-40 fixed left-0 top-0 h-full",
+      className
+    )}>
       {/* Logo Section */}
       <div className="h-20 flex items-center px-6 border-b border-slate-50 shrink-0">
         <div className="flex items-center gap-3">

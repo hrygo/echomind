@@ -128,7 +128,7 @@ func (p *Provider) generateContent(ctx context.Context, systemPrompt, userConten
 	return extractText(resp), nil
 }
 
-func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- string) error {
+func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- ai.ChatCompletionChunk) error {
 	defer close(ch)
 
 	model := p.client.GenerativeModel(p.model)
@@ -160,7 +160,7 @@ func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch cha
 	lastMsg := messages[len(messages)-1]
 	iter := cs.SendMessageStream(ctx, genai.Text(lastMsg.Content))
 
-	for {
+	for i := 0; ; i++ {
 		resp, err := iter.Next()
 		if errors.Is(err, iterator.Done) {
 			return nil
@@ -171,11 +171,20 @@ func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch cha
 
 		txt := extractText(resp)
 		if txt != "" {
-			ch <- txt
+			chunk := ai.ChatCompletionChunk{
+				ID: fmt.Sprintf("chatcmpl-%d", i), // Simple ID, can be UUID
+				Choices: []ai.Choice{
+					{
+						Index: 0,
+						Delta: ai.DeltaContent{Content: txt},
+
+					},
+				},
+			}
+			ch <- chunk
 		}
 	}
 }
-
 func extractText(resp *genai.GenerateContentResponse) string {
 	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
 		return ""
