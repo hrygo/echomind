@@ -16,11 +16,7 @@
 
 ### ✅ Recent Completion (v0.9.2 → v0.9.3)
 **Phase 6.3 - Stage 2: Smart Copilot (Omni-Bar)**
-- ✅ **Omni-Bar**: Unified Header Search and Chat into a single context-aware input (`CopilotWidget`).
-- ✅ **RAG Integration**: `ChatService` prioritizes explicit context (`context_ref_ids`) from search results before falling back to auto-search.
-- ✅ **Streaming**: Implemented real-time token streaming for Chat using SSE (`/api/v1/chat/completions`).
-- ✅ **UX Polish**: Seamless mode switching between "Instant Search" and "AI Chat".
-- ✅ **State Management**: Centralized `useCopilotStore` for managing Search/Chat modes and data.
+- ✅ Implemented and integrated the Smart Copilot, unifying search and chat with RAG capabilities and real-time streaming.
 
 ### 🚧 Current Sprint (v0.9.4 Target)
 **Phase 6.3 - Stage 3: Generative Widgets**

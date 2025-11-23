@@ -21,15 +21,15 @@
 
 ### 1.2 前端 (Frontend)
 基于 **Next.js 16 (App Router)** 和 **TypeScript**。
-*   **状态管理**: Zustand (`useEmailStore`, `useActionStore`, `useContextStore`)。
+*   **状态管理**: Zustand (`useEmailStore`, `useActionStore`, `useContextStore`, `useCopilotStore` - v0.9.3 新增)。
 *   **UI 框架**: Tailwind CSS + Lucide React Icons。
 *   **国际化**: React Context (`LanguageContext`) 加载 JSON 字典。
-*   **交互模式**: 
+*   **核心组件**: `CopilotWidget` (v0.9.3 新增) 统一了搜索和 AI 对话入口。
+*   **交互模式**:
     *   **Optimistic UI**: 用户点击操作（如批准）时，界面立即响应，后台异步请求。
     *   **Undo Mechanism**: 关键操作提供 Toast 撤销功能。
 
 ## 2. 数据模型设计 (ERD 核心)
-
 *   **Users**: 用户基础信息。
 *   **Emails**: 核心存储。
     *   包含 `Summary` (AI摘要), `Sentiment` (情感), `Urgency` (紧急度)。
@@ -50,11 +50,11 @@
     *   **Context Matching**: 遍历用户定义的 Context 规则，进行关键词和发件人匹配，打标签。
     *   **Embedding**: 调用 Embedding API 生成向量并存入 `pgvector`。
 
-### 3.2 搜索 (RAG)
-1.  用户输入查询语句。
-2.  后端将查询语句转化为 Vector。
-3.  数据库进行余弦相似度搜索 (`<=>` 运算符)，找出语义最接近的邮件。
-4.  结合传统 SQL 过滤（如时间范围、Context ID）返回结果。
+### 3.2 搜索与 AI 对话 (RAG Search & AI Chat)
+1.  用户通过 **智能副驾（Omni-Bar）**输入查询或提问。
+2.  **搜索模式**: 如果是关键词搜索，后端将查询语句转化为 Vector，数据库进行余弦相似度搜索 (`<=>` 运算符)，找出语义最接近的邮件。结合传统 SQL 过滤（如时间范围、Context ID）返回结果。
+3.  **AI 对话模式**: 如果是提问，前端会将对话历史和当前显示的搜索结果（作为 `context_ref_ids`）发送给后端。
+4.  **后端处理**: `ChatService` 优先从 `context_ref_ids` 获取邮件内容注入系统 Prompt，然后调用 AI 模型进行对话，并通过 SSE 流式返回响应。
 
 ### 3.3 极速行动 (Actions)
 *   **API**: `POST /api/v1/actions/{type}`

@@ -5,15 +5,15 @@
 
 EchoMind is a Personal Neural Interface designed for executives, managers, and dealmakers. It acts as an AI cognitive layer on top of your existing communication streams (Email, Calendar), transforming unstructured noise into structured insights, actionable tasks, and strategic intelligence.
 
-> **Current Status**: v0.9.0 (Beta) - Phase 6.2: Smart Contexts & Actionable Intelligence
+> **Current Status**: v0.9.3 (Beta) - Phase 6.3: Smart Copilot (Omni-Bar)
 
 ## 🚀 Core Capabilities
 
 EchoMind doesn't just organize your email; it understands it.
 
 ### 🧠 The Cognitive Engine (RAG + AI)
-*   **AI Chat Copilot**: A conversational assistant that answers questions about your work context ("What did Alice say about the budget?"), powered by RAG and streaming responses.
-*   **Semantic Search**: Ask natural language questions and get answers grounded in your email history.
+*   **Smart Copilot (Omni-Bar)**: A unified neural interface for instant search and contextual AI chat. Switches seamlessly between finding specific emails and answering complex questions.
+*   **Context-Aware RAG**: Automatically injects relevant search results (emails, tasks, contacts) into the AI chat context, grounding answers in your actual work data.
 *   **Smart Actions**: Automatically detects actionable items (meetings, tasks) in emails and provides one-click buttons to add them to your calendar or todo list.
 *   **Intent Radar**: Visualizes business signals (Buying, Hiring, Partnership) and urgency levels.
 *   **Multi-Model Intelligence**: Switches between DeepSeek, OpenAI, and Gemini for cost/performance optimization.
@@ -122,19 +122,18 @@ CONFIG_PATH=/path/to/config.yaml ./bin/server
 └── scripts/           # Dev utilities
 ```
 
-## 🔄 Recent Updates (v0.9.0)
+## 🔄 Recent Updates (v0.9.3)
 
-**Backend Optimizations:**
-- ✅ CLI parameter support (`-config`, `-production`)
-- ✅ Graceful shutdown (SIGINT/SIGTERM handling)
-- ✅ Dependency injection container
-- ✅ Router modularization
-- ✅ Configuration centralization
+**Smart Copilot (Omni-Bar):**
+- ✅ **Unified Interface**: Merged Search and Chat into a single `CopilotWidget`.
+- ✅ **Context-Aware RAG**: Chat service intelligently uses search results as context for AI answers.
+- ✅ **Real-time Streaming**: Implemented SSE for fluid AI response generation.
+- ✅ **Seamless Mode Switching**: Auto-detection of questions vs. search queries.
 
-**Feature Enhancements:**
-- ✅ Smart Contexts (project/topic organization)
-- ✅ Task management system
-- ✅ Enhanced logging with request ID tracing
+**Architecture & Fixes:**
+- ✅ Refactored `ChatService` with dependency injection for better testability.
+- ✅ Added rewrite rules in Next.js for proper backend API proxying.
+- ✅ Fixed authentication issues in frontend API calls.
 
 ---
 

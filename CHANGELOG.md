@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.9.3] - 2025-11-23
+
+### Added
+- **Smart Copilot (Omni-Bar)**: Unified Header Search and AI Chat into a single, context-aware input.
+  - Seamless mode switching between "Instant Search" and "AI Chat".
+  - Auto-detection of chat prompts (e.g., questions) to activate chat mode.
+- **RAG Integration**: Chat service now prioritizes explicit context (from search results) for AI responses.
+- **Real-time Streaming**: Implemented Server-Sent Events (SSE) for real-time AI chat responses.
+
+### Changed
+- **UI/UX**: Replaced dedicated Search/Chat components with the integrated `CopilotWidget`.
+- **Backend API**: Updated chat endpoint (`/api/v1/chat/completions`) to accept `context_ref_ids`.
+- **Dependencies**: Refactored `ChatService` to use interfaces for `ContextSearcher` and `EmailRetriever`.
+
+### Fixed
+- **Authentication**: Resolved missing JWT token in frontend `fetch` requests for search and chat.
+- **Frontend Routing**: Fixed 404 error by adding rewrite rules in `next.config.ts` to proxy API calls to the backend.
+- **Frontend Display**: Corrected "Search is not defined" error by re-importing the `Search` icon.
+- **Linting**: Addressed all remaining frontend lint warnings (unused variables, imports) and backend unreachable code.
+
+
 ## [v0.9.0] - 2025-11-23
 
 ### Added
