@@ -1,3 +1,7 @@
+# 📝 Specifications Archive
+
+
+# [Source: v0.6.0_rag/rag-spec.md]
 # 🛠️ RAG Implementation Specification (v0.6.0)
 
 > **Status**: Draft

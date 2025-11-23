@@ -1,3 +1,7 @@
+# 🧪 Test Plans Archive
+
+
+# [Source: v0.5.1_phase5_planning/integration-test-plan-phase3.md]
 # 🧪 Phase 3: Integration Test Plan & Guide
 
 **Objective**: Validate the full "Real-World Sync" lifecycle, ensuring that user credentials can be securely stored, decrypted, and used to perform a dynamic IMAP sync.
