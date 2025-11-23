@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 
 import { cn } from "@/lib/utils";
-import { OrgSwitcher } from "./OrgSwitcher";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function Sidebar({ className }: { className?: string }) {
@@ -48,12 +47,12 @@ export function Sidebar({ className }: { className?: string }) {
       if (params.category && currentCategory !== params.category) return false;
       if (params.filter && currentFilter !== params.filter) return false;
       if (params.folder && currentFolder !== params.folder) return false;
-      
+
       // If params are required but url has different ones (exclusive check)
       if (!params.category && currentCategory) return false;
       if (!params.filter && currentFilter) return false;
       if (!params.folder && currentFolder) return false;
-      
+
       return true;
     }
 
@@ -85,7 +84,7 @@ export function Sidebar({ className }: { className?: string }) {
 
       {/* Scrollable Navigation Area */}
       <div className="flex-1 flex flex-col overflow-y-auto py-4 custom-scrollbar">
-        
+
         {/* SECTION A: INTELLIGENCE */}
         <nav className="space-y-0.5 px-2 mb-6">
           <SectionLabel>{t('sidebar.intelligence')}</SectionLabel>
@@ -166,7 +165,7 @@ export function Sidebar({ className }: { className?: string }) {
             icon={Newspaper}
             active={isActive('/dashboard/inbox', { category: 'Newsletter' })}
           />
-           <NavItem
+          <NavItem
             href="/dashboard/inbox?category=Finance"
             label={t('sidebar.finance')}
             icon={CreditCard}
@@ -210,16 +209,14 @@ function NavItem({
   return (
     <Link
       href={href}
-      className={`flex items-center px-3 py-2 text-[13.5px] font-medium rounded-lg transition-all duration-200 group relative ${
-        active
+      className={`flex items-center px-3 py-2 text-[13.5px] font-medium rounded-lg transition-all duration-200 group relative ${active
           ? 'bg-blue-50/80 text-blue-700'
           : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
-      }`}
+        }`}
     >
       <Icon
-        className={`w-[18px] h-[18px] mr-3 transition-colors ${
-          active ? 'text-blue-600' : (iconColor || 'text-slate-400 group-hover:text-slate-600')
-        }`}
+        className={`w-[18px] h-[18px] mr-3 transition-colors ${active ? 'text-blue-600' : (iconColor || 'text-slate-400 group-hover:text-slate-600')
+          }`}
         strokeWidth={active ? 2.5 : 2}
       />
       <span className="truncate">{label}</span>

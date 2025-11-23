@@ -21,9 +21,7 @@ import {
 import { AlertCircle } from 'lucide-react';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-interface AuthErrorResponse {
-  error: string;
-}
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,7 +52,7 @@ export default function LoginPage() {
       setOrganizations(orgs);
 
       router.push('/dashboard'); // Redirect to dashboard after login
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
         err.response?.data?.error || t('auth.invalidCredentials')

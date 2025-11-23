@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/Sheet';
-import { api } from '@/lib/api';
+
 
 export function ChatSidebar() {
     const { isOpen, setOpen, messages, addMessage, isLoading, setLoading, updateLastMessage } = useChatStore();
@@ -92,7 +92,7 @@ export function ChatSidebar() {
                                 if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
                                     assistantMessage += parsed.choices[0].delta.content;
                                 }
-                            } catch (e) {
+                            } catch {
                                 console.warn('JSON parse failed, fallback:', data);
                             }
                             updateLastMessage(assistantMessage);
@@ -120,7 +120,7 @@ export function ChatSidebar() {
                                 if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
                                     assistantMessage += parsed.choices[0].delta.content;
                                 }
-                            } catch (e) {
+                            } catch {
                                 // Ignore if it's a broken JSON, already handled
                             }
                             updateLastMessage(assistantMessage);

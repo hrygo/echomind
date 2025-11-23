@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockApi } from './fixtures/mock-api';
+
 
 test.describe('Search Functionality', () => {
   test.beforeEach(async ({ page }) => {
@@ -33,21 +33,21 @@ test.describe('Search Functionality', () => {
 
     // Mock Search
     await page.route(url => url.href.includes('/api/v1/search'), async (route) => {
-        const json = {
-          query: 'test',
-          count: 1,
-          results: [
-            {
-              email_id: 'email-1',
-              subject: 'Mock Email Subject',
-              snippet: 'This is a mock email snippet...',
-              sender: 'sender@example.com',
-              date: new Date().toISOString(),
-              score: 0.95,
-            },
-          ],
-        };
-        await route.fulfill({ json });
+      const json = {
+        query: 'test',
+        count: 1,
+        results: [
+          {
+            email_id: 'email-1',
+            subject: 'Mock Email Subject',
+            snippet: 'This is a mock email snippet...',
+            sender: 'sender@example.com',
+            date: new Date().toISOString(),
+            score: 0.95,
+          },
+        ],
+      };
+      await route.fulfill({ json });
     });
 
     // Force English language
@@ -56,7 +56,7 @@ test.describe('Search Functionality', () => {
 
     // Go to login
     await page.goto('/login');
-    
+
     // Perform Mock Login
     await page.getByLabel('Email').fill('test@example.com');
     await page.getByLabel('Password').fill('password123');
@@ -65,7 +65,7 @@ test.describe('Search Functionality', () => {
     // Wait for dashboard
     await page.waitForURL('/dashboard');
     console.log('Navigated to /dashboard');
-    
+
     await page.waitForLoadState('domcontentloaded');
     await page.locator('h1', { hasText: 'EchoMind' }).waitFor({ state: 'visible' }); // Wait for the main dashboard heading (EchoMind)
   });

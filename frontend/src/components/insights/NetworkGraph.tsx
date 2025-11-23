@@ -54,7 +54,7 @@ export default function NetworkGraph() {
       try {
         const response = await api.get<NetworkGraphData>('/insights/network');
         setGraphData(response.data);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Failed to fetch network graph:", err);
         setError(err.response?.data?.error || err.message || t('insights.loadingGraphError')); // Assuming we add this key
@@ -71,7 +71,7 @@ export default function NetworkGraph() {
     }
 
     fetchGraphData();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-64 text-gray-500">{t('insights.loadingGraph')}</div>;
@@ -117,14 +117,14 @@ export default function NetworkGraph() {
           const label = nodeLabel(node as Node);
           const fontSize = 12 / globalScale;
           ctx.font = `${fontSize}px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-          
+
           // 1. Draw Node Circle
           const radius = 5;
           ctx.beginPath();
           ctx.arc((node.x || 0), (node.y || 0), radius, 0, 2 * Math.PI, false);
           ctx.fillStyle = nodeColor(node as Node);
           ctx.fill();
-          
+
           // 2. Draw Text Label
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
@@ -132,7 +132,7 @@ export default function NetworkGraph() {
           ctx.fillText(label, (node.x || 0), (node.y || 0) + radius + 2);
 
           // Store dimensions for pointer interaction (approximate for circle)
-          node.__bckgDimensions = [radius * 2, radius * 2]; 
+          node.__bckgDimensions = [radius * 2, radius * 2];
         }}
         nodePointerAreaPaint={(node: Node, color, ctx) => {
           ctx.fillStyle = color;

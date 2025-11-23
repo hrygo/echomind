@@ -3,7 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import AuthGuard from '@/components/auth/AuthGuard';
-import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+
 
 export default function DashboardLayout({
   children,
@@ -13,25 +13,25 @@ export default function DashboardLayout({
   return (
     <AuthGuard>
       <div className="flex h-screen bg-slate-50">
-          {/* Desktop Sidebar - Fixed */}
-          <Sidebar className="hidden md:flex" />
-          
-          {/* Mobile Sidebar - Sheet */}
-          <MobileSidebar />
+        {/* Desktop Sidebar - Fixed */}
+        <Sidebar className="hidden md:flex" />
 
-          <main className="flex-1 flex flex-col relative w-full md:ml-64">
-            <Header />
+        {/* Mobile Sidebar - Sheet */}
+        <MobileSidebar />
 
-            {/* Page Content */}
-            <div className="flex-1 overflow-y-auto scroll-smooth">
-              {/* Added a container to constrain width on large screens for better readability */}
-              <div className="max-w-7xl mx-auto p-4 md:p-8 w-full">
-                {children}
-              </div>
+        <main className="flex-1 flex flex-col relative w-full md:ml-64">
+          <Header />
+
+          {/* Page Content */}
+          <div className="flex-1 overflow-y-auto scroll-smooth">
+            {/* Added a container to constrain width on large screens for better readability */}
+            <div className="max-w-7xl mx-auto p-4 md:p-8 w-full">
+              {children}
             </div>
-          </main>
-          <ChatSidebar />
-        </div>
-      </AuthGuard>
+          </div>
+        </main>
+        <ChatSidebar />
+      </div>
+    </AuthGuard>
   );
 }
