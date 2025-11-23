@@ -23,7 +23,8 @@ func NewChatHandler(chatService *service.ChatService) *ChatHandler {
 }
 
 type ChatRequest struct {
-	Messages []ai.Message `json:"messages" binding:"required"`
+	Messages      []ai.Message `json:"messages" binding:"required"`
+	ContextRefIDs []uuid.UUID  `json:"context_ref_ids"`
 }
 
 func (h *ChatHandler) StreamChat(c *gin.Context) {
@@ -56,7 +57,7 @@ func (h *ChatHandler) StreamChat(c *gin.Context) {
 	errCh := make(chan error)
 
 	go func() {
-		err := h.chatService.StreamChat(c.Request.Context(), userID, req.Messages, ch)
+		err := h.chatService.StreamChat(c.Request.Context(), userID, req.Messages, req.ContextRefIDs, ch)
 		if err != nil {
 			errCh <- err
 		}

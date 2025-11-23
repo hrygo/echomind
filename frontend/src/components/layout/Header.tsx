@@ -2,297 +2,64 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Bell, Settings, LogOut, Globe, Sparkles, Menu, ArrowLeft, X } from "lucide-react";
+import { Bell, Settings, LogOut, Globe, Sparkles, Menu } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { searchEmails, SearchResult } from "@/lib/api";
-import { SearchResults } from "./SearchResults";
-import { SearchHistory } from "./SearchHistory";
-import { useSearchHistory } from "@/hooks/useSearchHistory";
-import { useChatStore } from "@/lib/store/chat";
 import { useUIStore } from "@/store/ui";
-import { Email } from "@/lib/api/emails";
+import { CopilotWidget } from "@/components/copilot/CopilotWidget";
+import { useCopilotStore } from "@/store/useCopilotStore";
 
 export function Header() {
-    const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
     const { language, setLanguage, t } = useLanguage();
-    const { setOpen, addMessage, setActiveContextEmails } = useChatStore(); // Destructure setActiveContextEmails
     const { openMobileSidebar } = useUIStore();
-
-    const [searchQuery, setSearchQuery] = useState('');
-    const [showResults, setShowResults] = useState(false);
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [searchError, setSearchError] = useState<string | null>(null);
-    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-    const toggleOpen = useChatStore(state => state.toggleOpen);
+    
+    const { setMode, setIsOpen } = useCopilotStore();
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
     };
-
-    interface QueryIntent {
-        type: 'search' | 'chat' | 'mixed';
-        searchPart?: string; // For search-only or mixed queries
-        chatPart?: string;   // For chat-only or mixed queries
-    }
-
-    const classifyQueryIntent = (query: string): QueryIntent => {
-        const lowerCaseQuery = query.toLowerCase();
-
-        // Heuristic for Mixed Mode: "search part and/then chat part"
-        const mixedKeywords = [" and summarize", " then summarize", " and ask about", " then ask about"];
-        for (const keyword of mixedKeywords) {
-            const index = lowerCaseQuery.indexOf(keyword);
-            if (index !== -1) {
-                const searchPart = query.substring(0, index).trim();
-                const chatPart = query.substring(index + keyword.length).trim();
-                if (searchPart && chatPart) {
-                    return { type: 'mixed', searchPart, chatPart };
-                }
-            }
-        }
-
-        // Heuristic for Chat-only (Question)
-        const questionKeywords = ["what", "how", "why", "summarize", "explain", "tell me", "list", "show me", "can you"];
-        if (lowerCaseQuery.endsWith('?') || questionKeywords.some(keyword => lowerCaseQuery.includes(keyword))) {
-            return { type: 'chat', chatPart: query };
-        }
-
-        // Default to Search
-        return { type: 'search', searchPart: query };
-    };
-
-    const handleSearch = async (currentSearchQuery: string, queryOverride?: string) => {
-
-        const query = typeof queryOverride === 'string' ? queryOverride : currentSearchQuery;
-
-        if (!query.trim()) {
-
-            setShowResults(false);
-
-            return;
-
-        }
-
-
-
-        const intent = classifyQueryIntent(query); if (intent.type === 'chat') {
-            addMessage({ role: 'user', content: intent.chatPart! });
-            setOpen(true);
-            setSearchQuery('');
-            setShowResults(false);
-            return;
-        }
-
-        if (intent.type === 'mixed') {
-            addToHistory(intent.searchPart!); // Add search part to history
-            setIsSearching(true);
-            setSearchError(null);
-            setShowResults(true);
-
-            try {
-                const response = await searchEmails(intent.searchPart!, 10);
-                if (response.results.length > 0) {
-                    const emailsForContext: Email[] = response.results.map(result => ({
-                        ID: result.email_id,
-                        Subject: result.subject || "(No Subject)",
-                        Sender: result.sender,
-                        Snippet: result.snippet,
-                        BodyText: result.snippet, // Use snippet as placeholder for body
-                        Date: result.date,
-                        Summary: result.snippet, // Use snippet as placeholder for summary
-                        Category: "",
-                        Sentiment: "",
-                        Urgency: "",
-                        IsRead: true,
-                        ActionItems: [],
-                        SmartActions: {},
-                    }));
-                    setActiveContextEmails(emailsForContext);
-                    setOpen(true); // Open chat sidebar
-                    addMessage({ role: 'user', content: intent.chatPart! }); // Send the chat part as a user message
-                    setSearchQuery(''); // Clear search input
-                    setShowResults(false); // Close search results overlay
-                } else {
-                    setSearchError(t('common.noResultsDesc') + " (for search part)");
-                    setSearchResults([]);
-                }
-            } catch (error) {
-                console.error("Mixed mode search failed:", error);
-                setSearchError("Failed to search for mixed query. Please try again.");
-                setSearchResults([]);
-            } finally {
-                setIsSearching(false);
-            }
-            return; // Prevent normal search
-        }
-
-        // Pure Search (default behavior)
-        if (queryOverride) setSearchQuery(queryOverride);
-
-        addToHistory(query);
-        setIsSearching(true);
-        setSearchError(null);
-        setShowResults(true);
-
-        try {
-            const response = await searchEmails(query, 10);
-            setSearchResults(response.results);
-        } catch (error) {
-            console.error("Search failed:", error);
-            setSearchError("Failed to search emails. Please try again.");
-            setSearchResults([]);
-        } finally {
-            setIsSearching(false);
-        }
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent form submission if inside a form
-            handleSearch(searchQuery);
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSearch(searchQuery);
-        }
-    };
-
-    const handleCloseResults = () => {
-        setShowResults(false);
-        setSearchQuery("");
-        // On mobile, closing results might also mean closing the search bar, but usually we keep it open until user hits back
+    
+    const handleOpenChat = () => {
+        setMode('chat');
+        setIsOpen(true);
     };
 
     return (
         <header className="h-16 md:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 transition-all duration-200">
-
-            {/* Mobile: Search Overlay Mode */}
-            {isMobileSearchOpen ? (
-                <div className="absolute inset-0 bg-white z-40 flex items-center px-4 gap-2 md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Mobile Header (Simplified for now) */}
+             <div className="flex md:hidden items-center w-full justify-between">
+                <div className="flex items-center gap-3">
                     <button
-                        onClick={() => setIsMobileSearchOpen(false)}
-                        className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full"
+                        onClick={openMobileSidebar}
+                        className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg"
                     >
-                        <ArrowLeft className="w-5 h-5" />
+                        <Menu className="w-6 h-6" />
                     </button>
-                    <div className="flex-1 relative group">
-                        <input
-                            autoFocus
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                if (!e.target.value) setShowResults(false);
-                            }}
-                            onKeyPress={handleKeyPress}
-                            onKeyDown={handleKeyDown}
-                            className="block w-full pl-4 pr-10 py-2 bg-slate-100 border-none rounded-full text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-sm"
-                            placeholder={t('common.searchPlaceholder')}
-                        />
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-2.5 text-slate-400"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        )}
-                    </div>
+                    <span className="font-bold text-lg text-slate-800">EchoMind</span>
                 </div>
-            ) : (
-                // Mobile: Default Mode
-                <div className="flex md:hidden items-center w-full justify-between">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={openMobileSidebar}
-                            className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg"
-                        >
-                            <Menu className="w-6 h-6" />
-                        </button>
-                        {/* Optional: Mobile Logo Text */}
-                        <span className="font-bold text-lg text-slate-800">EchoMind</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setIsMobileSearchOpen(true)}
-                            className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"
-                        >
-                            <Search className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={toggleOpen}
-                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full"
-                        >
-                            <Sparkles className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                            className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
-                        >
-                            U
-                        </button>
-                    </div>
+                <div className="flex items-center gap-2">
+                     {/* Mobile Search/Chat Trigger */}
+                    <button
+                        onClick={handleOpenChat}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full"
+                    >
+                        <Sparkles className="w-5 h-5" />
+                    </button>
+                    <button
+                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                         className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
+                    >
+                        U
+                    </button>
                 </div>
-            )}
+            </div>
 
-            {/* Desktop: Standard Layout (Hidden on Mobile) */}
+            {/* Desktop: Standard Layout */}
             <div className="hidden md:flex flex-1 items-center justify-between w-full">
-                {/* Search Bar */}
-                <div className="flex-1 max-w-2xl relative flex items-center gap-2 mr-4">
-                    <div className="relative group flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                        </div>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                if (!e.target.value) setShowResults(false);
-                            }}
-                            onKeyPress={handleKeyPress}
-                            onKeyDown={handleKeyDown}
-                            onFocus={() => {
-                                setShowResults(true);
-                            }}
-                            onBlur={() => {
-                                setTimeout(() => {
-                                    setShowResults(false);
-                                }, 200);
-                            }}
-                            className="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200 text-sm font-medium"
-                            placeholder={t('common.searchPlaceholder')}
-                        />
-                    </div>
+                {/* Copilot Widget (The Omni-Bar) */}
+                <div className="flex-1 max-w-2xl relative mr-4">
+                    <CopilotWidget />
                 </div>
-
-                {/* Desktop Search Results / History Overlay */}
-                {(showResults || (searchQuery === '' && history.length > 0)) && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50 max-h-96 overflow-y-auto">
-                        {showResults && searchQuery ? (
-                            <SearchResults
-                                results={searchResults}
-                                isLoading={isSearching}
-                                error={searchError}
-                                query={searchQuery}
-                                onClose={handleCloseResults}
-                            />
-                        ) : (
-                            <SearchHistory
-                                history={history}
-                                onSelect={(query) => handleSearch(query)}
-                                onRemove={removeFromHistory}
-                                onClear={clearHistory}
-                            />
-                        )}
-                    </div>
-                )}
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4 ml-auto shrink-0">
@@ -305,7 +72,7 @@ export function Header() {
                     </button>
 
                     <button
-                        onClick={toggleOpen}
+                        onClick={handleOpenChat}
                         className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
                         title="AI Copilot"
                     >
@@ -321,7 +88,7 @@ export function Header() {
 
                     {/* User Profile Dropdown */}
                     <div className="relative">
-                        <button
+                         <button
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-slate-100 transition-all duration-200 focus:outline-none"
                         >
@@ -333,7 +100,7 @@ export function Header() {
                                 <p className="text-[10px] text-slate-400 font-medium mt-1">{t('sidebar.freePlan')}</p>
                             </div>
                         </button>
-
+                        
                         {/* Dropdown Menu */}
                         {isUserMenuOpen && (
                             <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
@@ -365,28 +132,6 @@ export function Header() {
                     </div>
                 </div>
             </div>
-
-            {/* Mobile Search Results / History Overlay */}
-            {(isMobileSearchOpen && (showResults || (history.length > 0 && !searchQuery))) && (
-                <div className="absolute top-16 left-0 right-0 bg-white border-t border-slate-100 shadow-xl z-30 max-h-[80vh] overflow-y-auto md:hidden">
-                    {showResults ? (
-                        <SearchResults
-                            results={searchResults}
-                            isLoading={isSearching}
-                            error={searchError}
-                            query={searchQuery}
-                            onClose={handleCloseResults}
-                        />
-                    ) : (
-                        <SearchHistory
-                            history={history}
-                            onSelect={(query) => handleSearch(query)}
-                            onRemove={removeFromHistory}
-                            onClear={clearHistory}
-                        />
-                    )}
-                </div>
-            )}
         </header>
     );
 }

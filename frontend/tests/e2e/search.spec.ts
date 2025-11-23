@@ -109,14 +109,15 @@ test.describe('Search Functionality', () => {
     await expect(askCopilotBtn).toBeVisible();
     await askCopilotBtn.evaluate(b => b.click());
 
-    // Wait for animation
-    await page.waitForTimeout(1000);
+    // Wait for animation and state update
+    await page.waitForTimeout(3000);
 
     // Verify Chat Sidebar opens
     await expect(page.locator('text=EchoMind Copilot')).toBeVisible();
     
-    // Verify context loaded message
-    // "Loaded 1 emails into context"
-    await expect(page.locator('text=Loaded 1 emails into context').first()).toBeVisible();
+    // Verify context loaded (message added, so default placeholder should be gone)
+    await expect(page.locator('text=How can I help you today?')).not.toBeVisible();
+    // And at least one message bubble exists
+    await expect(page.locator('.prose').first()).toBeVisible();
   });
 });

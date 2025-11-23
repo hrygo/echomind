@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
-import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { ToastContainer } from '@/components/ui/Toast'; // Import ToastContainer
 
 export const metadata: Metadata = {
@@ -21,7 +20,6 @@ export default function RootLayout({
         <LanguageProvider>
           <AuthGuard>
             {children}
-            <ChatSidebar />
             <ToastContainer />
           </AuthGuard>
         </LanguageProvider>

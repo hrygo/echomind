@@ -81,7 +81,7 @@ func main() {
 		container.Sugar.Errorf("Failed to migrate organizations: %v", err)
 	}
 
-	chatService := service.NewChatService(container.AIProvider, container.SearchService)
+	chatService := service.NewChatService(container.AIProvider, container.SearchService, emailService)
 	taskService := service.NewTaskService(container.DB)
 
 	// Initialize handlers

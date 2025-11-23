@@ -87,6 +87,18 @@ func (s *EmailService) GetEmail(ctx context.Context, userID, emailID uuid.UUID) 
 	return &email, nil
 }
 
+// GetEmailsByIDs retrieves multiple emails by their IDs for a given user.
+func (s *EmailService) GetEmailsByIDs(ctx context.Context, userID uuid.UUID, emailIDs []uuid.UUID) ([]model.Email, error) {
+	var emails []model.Email
+	if len(emailIDs) == 0 {
+		return nil, nil
+	}
+	if err := s.db.WithContext(ctx).Where("user_id = ? AND id IN ?", userID, emailIDs).Find(&emails).Error; err != nil {
+		return nil, err
+	}
+	return emails, nil
+}
+
 // CreateEmail creates a new email record.
 func (s *EmailService) CreateEmail(ctx context.Context, email *model.Email) error {
 	return s.db.WithContext(ctx).Create(email).Error

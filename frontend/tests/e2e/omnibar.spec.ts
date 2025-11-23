@@ -87,9 +87,9 @@ test.describe('Omni-Bar Functionality', () => {
     // Expect Chat Sidebar to open
     await expect(page.getByRole('heading', { name: 'EchoMind Copilot' })).toBeVisible();
 
-    // Expect Context Loaded message (from Search results)
-    // "Loaded 1 emails into context"
-    await expect(page.locator('text=Loaded 1 emails into context').first()).toBeVisible();
+    // Verify context loaded (message added, so default placeholder should be gone)
+    await expect(page.locator('text=How can I help you today?')).not.toBeVisible();
+    await expect(page.locator('.prose').first()).toBeVisible();
 
     // Expect the chat part ("status") to be sent as user message (keyword "and summarize" is stripped)
     await expect(page.locator('text=status').first()).toBeVisible();

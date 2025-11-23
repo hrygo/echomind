@@ -99,7 +99,7 @@
                 - generic:
                   - generic:
                     - img
-                    - generic: project alpha
+                    - generic: Test Query
                   - button:
                     - img
           - generic:
@@ -179,12 +179,11 @@
     - generic [ref=e13]:
       - img [ref=e14]
       - heading "EchoMind Copilot" [level=2] [ref=e17]
-    - paragraph [ref=e22]: status
-    - generic [ref=e24]:
-      - textbox "Ask anything..." [active] [ref=e25]
-      - button [disabled] [ref=e26]:
-        - img [ref=e27]
-    - button "Close" [ref=e30]:
-      - img [ref=e31]
-      - generic [ref=e34]: Close
+    - generic [ref=e20]:
+      - textbox "Ask anything..." [active] [ref=e21]
+      - button [disabled] [ref=e22]:
+        - img [ref=e23]
+    - button "Close" [ref=e26]:
+      - img [ref=e27]
+      - generic [ref=e30]: Close
 ```
