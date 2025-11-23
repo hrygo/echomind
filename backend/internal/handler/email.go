@@ -14,7 +14,7 @@ import (
 
 // EmailServicer defines the interface for the email service that the handler depends on.
 type EmailServicer interface {
-	ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int) ([]model.Email, error)
+	ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int, contextID, folder, category, filter string) ([]model.Email, error)
 	GetEmail(ctx context.Context, userID, emailID uuid.UUID) (*model.Email, error)
 	DeleteAllUserEmails(ctx context.Context, userID uuid.UUID) error
 }
@@ -35,9 +35,13 @@ func (h *EmailHandler) ListEmails(c *gin.Context) {
 		return
 	}
 
-	// Pagination parameters
+	// Pagination and filter parameters
 	limitStr := c.DefaultQuery("limit", "50")
 	offsetStr := c.DefaultQuery("offset", "0")
+	contextID := c.Query("context_id")
+	folder := c.Query("folder")
+	category := c.Query("category")
+	filter := c.Query("filter")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 0 {
@@ -50,7 +54,7 @@ func (h *EmailHandler) ListEmails(c *gin.Context) {
 		return
 	}
 
-	emails, err := h.emailService.ListEmails(c.Request.Context(), userID, limit, offset)
+	emails, err := h.emailService.ListEmails(c.Request.Context(), userID, limit, offset, contextID, folder, category, filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

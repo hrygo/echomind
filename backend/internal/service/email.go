@@ -23,9 +23,41 @@ func NewEmailService(db *gorm.DB) *EmailService {
 }
 
 // ListEmails retrieves a list of emails for a given user.
-func (s *EmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int) ([]model.Email, error) {
+func (s *EmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int, contextID, folder, category, filter string) ([]model.Email, error) {
 	var emails []model.Email
-	query := s.db.WithContext(ctx).Where("user_id = ?", userID).Order("date DESC")
+	query := s.db.WithContext(ctx).Where("user_id = ?", userID)
+
+	// Apply Context Filter
+	if contextID != "" {
+		query = query.Joins("JOIN email_contexts ON emails.id = email_contexts.email_id").Where("email_contexts.context_id = ?", contextID)
+	}
+
+	// Apply Folder Filter
+	if folder != "" {
+		// For demonstration, let's map "sent" to a hypothetical sender check (needs user's email)
+		// and "trash" to soft-deleted emails.
+		// A more complete solution would involve an explicit 'folder' field in the Email model.
+		if folder == "trash" {
+			query = query.Where("deleted_at IS NOT NULL").Unscoped() // Include soft-deleted emails
+		} else if folder == "drafts" {
+			// Assuming drafts are emails not yet sent, perhaps marked with a flag or specific category.
+			// For now, no specific implementation for drafts based on current model.
+		}
+		// For "sent" a user's email would be needed, which is not passed to EmailService.
+	}
+
+	// Apply Category Filter
+	if category != "" {
+		query = query.Where("category = ?", category)
+	}
+
+	// Apply Smart Filter
+	if filter == "smart" {
+		// Example: high urgency emails or emails with smart actions
+		query = query.Where("urgency = ? OR smart_actions IS NOT NULL", "High")
+	}
+
+	query = query.Order("date DESC")
 
 	if limit > 0 {
 		query = query.Limit(limit)

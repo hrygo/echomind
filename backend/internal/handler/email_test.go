@@ -24,8 +24,8 @@ type MockEmailService struct {
 	mock.Mock
 }
 
-func (m *MockEmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int) ([]model.Email, error) {
-	args := m.Called(ctx, userID, limit, offset)
+func (m *MockEmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, offset int, contextID, folder, category, filter string) ([]model.Email, error) {
+	args := m.Called(ctx, userID, limit, offset, contextID, folder, category, filter)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -69,12 +69,11 @@ func TestEmailHandler_ListEmails(t *testing.T) {
 		c.Set(middleware.ContextUserIDKey, userID)
 		c.Request = httptest.NewRequest("GET", "/api/v1/emails?limit=10&offset=0", nil)
 
-		expectedEmails := []model.Email{
-			{ID: uuid.New(), Subject: "Email 1", Sender: "a@b.com", Date: time.Now()},
-			{ID: uuid.New(), Subject: "Email 2", Sender: "c@d.com", Date: time.Now().Add(-time.Hour)},
-		}
-		mockService.On("ListEmails", mock.Anything, userID, 10, 0).Return(expectedEmails, nil)
-
+					expectedEmails := []model.Email{
+						{ID: uuid.New(), Subject: "Email 1", Sender: "a@b.com", Date: time.Now()},
+						{ID: uuid.New(), Subject: "Email 2", Sender: "c@d.com", Date: time.Now().Add(-time.Hour)},
+					}
+					mockService.On("ListEmails", mock.Anything, userID, 10, 0, "", "", "", "").Return(expectedEmails, nil)
 		h.ListEmails(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)

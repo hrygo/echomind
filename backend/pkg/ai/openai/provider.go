@@ -136,7 +136,7 @@ func (p *Provider) chatCompletion(ctx context.Context, systemPrompt, userContent
 	return resp.Choices[0].Message.Content, nil
 }
 
-func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- string) error {
+func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch chan<- ai.ChatCompletionChunk) error {
 	defer close(ch)
 
 	var openaiMessages []openai.ChatCompletionMessage
@@ -169,7 +169,17 @@ func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch cha
 		}
 
 		if len(response.Choices) > 0 {
-			ch <- response.Choices[0].Delta.Content
+			ch <- ai.ChatCompletionChunk{
+				ID: response.ID,
+				Choices: []ai.Choice{
+					{
+						Index: response.Choices[0].Index,
+						Delta: ai.DeltaContent{
+							Content: response.Choices[0].Delta.Content,
+						},
+					},
+				},
+			}
 		}
 	}
 }
