@@ -105,6 +105,6 @@ func (app *App) Close() {
 		app.AsynqClient.Close()
 	}
 	if app.Logger != nil {
-		app.Logger.Sync()
+		_ = app.Logger.Sync()
 	}
 }

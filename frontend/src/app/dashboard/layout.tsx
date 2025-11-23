@@ -1,7 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
-import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import AuthGuard from '@/components/auth/AuthGuard';
 
 
@@ -30,7 +29,6 @@ export default function DashboardLayout({
             </div>
           </div>
         </main>
-        <ChatSidebar />
       </div>
     </AuthGuard>
   );

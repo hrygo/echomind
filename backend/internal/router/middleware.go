@@ -6,11 +6,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/hrygo/echomind/configs"
+	"github.com/hrygo/echomind/internal/bootstrap"
 	"github.com/hrygo/echomind/internal/middleware"
 )
 
 // SetupMiddleware configures all global middleware for the Gin engine
-func SetupMiddleware(r *gin.Engine, isProduction bool) {
+func SetupMiddleware(r *gin.Engine, app *bootstrap.App, isProduction bool) {
 	// Configure Gin mode
 	if isProduction {
 		gin.SetMode(gin.ReleaseMode)
@@ -18,7 +19,7 @@ func SetupMiddleware(r *gin.Engine, isProduction bool) {
 
 	// Configure trusted proxies (security best practice)
 	if err := r.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
-		// Log warning but don't fail
+		app.Sugar.Warnf("Failed to set trusted proxies: %v", err)
 	}
 
 	// Middleware: Request ID (for tracing)

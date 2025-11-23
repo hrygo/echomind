@@ -17,14 +17,16 @@ export interface ContextInput {
   stakeholders: string[];
 }
 
+export interface RawContext extends Omit<Context, 'Keywords' | 'Stakeholders'> {
+  Keywords: string | string[];
+  Stakeholders: string | string[];
+}
+
 export const ContextAPI = {
   list: async (): Promise<Context[]> => {
     const response = await api.get('/contexts');
-    return response.data.map((ctx: any) => ({
+    return response.data.map((ctx: RawContext) => ({
       ...ctx,
-      // Parse JSON fields if they come as strings, though usually axios handles JSON response
-      // But GORM might send them as actual JSON objects if configured right, 
-      // or strings if using datatypes.JSON. Let's assume standard JSON response.
       Keywords: typeof ctx.Keywords === 'string' ? JSON.parse(ctx.Keywords) : ctx.Keywords,
       Stakeholders: typeof ctx.Stakeholders === 'string' ? JSON.parse(ctx.Stakeholders) : ctx.Stakeholders,
     }));

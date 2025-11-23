@@ -101,7 +101,7 @@ func main() {
 
 		// Setup Router and Middleware
 		r := gin.Default()
-		router.SetupMiddleware(r, container.IsProduction())
+		router.SetupMiddleware(r, container.App, container.IsProduction())
 
 		// Register routes
 		handlers := &router.Handlers{

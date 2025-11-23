@@ -22,8 +22,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
     try {
       const data = await ContextAPI.list();
       set({ contexts: data, isLoading: false });
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to fetch contexts', isLoading: false });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch contexts';
+      set({ error: errorMessage, isLoading: false });
     }
   },
 
@@ -35,8 +36,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
         contexts: [newContext, ...state.contexts],
         isLoading: false 
       }));
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to create context', isLoading: false });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create context';
+      set({ error: errorMessage, isLoading: false });
       throw err;
     }
   },
@@ -49,8 +51,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
         contexts: state.contexts.map(c => c.ID === id ? updatedContext : c),
         isLoading: false
       }));
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to update context', isLoading: false });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update context';
+      set({ error: errorMessage, isLoading: false });
       throw err;
     }
   },
@@ -63,8 +66,9 @@ export const useContextStore = create<ContextState>((set, get) => ({
         contexts: state.contexts.filter(c => c.ID !== id),
         isLoading: false
       }));
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to delete context', isLoading: false });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete context';
+      set({ error: errorMessage, isLoading: false });
       throw err;
     }
   },

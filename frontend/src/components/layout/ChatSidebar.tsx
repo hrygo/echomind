@@ -1,18 +1,20 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Sparkles, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Loader2 } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat';
 import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/Sheet';
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 
 export function ChatSidebar() {
-    const { isOpen, setOpen, messages, addMessage, isLoading, setLoading, updateLastMessage } = useChatStore();
+    const { isOpen, setOpen, messages, addMessage, isLoading, setLoading, updateLastMessage, activeContextEmails, clearActiveContextEmails } = useChatStore();
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { t } = useLanguage();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -22,23 +24,41 @@ export function ChatSidebar() {
         scrollToBottom();
     }, [messages]);
 
+    // Handle activeContextEmails when they are set
+    useEffect(() => {
+        if (activeContextEmails.length > 0) {
+            const contextSummary = activeContextEmails.map(email => 
+                `Subject: ${email.Subject}\nSender: ${email.Sender}\nSnippet: ${email.Snippet}`
+            ).join('\n\n');
+
+            const systemMessageContent = t('chat.contextLoaded').replace('{count}', activeContextEmails.length.toString()) + '\n\n' + contextSummary;
+            addMessage({ role: 'system', content: systemMessageContent });
+            // Clear the context emails after they have been added to the chat as a system message
+            clearActiveContextEmails();
+            setOpen(true); // Ensure chat is open when context is loaded
+        }
+    }, [activeContextEmails, addMessage, clearActiveContextEmails, setOpen, t]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
 
-        const userMessage = input.trim();
+        const userMessageContent = input.trim();
         setInput('');
-        addMessage({ role: 'user', content: userMessage });
+
+        const conversationMessages = [...messages, { role: 'user', content: userMessageContent }];
+        
+        // If there's active context, prepend it as a system message for the API call
+        // Note: The context has already been added to `messages` by the useEffect above.
+        // So, we just need to ensure the `apiMessages` correctly represents the full conversation history.
+        const apiMessages = conversationMessages;
+
         setLoading(true);
 
         // Add placeholder for assistant message
         addMessage({ role: 'assistant', content: '' });
 
         try {
-            // Prepare messages for API (exclude system messages if any, or keep them)
-            // We send the full history for context
-            const apiMessages = [...messages, { role: 'user', content: userMessage }];
-
             // Get token from auth store
             const token = useAuthStore.getState().token;
             const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
@@ -145,13 +165,6 @@ export function ChatSidebar() {
                         <Sparkles className="w-5 h-5" />
                         <SheetTitle className="font-semibold text-lg">EchoMind Copilot</SheetTitle>
                     </div>
-                    {/* SheetClose is automatically provided by SheetContent, but we can add our own custom close button if needed */}
-                    <button
-                        onClick={() => setOpen(false)}
-                        className="p-1 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
                 </SheetHeader>
 
                 {/* Messages */}

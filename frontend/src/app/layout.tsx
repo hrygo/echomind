@@ -22,7 +22,7 @@ export default function RootLayout({
           <AuthGuard>
             {children}
             <ChatSidebar />
-            <ToastContainer /> /* Add ToastContainer here */
+            <ToastContainer />
           </AuthGuard>
         </LanguageProvider>
       </body>

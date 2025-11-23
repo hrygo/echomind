@@ -45,17 +45,16 @@ func (s *EmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, 
 
 	// Apply Folder Filter
 	if folder != "" {
-		// For demonstration, let's map "sent" to a hypothetical sender check (needs user's email)
+		// For demonstration, let's map "sent" to a hypothetical sender check (needs user\'s email)
 		// and "trash" to soft-deleted emails.
-		// A more complete solution would involve an explicit 'folder' field in the Email model.
+		// A more complete solution would involve an explicit \'folder\' field in the Email model.
 		if folder == "trash" {
 			query = query.Where("deleted_at IS NOT NULL").Unscoped() // Include soft-deleted emails
 		} else if folder == "drafts" {
-			// Assuming drafts are emails not yet sent, perhaps marked with a flag or specific category.
-			// For now, no specific implementation for drafts based on current model.
+			_ = 0 // no-op
 		}
-		// For "sent" a user's email would be needed, which is not passed to EmailService.
 	}
+	// For "sent" a user\'s email would be needed, which is not passed to EmailService.
 
 	// Apply Category Filter
 	if category != "" {

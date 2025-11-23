@@ -13,7 +13,7 @@ export interface Email {
   Urgency: string;
   IsRead: boolean;
   ActionItems: string[]; // JSON
-  SmartActions: any; // JSON
+  SmartActions: Record<string, unknown>; // JSON
 }
 
 export const EmailAPI = {

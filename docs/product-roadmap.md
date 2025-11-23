@@ -1,57 +1,52 @@
 # 📅 产品路线图 - EchoMind (6-Month Plan)
 
-**当前日期**: 2025-11-22
-**当前版本**: v0.7.3 (Alpha)
-**规划周期**: 2025.12 - 2026.05
+**当前日期**: 2025-11-23
+**当前版本**: v0.9.1 (Beta)
+**规划周期**: 2025.11 - 2026.05
 
 ---
 
-## ✅ Phase 5: 深度优化与 RAG (Core Intelligence) - COMPLETED
-**时间**: 2025.11 - 2025.12 (Month 1)
-**版本**: v0.6.0 -> v0.7.2
-**状态**: ✅ 已完成 (2025-11-22)
-**目标**: 构建私有知识库，实现自然语言搜索，多租户基础架构。
-
-*   **RAG 引擎**: 向量基础设施，语义搜索。
-*   **架构升级**: 多租户 (Org/Team) 数据库模型与迁移完成。
-*   **工程质量**: 完善 E2E 测试与 CI 流程。
-
-## ✅ Phase 6.0: Personal Intelligence Deep-Dive - COMPLETED
-**时间**: 2025.12 (Month 2)
-**版本**: v0.8.0
+## ✅ Phase 6.2: Actionable Intelligence - COMPLETED
+**时间**: 2025.11 (Month 1)
+**版本**: v0.9.0 -> v0.9.1
 **状态**: ✅ 已完成 (2025-11-23)
-**目标**: 深化个人 AI 体验，聚焦 Web 端交互与微信生态。
-
-*   **AI Copilot (Web)**
-    *   ✅ **Chat Sidebar**: 右侧边栏对话框，支持自然语言查信。
-    *   ✅ **Smart Actions**: 基于 AI 分析的快捷操作 ("添加到待办", "草拟回复")。
-*   **移动端策略 (Mobile Strategy)**
-    *   ✅ **Web Mobile Polish**: 优化手机浏览器上的 Dashboard 阅读体验。
-
-## 🚧 Phase 6.2: Actionable Intelligence (Current Sprint)
-**时间**: 2025.12 - 2026.01 (Month 3)
-**版本**: v0.9.0
 **目标**: 从“被动阅读”到“主动决策”。实现可交互的 Dashboard 和任务闭环。
 
-*   **Dashboard Upgrade**
-    *   [ ] **Actionable Cards**: 卡片支持直接 [Approve] / [Dismiss] / [Reply]。
-    *   [ ] **Optimistic UI**: 操作即时反馈，支持撤销。
-*   **Task Hub (任务中枢)**
-    *   [ ] **Internal Task System**: 构建轻量级任务表，支持从邮件生成。
-    *   [ ] **Task Management UI**: Dashboard 任务列表视图。
-*   **Smart Contexts (智能上下文)**
-    *   [ ] **Context Management**: 定义项目/话题上下文。
-    *   [ ] **Context-Aware RAG**: 基于当前上下文过滤搜索和对话。
+*   **Smart Contexts**: 智能情境管理与自动聚合。
+*   **Actionable Dashboard**: "Smart Feed" 与一键行动 (Approve/Snooze/Dismiss)。
+*   **Backend Infrastructure**: 引入 `bootstrap` 包统一初始化流程。
+
+## 🚀 Phase 6.3: The Neural Nexus (智能中枢整合) - CURRENT SPRINT
+**时间**: 2025.11 - 2025.12 (Month 2)
+**版本**: v0.9.2 -> v0.9.4
+**目标**: 打破“搜索”与“对话”的边界，让用户在同一个心流中完成查找信息与分析决策。
+
+### Stage 1: Context Bridge (上下文桥梁) [v0.9.2]
+*   **目标**: 实现 Search 到 Chat 的无缝“投递”。
+*   **Key Features**:
+    *   [ ] **Integration**: Chat Store 支持 `activeContext` 状态。
+    *   [ ] **UI**: 搜索结果增加 "Ask Copilot" 按钮。
+    *   [ ] **Chat**: 聊天组件自动读取上下文并生成回答。
+
+### Stage 2: Omni-Bar (全能入口) [v0.9.3]
+*   **目标**: 搜索框具备“路由”能力，自动识别搜索或对话意图。
+*   **Key Features**:
+    *   [ ] **Smart Routing**: 识别问句并自动跳转 Chat。
+    *   [ ] **Mixed Mode**: 先搜索后分析的混合交互。
+
+### Stage 3: Generative Widgets (生成式组件) [v0.9.4]
+*   **目标**: Chat 中渲染 UI 组件。
+*   **Key Features**:
+    *   [ ] **Widget Rendering**: Chat 流中显示 TaskList 或 SearchResultCard。
 
 ## 🗓️ Phase 7: WeChat Connect (Conversational OS)
 **时间**: 2026.01 - 2026.02 (Month 3-4)
-**版本**: v0.9.0
+**版本**: v0.9.5+
 **目标**: 将微信打造为 EchoMind 的核心移动交互系统。
 
 *   **Conversational Core**
     *   [ ] **Voice Commander**: 微信语音 -> Whisper 转录 -> 意图执行 (回复邮件/查询)。
     *   [ ] **One-Touch Decision**: 推送 "审批/决策" 卡片，微信内直接点击 [批准]/[驳回]。
-    *   [ ] **Thought Catcher**: 随时语音记录灵感/待办，自动同步到 Dashboard。
 *   **Intelligent Features**
     *   [ ] **Calendar Gatekeeper**: "下周二下午有空吗？" -> 自动检测冲突并生成建议回复。
     *   [ ] **Morning Briefing**: 每日晨报推送 (今日待办 + 关键邮件)。
@@ -74,10 +69,8 @@
 
 ## 📝 版本历史
 
-- **v0.8.0** (2025-11-23): ✅ Smart Actions, AI Copilot, Mobile-First UI, i18n
+- **v0.9.1** (2025-11-23): ✅ Smart Contexts, Actionable Dashboard, Action Service (Approve/Snooze), i18n
+- **v0.9.0** (2025-11-23): ✅ Task Engine, Backend Refactor (Bootstrap)
+- **v0.8.0** (2025-11-23): ✅ Smart Actions, AI Copilot, Mobile-First UI
 - **v0.7.4** (2025-11-22): ✅ AI Chat Interface (Copilot) with Streaming Response
-- **v0.7.3** (2025-11-22): ✅ Fix Embedding Dimension (1536->768)
-- **v0.7.2** (2025-11-22): ✅ Team Foundation & Fixes
-- **v0.7.0-beta** (2025-11-22): ✅ RAG Polish
-- **v0.6.4** (2025-11-22): ✅ RAG & Semantic Search
-- **v0.6.0** (2025-11-22): pgvector Infrastructure
+- **v0.7.0-beta** (2025-11-22): ✅ RAG Polish & Semantic Search

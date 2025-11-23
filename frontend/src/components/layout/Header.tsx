@@ -10,32 +10,126 @@ import { SearchHistory } from "./SearchHistory";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
 import { useChatStore } from "@/lib/store/chat";
 import { useUIStore } from "@/store/ui";
+import { Email } from "@/lib/api/emails";
 
 export function Header() {
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
+    const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
+    const { language, setLanguage, t } = useLanguage();
+    const { setOpen, addMessage, setActiveContextEmails } = useChatStore(); // Destructure setActiveContextEmails
+    const { openMobileSidebar } = useUIStore();
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showResults, setShowResults] = useState(false);
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [searchError, setSearchError] = useState<string | null>(null);
-    const [showResults, setShowResults] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-    const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
-    const { language, setLanguage, t } = useLanguage();
-    const { toggleOpen } = useChatStore();
-    const { openMobileSidebar } = useUIStore();
+    const toggleOpen = useChatStore(state => state.toggleOpen);
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
     };
 
-    const handleSearch = async (queryOverride?: string) => {
-        const query = typeof queryOverride === 'string' ? queryOverride : searchQuery;
-        if (!query.trim()) {
-            setShowResults(false);
-            return;
+    interface QueryIntent {
+        type: 'search' | 'chat' | 'mixed';
+        searchPart?: string; // For search-only or mixed queries
+        chatPart?: string;   // For chat-only or mixed queries
+    }
+
+    const classifyQueryIntent = (query: string): QueryIntent => {
+        const lowerCaseQuery = query.toLowerCase();
+
+        // Heuristic for Mixed Mode: "search part and/then chat part"
+        const mixedKeywords = [" and summarize", " then summarize", " and ask about", " then ask about"];
+        for (const keyword of mixedKeywords) {
+            const index = lowerCaseQuery.indexOf(keyword);
+            if (index !== -1) {
+                const searchPart = query.substring(0, index).trim();
+                const chatPart = query.substring(index + keyword.length).trim();
+                if (searchPart && chatPart) {
+                    return { type: 'mixed', searchPart, chatPart };
+                }
+            }
         }
 
+        // Heuristic for Chat-only (Question)
+        const questionKeywords = ["what", "how", "why", "summarize", "explain", "tell me", "list", "show me", "can you"];
+        if (lowerCaseQuery.endsWith('?') || questionKeywords.some(keyword => lowerCaseQuery.includes(keyword))) {
+            return { type: 'chat', chatPart: query };
+        }
+
+        // Default to Search
+        return { type: 'search', searchPart: query };
+    };
+
+                const handleSearch = async (currentSearchQuery: string, queryOverride?: string) => {
+
+                    const query = typeof queryOverride === 'string' ? queryOverride : currentSearchQuery;
+
+                    if (!query.trim()) {
+
+                        setShowResults(false);
+
+                        return;
+
+                    }
+
+            
+
+                    const intent = classifyQueryIntent(query);        if (intent.type === 'chat') {
+            addMessage({ role: 'user', content: intent.chatPart! });
+            setOpen(true);
+            setSearchQuery('');
+            setShowResults(false);
+            return;
+        } 
+        
+        if (intent.type === 'mixed') {
+            addToHistory(intent.searchPart!); // Add search part to history
+            setIsSearching(true);
+            setSearchError(null);
+            setShowResults(true);
+
+            try {
+                const response = await searchEmails(intent.searchPart!, 10);
+                if (response.results.length > 0) {
+                    const emailsForContext: Email[] = response.results.map(result => ({
+                        ID: result.email_id,
+                        Subject: result.subject || "(No Subject)",
+                        Sender: result.sender,
+                        Snippet: result.snippet,
+                        BodyText: result.snippet, // Use snippet as placeholder for body
+                        Date: result.date,
+                        Summary: result.snippet, // Use snippet as placeholder for summary
+                        Category: "",
+                        Sentiment: "",
+                        Urgency: "",
+                        IsRead: true,
+                        ActionItems: [],
+                        SmartActions: {},
+                    }));
+                    setActiveContextEmails(emailsForContext);
+                    setOpen(true); // Open chat sidebar
+                    addMessage({ role: 'user', content: intent.chatPart! }); // Send the chat part as a user message
+                    setSearchQuery(''); // Clear search input
+                    setShowResults(false); // Close search results overlay
+                } else {
+                    setSearchError(t('common.noResultsDesc') + " (for search part)");
+                    setSearchResults([]);
+                }
+            } catch (error) {
+                console.error("Mixed mode search failed:", error);
+                setSearchError("Failed to search for mixed query. Please try again.");
+                setSearchResults([]);
+            } finally {
+                setIsSearching(false);
+            }
+            return; // Prevent normal search
+        }
+
+        // Pure Search (default behavior)
         if (queryOverride) setSearchQuery(queryOverride);
 
         addToHistory(query);
@@ -44,7 +138,6 @@ export function Header() {
         setShowResults(true);
 
         try {
-            // filters parameter is removed
             const response = await searchEmails(query, 10);
             setSearchResults(response.results);
         } catch (error) {
@@ -58,7 +151,7 @@ export function Header() {
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            handleSearch();
+            handleSearch(searchQuery);
         }
     };
 
@@ -156,15 +249,40 @@ export function Header() {
                             }}
                             onKeyPress={handleKeyPress}
                             onFocus={() => {
-                                if (searchQuery) setShowResults(true);
+                                setShowResults(true); 
                             }}
                             onBlur={() => {
+                                setTimeout(() => {
+                                    setShowResults(false);
+                                }, 200); 
                             }}
                             className="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200 text-sm font-medium"
                             placeholder={t('common.searchPlaceholder')}
                         />
                     </div>
                 </div>
+
+                {/* Desktop Search Results / History Overlay */}
+                {(showResults || (searchQuery === '' && history.length > 0)) && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50 max-h-96 overflow-y-auto">
+                        {showResults && searchQuery ? (
+                            <SearchResults
+                                results={searchResults}
+                                isLoading={isSearching}
+                                error={searchError}
+                                query={searchQuery}
+                                onClose={handleCloseResults}
+                            />
+                        ) : (
+                            <SearchHistory
+                                history={history}
+                                onSelect={(query) => handleSearch(query)}
+                                onRemove={removeFromHistory}
+                                onClear={clearHistory}
+                            />
+                        )}
+                    </div>
+                )}
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4 ml-auto shrink-0">

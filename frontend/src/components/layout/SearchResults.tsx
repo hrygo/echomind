@@ -41,7 +41,7 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
             Urgency: "", // Not available in SearchResult
             IsRead: true, // Assuming read if it's in search results
             ActionItems: [],
-            SmartActions: null,
+            SmartActions: {},
         }));
         setActiveContextEmails(emailsForContext);
         setOpen(true);
