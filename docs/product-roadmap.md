@@ -16,23 +16,24 @@
 *   **Actionable Dashboard**: "Smart Feed" 与一键行动 (Approve/Snooze/Dismiss)。
 *   **Backend Infrastructure**: 引入 `bootstrap` 包统一初始化流程。
 
-## 🚀 Phase 6.3: The Neural Nexus (智能中枢整合) - CURRENT SPRINT
+## ✅ Phase 6.3: The Neural Nexus (智能中枢整合) - COMPLETED
 **时间**: 2025.11 - 2025.12 (Month 2)
 **版本**: v0.9.2 -> v0.9.4
+**状态**: ✅ 已完成 (2025-11-23)
 **目标**: 打破“搜索”与“对话”的边界，让用户在同一个心流中完成查找信息与分析决策。
 
 ### Stage 1: Context Bridge (上下文桥梁) [v0.9.2]
 *   **目标**: 实现 Search 到 Chat 的无缝“投递”。
 *   **Key Features**:
-    *   [ ] **Integration**: Chat Store 支持 `activeContext` 状态。
-    *   [ ] **UI**: 搜索结果增加 "Ask Copilot" 按钮。
-    *   [ ] **Chat**: 聊天组件自动读取上下文并生成回答。
+    *   [x] **Integration**: Chat Store 支持 `activeContext` 状态。
+    *   [x] **UI**: 搜索结果增加 "Ask Copilot" 按钮。
+    *   [x] **Chat**: 聊天组件自动读取上下文并生成回答。
 
 ### Stage 2: Omni-Bar (全能入口) [v0.9.3]
 *   **目标**: 搜索框具备“路由”能力，自动识别搜索或对话意图。
 *   **Key Features**:
-    *   [ ] **Smart Routing**: 识别问句并自动跳转 Chat。
-    *   [ ] **Mixed Mode**: 先搜索后分析的混合交互。
+    *   [x] **Smart Routing**: 识别问句并自动跳转 Chat。
+    *   [x] **Mixed Mode**: 先搜索后分析的混合交互。
 
 ### Stage 3: Generative Widgets (生成式组件) [v0.9.4]
 *   **目标**: Chat 中渲染 UI 组件。
@@ -69,6 +70,9 @@
 
 ## 📝 版本历史
 
+- **v0.9.4** (2025-11-23): ✅ Generative Widgets (Chat UI)
+- **v0.9.3** (2025-11-23): ✅ Omni-Bar (Smart Routing & Mixed Mode)
+- **v0.9.2** (2025-11-23): ✅ Context Bridge (Search -> Chat Integration)
 - **v0.9.1** (2025-11-23): ✅ Smart Contexts, Actionable Dashboard, Action Service (Approve/Snooze), i18n
 - **v0.9.0** (2025-11-23): ✅ Task Engine, Backend Refactor (Bootstrap)
 - **v0.8.0** (2025-11-23): ✅ Smart Actions, AI Copilot, Mobile-First UI
