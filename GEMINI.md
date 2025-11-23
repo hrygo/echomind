@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.9.0 (Beta) | **Active Sprint**: Phase 6.2 - Week 2: Smart Contexts
+> **Stage**: v0.9.1 (Beta) | **Active Sprint**: Phase 6.2 - Week 3: Polish & Completion
 
 ---
 
@@ -14,22 +14,20 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.8.0 → v0.9.0)
-**Phase 6.2 - Week 1: Task Engine**
-- ✅ **Task Hub**: Internal Task System (Model, Service, API, Dashboard Integration)
+### ✅ Recent Completion (v0.9.0 → v0.9.1)
+**Phase 6.2 - Week 2: Actionable Intelligence**
+- ✅ **Smart Contexts**: Project/Topic-based organization (`contexts` table, CRUD, Sidebar UI, Auto-tagging).
+- ✅ **Actionable Dashboard**: "Smart Feed" with optimistic UI updates.
+- ✅ **Actions System**: Approve/Snooze/Dismiss logic (`ActionService`, `useActionStore`, Undo Toast).
+- ✅ **Backend Refactor**: Unified `bootstrap` package for consistent startup.
+- ✅ **i18n**: Full bilingual support for new features.
 
-**Backend Infrastructure Optimization (v0.9.0)**
-- ✅ **CLI Configuration**: Environment variables & command-line parameters (`-config`, `-production`)
-- ✅ **Dependency Injection**: Centralized container pattern (`internal/app/container.go`)
-- ✅ **Graceful Shutdown**: SIGINT/SIGTERM handling for Server & Worker
-- ✅ **Router Modularization**: Extracted routes & middleware (`internal/router/`)
-- ✅ **Code Reduction**: 16% less code (409→345 lines across cmd programs)
-
-### 🚧 Current Sprint (v0.9.0+)
-**Phase 6.2 - Week 2: Smart Contexts** | [Plan](docs/sprints/v0.9.0_actionable_intelligence/plan.md)
-- **Actionable Dashboard**: Interactive cards (Approve/Dismiss).
-- **Smart Contexts**: Project/Topic-based organization (`contexts` table completed).
-- **Generative Widgets**: Chat-rendered UI components.
+### 🚧 Current Sprint (v0.9.2 Target)
+**Phase 6.2 - Week 3: Polish & Completion**
+- **Dashboard Stats**: Connect Executive View stats to real backend data (removing mocks).
+- **AI Reply Flow**: Implement "Reply with AI" modal and draft generation integration.
+- **Chat Integration**: Render Task Cards in chat stream.
+- **Task Hub**: Finalize Task Widget UI in Manager View.
 
 ### 🔮 Future (6-Month Plan)
 - **Phase 7** (2026.03-04): WeChat Integration (Official Account)
