@@ -123,7 +123,8 @@ func main() {
 		}
 
 		searchService := service.NewSearchService(db, embedder)
-		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, searchService, chunkSize)
+		contextService := service.NewContextService(db)
+		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, searchService, contextService, chunkSize)
 	})
 
 	if err := srv.Run(mux); err != nil {

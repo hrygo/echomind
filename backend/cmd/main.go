@@ -71,7 +71,7 @@ func main() {
 	}
 
 	// AutoMigrate models
-	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}, &model.Organization{}, &model.OrganizationMember{}, &model.Team{}, &model.TeamMember{}, &model.Task{}); err != nil {
+	if err := db.AutoMigrate(&model.Email{}, &model.User{}, &model.Contact{}, &model.EmailAccount{}, &model.EmailEmbedding{}, &model.Organization{}, &model.OrganizationMember{}, &model.Team{}, &model.TeamMember{}, &model.Task{}, &model.Context{}, &model.EmailContext{}); err != nil {
 		sugar.Fatalf("Failed to auto migrate database: %v", err)
 	}
 	sugar.Infof("Database migration completed")
@@ -132,6 +132,7 @@ func main() {
 	searchService := service.NewSearchService(db, embedder)
 	chatService := service.NewChatService(aiProvider, searchService)
 	taskService := service.NewTaskService(db)
+	contextService := service.NewContextService(db)
 
 	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(accountService)
@@ -145,6 +146,7 @@ func main() {
 	orgHandler := handler.NewOrganizationHandler(organizationService)
 	chatHandler := handler.NewChatHandler(chatService)
 	taskHandler := handler.NewTaskHandler(taskService)
+	contextHandler := handler.NewContextHandler(contextService)
 
 	// Register routes
 	api := r.Group("/api/v1")
@@ -180,6 +182,12 @@ func main() {
 			protected.PATCH("/tasks/:id", taskHandler.UpdateTask)
 			protected.PATCH("/tasks/:id/status", taskHandler.UpdateTaskStatus)
 			protected.DELETE("/tasks/:id", taskHandler.DeleteTask)
+
+			// Context Routes
+			protected.POST("/contexts", contextHandler.CreateContext)
+			protected.GET("/contexts", contextHandler.ListContexts)
+			protected.PATCH("/contexts/:id", contextHandler.UpdateContext)
+			protected.DELETE("/contexts/:id", contextHandler.DeleteContext)
 		}
 	}
 

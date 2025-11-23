@@ -46,8 +46,14 @@ type EmbeddingGenerator interface {
 	GenerateAndSaveEmbedding(ctx context.Context, email *model.Email, chunkSize int) error
 }
 
+// ContextMatcher defines the interface for matching and assigning contexts.
+type ContextMatcher interface {
+	MatchContexts(email *model.Email) ([]model.Context, error)
+	AssignContextsToEmail(emailID uuid.UUID, contextIDs []uuid.UUID) error
+}
+
 // HandleEmailAnalyzeTask handles the email analysis task for a specific user.
-func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder EmbeddingGenerator, chunkSize int) error {
+func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder EmbeddingGenerator, contextMatcher ContextMatcher, chunkSize int) error {
 	var p EmailAnalyzePayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
@@ -112,7 +118,21 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		// Do not return error, as email analysis is complete, contact update can be retried or ignored
 	}
 
-	// 7. Generate and Save Embeddings
+	// 7. Match and Assign Smart Contexts
+	matches, err := contextMatcher.MatchContexts(&email)
+	if err == nil && len(matches) > 0 {
+		var contextIDs []uuid.UUID
+		for _, m := range matches {
+			contextIDs = append(contextIDs, m.ID)
+		}
+		if err := contextMatcher.AssignContextsToEmail(email.ID, contextIDs); err != nil {
+			log.Printf("Warning: Failed to assign contexts to email %s: %v", email.ID, err)
+		}
+	} else if err != nil {
+		log.Printf("Warning: Failed to match contexts for email %s: %v", email.ID, err)
+	}
+
+	// 8. Generate and Save Embeddings
 	if err := embedder.GenerateAndSaveEmbedding(ctx, &email, chunkSize); err != nil {
 		log.Printf("Warning: Failed to process embedding for email %s: %v", p.EmailID, err)
 		// We treat embedding failure as non-fatal for the analysis task, but log it.
