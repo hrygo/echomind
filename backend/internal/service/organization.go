@@ -19,7 +19,7 @@ func NewOrganizationService(db *gorm.DB) *OrganizationService {
 }
 
 // CreatePersonalOrganization creates a default organization for a user
-func (s *OrganizationService) CreatePersonalOrganization(ctx context.Context, user *model.User) (*model.Organization, error) {
+func (s *OrganizationService) CreatePersonalOrganization(ctx context.Context, user *model.User, tx *gorm.DB) (*model.Organization, error) {
 	org := &model.Organization{
 		ID:      uuid.New(),
 		Name:    fmt.Sprintf("%s's Workspace", user.Name),
@@ -27,7 +27,12 @@ func (s *OrganizationService) CreatePersonalOrganization(ctx context.Context, us
 		OwnerID: user.ID,
 	}
 
-	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	db := s.db
+	if tx != nil {
+		db = tx
+	}
+
+	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Create Organization
 		if err := tx.Create(org).Error; err != nil {
 			return err
@@ -53,51 +58,39 @@ func (s *OrganizationService) CreatePersonalOrganization(ctx context.Context, us
 	return org, nil
 }
 
-	
+// GetOrganizationMembers returns members of an org
 
-	// GetOrganizationMembers returns members of an org
+func (s *OrganizationService) GetOrganizationMembers(ctx context.Context, orgID uuid.UUID) ([]model.OrganizationMember, error) {
 
-	func (s *OrganizationService) GetOrganizationMembers(ctx context.Context, orgID uuid.UUID) ([]model.OrganizationMember, error) {
+	var members []model.OrganizationMember
 
-		var members []model.OrganizationMember
+	// Preload User to get names/emails
 
-		// Preload User to get names/emails
+	err := s.db.WithContext(ctx).
+		Preload("User").
+		Where("organization_id = ?", orgID).
+		Find(&members).Error
 
-		err := s.db.WithContext(ctx).
+	return members, err
 
-			Preload("User").
+}
 
-			Where("organization_id = ?", orgID).
+// AddMember adds a user to an organization
 
-			Find(&members).Error
+func (s *OrganizationService) AddMember(ctx context.Context, orgID, userID uuid.UUID, role model.OrganizationRole) error {
 
-		return members, err
+	member := &model.OrganizationMember{
 
+		OrganizationID: orgID,
+
+		UserID: userID,
+
+		Role: role,
 	}
 
-	
+	return s.db.WithContext(ctx).Create(member).Error
 
-	// AddMember adds a user to an organization
-
-	func (s *OrganizationService) AddMember(ctx context.Context, orgID, userID uuid.UUID, role model.OrganizationRole) error {
-
-		member := &model.OrganizationMember{
-
-			OrganizationID: orgID,
-
-			UserID:         userID,
-
-			Role:           role,
-
-		}
-
-		return s.db.WithContext(ctx).Create(member).Error
-
-	}
-
-	
-
-	
+}
 
 // EnsureAllUsersHaveOrganization runs a migration to check all users
 func (s *OrganizationService) EnsureAllUsersHaveOrganization(ctx context.Context) error {
@@ -114,7 +107,7 @@ func (s *OrganizationService) EnsureAllUsersHaveOrganization(ctx context.Context
 
 	count := 0
 	for _, user := range users {
-		if _, err := s.CreatePersonalOrganization(ctx, &user); err != nil {
+		if _, err := s.CreatePersonalOrganization(ctx, &user, nil); err != nil {
 			// Log error but continue? Or fail hard?
 			// For now, let's return error to stop migration if something is wrong
 			return fmt.Errorf("failed to create org for user %s: %w", user.ID, err)
@@ -148,7 +141,7 @@ func (s *OrganizationService) GetOrganizationByID(ctx context.Context, orgID, us
 		Joins("JOIN organization_members ON organization_members.organization_id = organizations.id").
 		Where("organizations.id = ? AND organization_members.user_id = ?", orgID, userID).
 		First(&org).Error
-	
+
 	if err != nil {
 		return nil, err
 	}

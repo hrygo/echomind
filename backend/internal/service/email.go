@@ -27,34 +27,27 @@ func (s *EmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, 
 	var emails []model.Email
 	query := s.db.WithContext(ctx).Where("user_id = ?", userID)
 
-	// Default: Filter out snoozed emails (SnoozedUntil > Now)
-	// Unless a specific folder is requested (e.g. "snoozed" or "all")
-	if folder == "snoozed" {
-		query = query.Where("snoozed_until > NOW()")
-	} else if folder == "trash" {
-		// ... existing trash logic
-	} else {
-		// Normal inbox view: Hide snoozed
-		query = query.Where("snoozed_until IS NULL OR snoozed_until <= NOW()")
-	}
-
 	// Apply Context Filter
 	if contextID != "" {
 		query = query.Joins("JOIN email_contexts ON emails.id = email_contexts.email_id").Where("email_contexts.context_id = ?", contextID)
 	}
 
 	// Apply Folder Filter
-	if folder != "" {
-		// For demonstration, let's map "sent" to a hypothetical sender check (needs user\'s email)
-		// and "trash" to soft-deleted emails.
-		// A more complete solution would involve an explicit \'folder\' field in the Email model.
-		if folder == "trash" {
-			query = query.Where("deleted_at IS NOT NULL").Unscoped() // Include soft-deleted emails
-		} else if folder == "drafts" {
-			_ = 0 // no-op
-		}
+	switch folder {
+	case "snoozed":
+		query = query.Where("snoozed_until > NOW()")
+	case "trash":
+		query = query.Where("deleted_at IS NOT NULL").Unscoped()
+	case "drafts":
+		// TODO: Implement drafts logic
+		fallthrough
+	case "sent":
+		// TODO: Implement sent logic (needs user email)
+		fallthrough
+	default:
+		// Normal inbox view: Hide snoozed
+		query = query.Where("snoozed_until IS NULL OR snoozed_until <= NOW()")
 	}
-	// For "sent" a user\'s email would be needed, which is not passed to EmailService.
 
 	// Apply Category Filter
 	if category != "" {

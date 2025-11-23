@@ -14,8 +14,8 @@ import (
 )
 
 var ( // Define custom errors
-	ErrUserAlreadyExists = errors.New("user with this email already exists")
-	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrUserAlreadyExists  = errors.New("user with this email already exists")
+	ErrInvalidCredentials = errors.New("invalid credentials")
 )
 
 // UserService handles user-related business logic.
@@ -66,7 +66,8 @@ func (s *UserService) RegisterUser(ctx context.Context, email, password, name st
 		// Note: We use the *service method* but passing the transaction context would be ideal.
 		// However, s.orgService.CreatePersonalOrganization starts its own transaction.
 		// Nested transactions are supported by GORM (SavePoints).
-		_, err := s.orgService.CreatePersonalOrganization(ctx, user)
+		// Nested transactions are supported by GORM (SavePoints).
+		_, err := s.orgService.CreatePersonalOrganization(ctx, user, tx)
 		return err
 	})
 

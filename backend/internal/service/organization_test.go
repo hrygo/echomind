@@ -27,10 +27,8 @@ func TestCreatePersonalOrganization(t *testing.T) {
 		Name:  "Test User",
 		Email: "test@example.com",
 	}
-	db.Create(user)
-
-	org, err := svc.CreatePersonalOrganization(ctx, user)
-
+	// Create Personal Org
+	org, err := svc.CreatePersonalOrganization(ctx, user, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, org)
 	assert.Equal(t, "Test User's Workspace", org.Name)
