@@ -37,7 +37,7 @@
 ### Stage 3: Generative Widgets (生成式组件) [v0.9.4]
 *   **目标**: Chat 中渲染 UI 组件。
 *   **Key Features**:
-    *   [ ] **Widget Rendering**: Chat 流中显示 TaskList 或 SearchResultCard。
+    *   [x] **Widget Rendering**: Chat 流中显示 TaskList 或 SearchResultCard。
 
 ## 🗓️ Phase 7: WeChat Connect (Conversational OS)
 **时间**: 2026.01 - 2026.02 (Month 3-4)

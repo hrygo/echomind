@@ -1,9 +1,15 @@
 import { create } from 'zustand';
 import { Email } from '@/lib/api/emails';
 
+export interface WidgetData {
+  type: string; // e.g., 'task_card', 'search_result_card'
+  data: Record<string, any>; // Arbitrary data for the widget
+}
+
 interface Message {
   role: 'user' | 'assistant' | 'system';
-  content: string;
+  content?: string; // Make content optional if widget is present
+  widget?: WidgetData; // Optional widget data
 }
 
 interface ChatState {

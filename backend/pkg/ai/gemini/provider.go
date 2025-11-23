@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
@@ -169,21 +170,31 @@ func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch cha
 			return err
 		}
 
-		txt := extractText(resp)
-		if txt != "" {
+		// Use the new function to extract both content and widget data
+		content, widgetData := extractContentAndWidget(resp)
+
+		if content != "" || widgetData != nil { // Send if either content or widget is present
+			delta := ai.DeltaContent{}
+			if content != "" {
+				delta.Content = content
+			}
+			if widgetData != nil {
+				delta.Widget = widgetData
+			}
+
 			chunk := ai.ChatCompletionChunk{
 				ID: fmt.Sprintf("chatcmpl-%d", i), // Simple ID, can be UUID
 				Choices: []ai.Choice{
 					{
 						Index: 0,
-						Delta: ai.DeltaContent{Content: txt},
-
+						Delta: delta,
 					},
 				},
 			}
 			ch <- chunk
 		}
 	}
+	return nil // Should not be reached, but good for completeness
 }
 func extractText(resp *genai.GenerateContentResponse) string {
 	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
@@ -213,6 +224,35 @@ func cleanMarkdown(text string) string {
 		}
 	}
 	return strings.TrimSpace(cleaned)
+}
+
+// extractContentAndWidget parses the AI response for potential widget data.
+// It returns the remaining text content and an optional WidgetData object.
+func extractContentAndWidget(resp *genai.GenerateContentResponse) (string, *ai.WidgetData) {
+	fullText := extractText(resp)
+
+	// Check for widget pattern: ```widget_TYPE\n{JSON_DATA}\n```
+	widgetPattern := regexp.MustCompile("```widget_([a-zA-Z0-9_]+)\\n([\\s\\S]*?)\\n```")
+	matches := widgetPattern.FindStringSubmatch(fullText)
+
+	if len(matches) == 3 {
+		widgetType := matches[1]
+		jsonData := strings.TrimSpace(matches[2])
+
+		var data map[string]interface{}
+		if err := json.Unmarshal([]byte(jsonData), &data); err == nil {
+			// Successfully parsed widget JSON
+			widget := &ai.WidgetData{
+				Type: widgetType,
+				Data: data,
+			}
+			// Remove the widget block from the fullText
+			cleanText := strings.Replace(fullText, matches[0], "", 1)
+			return strings.TrimSpace(cleanText), widget
+		}
+	}
+	// No widget found or failed to parse, return full text as content
+	return fullText, nil
 }
 
 // Embed generates a vector for a single text.

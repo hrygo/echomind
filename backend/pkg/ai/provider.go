@@ -42,7 +42,13 @@ type ChatCompletionChunk struct {
 }
 
 type DeltaContent struct {
-	Content string `json:"content"`
+	Content string     `json:"content,omitempty"`
+	Widget  *WidgetData `json:"widget,omitempty"`
+}
+
+type WidgetData struct {
+	Type  string                 `json:"type"`  // e.g., "task_card", "search_result_card"
+	Data  map[string]interface{} `json:"data"` // Arbitrary data for the widget
 }
 
 type Choice struct {

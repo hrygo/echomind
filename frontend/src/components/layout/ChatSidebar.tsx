@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/Sheet';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { TaskWidget } from '@/components/widgets/TaskWidget';
+import { SearchResultWidget } from '@/components/widgets/SearchResultWidget';
 
 
 export function ChatSidebar() {
@@ -55,8 +57,7 @@ export function ChatSidebar() {
 
         setLoading(true);
 
-        // Add placeholder for assistant message
-        addMessage({ role: 'assistant', content: '' });
+        // Do NOT add a placeholder assistant message here. It will be added when the first content chunk arrives.
 
         try {
             // Get token from auth store
@@ -82,6 +83,7 @@ export function ChatSidebar() {
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
             let assistantMessage = '';
+            let isFirstMessageChunk = true; // Track if this is the first chunk for a new assistant response
 
             if (reader) {
                 let buffer = '';
@@ -92,8 +94,7 @@ export function ChatSidebar() {
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
 
-                    // Keep the last line in buffer if it's incomplete (doesn't end with \n)
-                    buffer = lines.pop() || '';
+                    buffer = lines.pop() || ''; // Keep the last line if it's incomplete
 
                     for (const line of lines) {
                         if (line.trim() === '') continue;
@@ -105,52 +106,66 @@ export function ChatSidebar() {
                                 const parsed = JSON.parse(data);
                                 if (parsed.error) {
                                     console.error('Chat API returned error:', parsed.error);
-                                    assistantMessage = `Error: ${parsed.error}`;
-                                    updateLastMessage(assistantMessage);
+                                    updateLastMessage(`Error: ${parsed.error}`);
                                     break;
                                 }
-                                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                                    assistantMessage += parsed.choices[0].delta.content;
+                                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
+                                    const delta = parsed.choices[0].delta;
+
+                                    if (delta.widget) {
+                                        // If a widget is received, add it as a new, complete message
+                                        addMessage({ role: 'assistant', widget: delta.widget });
+                                        assistantMessage = ''; // Reset assistantMessage
+                                        isFirstMessageChunk = true; // Next content should start a new message
+                                    } else if (delta.content) {
+                                        if (isFirstMessageChunk) {
+                                            addMessage({ role: 'assistant', content: delta.content });
+                                            assistantMessage = delta.content;
+                                            isFirstMessageChunk = false;
+                                        } else {
+                                            assistantMessage += delta.content;
+                                            updateLastMessage(assistantMessage);
+                                        }
+                                    }
                                 }
                             } catch {
                                 console.warn('JSON parse failed, fallback:', data);
-                            }
-                            updateLastMessage(assistantMessage);
-                        }
-                    }
-                }
-
-                // Process any remaining buffer
-                if (buffer.trim()) {
-                    const lines = buffer.split('\n');
-                    for (const line of lines) {
-                        if (line.trim() === '') continue;
-                        if (line.startsWith('data: ')) {
-                            const data = line.slice(6);
-                            if (data === '[DONE]') break;
-
-                            try {
-                                const parsed = JSON.parse(data);
-                                if (parsed.error) {
-                                    console.error('Chat API returned error:', parsed.error);
-                                    assistantMessage = `Error: ${parsed.error}`;
+                                // Fallback to raw content if JSON parse fails, append to current assistantMessage
+                                if (isFirstMessageChunk) {
+                                    addMessage({ role: 'assistant', content: data });
+                                    assistantMessage = data;
+                                    isFirstMessageChunk = false;
+                                } else {
+                                    assistantMessage += data;
                                     updateLastMessage(assistantMessage);
-                                    break;
                                 }
-                                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
-                                    assistantMessage += parsed.choices[0].delta.content;
-                                }
-                            } catch {
-                                // Ignore if it's a broken JSON, already handled
                             }
-                            updateLastMessage(assistantMessage);
                         }
                     }
                 }
+
+                // Process any remaining buffer at the end of the stream
+                if (buffer.trim()) {
+                    // This part is for any final content not ending with \n in the last chunk
+                    const data = buffer.slice(6); // Assuming it starts with 'data: '
+                    if (isFirstMessageChunk) {
+                        addMessage({ role: 'assistant', content: data });
+                        assistantMessage = data;
+                    } else {
+                        assistantMessage += data;
+                        updateLastMessage(assistantMessage);
+                    }
+                }
+
             }
         } catch (error) {
             console.error('Chat error:', error);
-            updateLastMessage('Sorry, something went wrong. Please try again.');
+            // If an error occurs before any message is added, add it as the first message.
+            if (messages.length === apiMessages.length) { // No assistant message added yet
+                addMessage({ role: 'assistant', content: 'Sorry, something went wrong. Please try again.' });
+            } else {
+                updateLastMessage('Sorry, something went wrong. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -194,7 +209,12 @@ export function ChatSidebar() {
                                 )}
                             >
                                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    {msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>}
+                                    {msg.widget && (
+                                        msg.widget.type === 'task_card' ? <TaskWidget data={msg.widget.data as any} /> :
+                                        msg.widget.type === 'search_result_card' ? <SearchResultWidget data={msg.widget.data as any} /> :
+                                        null
+                                    )}
                                 </div>
                             </div>
                         </div>
