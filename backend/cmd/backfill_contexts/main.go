@@ -2,45 +2,30 @@ package main
 
 import (
 	"log"
-	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/bootstrap"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
-	"github.com/spf13/viper"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
-	// Initialize Viper
-	vip := viper.New()
-	vip.SetConfigFile("configs/config.yaml")
-	vip.AddConfigPath(".")
-	vip.AutomaticEnv()
-	vip.SetEnvPrefix("ECHOMIND")
-	vip.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	if err := vip.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
-
-	// Database
-	dsn := vip.GetString("database.dsn")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// 1. Bootstrap
+	app, err := bootstrap.Init("configs/config.yaml", false)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Bootstrap failed: %v", err)
 	}
+	defer app.Close()
 
-	contextService := service.NewContextService(db)
+	contextService := service.NewContextService(app.DB)
 
 	// Fetch all emails
 	var emails []model.Email
-	if err := db.Find(&emails).Error; err != nil {
-		log.Fatalf("Failed to fetch emails: %v", err)
+	if err := app.DB.Find(&emails).Error; err != nil {
+		app.Sugar.Fatalf("Failed to fetch emails: %v", err)
 	}
 
-	log.Printf("Found %d emails to scan for contexts", len(emails))
+	app.Sugar.Infof("Found %d emails to scan for contexts", len(emails))
 
 	success := 0
 	matched := 0
@@ -49,7 +34,7 @@ func main() {
 	for _, email := range emails {
 		matches, err := contextService.MatchContexts(&email)
 		if err != nil {
-			log.Printf("Failed to match context for email %s: %v", email.ID, err)
+			app.Sugar.Warnf("Failed to match context for email %s: %v", email.ID, err)
 			failed++
 			continue
 		}
@@ -63,15 +48,15 @@ func main() {
 			}
 			
 			if err := contextService.AssignContextsToEmail(email.ID, contextIDs); err != nil {
-				log.Printf("Failed to assign contexts to email %s: %v", email.ID, err)
+				app.Sugar.Warnf("Failed to assign contexts to email %s: %v", email.ID, err)
 				failed++
 			} else {
-				log.Printf("Matched email %s to contexts: %v", email.ID, names)
+				app.Sugar.Infof("Matched email %s to contexts: %v", email.ID, names)
 				matched++
 			}
 		}
 		success++
 	}
 
-	log.Printf("Backfill complete. Scanned: %d, Matched: %d, Failed: %d", success, matched, failed)
+	app.Sugar.Infof("Backfill complete. Scanned: %d, Matched: %d, Failed: %d", success, matched, failed)
 }

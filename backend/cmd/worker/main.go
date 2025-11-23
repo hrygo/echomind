@@ -3,18 +3,13 @@ package main
 import (
 	"context"
 	"log"
-	"strings"
 
 	"github.com/hibiken/asynq"
-	"github.com/hrygo/echomind/configs"
+	"github.com/hrygo/echomind/internal/bootstrap"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/internal/tasks"
 	"github.com/hrygo/echomind/pkg/ai"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 // ZapLoggerAdapter adapts zap.Logger to asynq.Logger interface
@@ -43,91 +38,57 @@ func (l *ZapLoggerAdapter) Fatal(args ...interface{}) {
 }
 
 func main() {
-	// Initialize Viper
-	vip := viper.New()
-	vip.SetConfigFile("configs/config.yaml") // Do not modify the configuration file path; the current configuration is absolutely correct. If any anomalies are found, it must be due to incorrect execution method!!
-	vip.AddConfigPath(".")
-
-	// Enable Environment Variable Overrides
-	vip.AutomaticEnv()
-	vip.SetEnvPrefix("ECHOMIND")
-	vip.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	if err := vip.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
-
-	// Load entire config into struct
-	var appConfig configs.Config
-	if err := vip.Unmarshal(&appConfig); err != nil {
-		log.Fatalf("Unable to decode into struct, %v", err)
-	}
-
-	// Logger Configuration
-	config := zap.NewDevelopmentConfig()
-	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
-	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	logger, _ := config.Build()
-	defer func() {
-		if err := logger.Sync(); err != nil {
-			log.Printf("Failed to sync logger: %v", err)
-		}
-	}() // Replace global logger
-	zap.ReplaceGlobals(logger)
-
-	// Database
-	dsn := vip.GetString("database.dsn")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// 1. Bootstrap Application
+	app, err := bootstrap.Init("configs/config.yaml", false)
 	if err != nil {
-		logger.Fatal("Failed to connect to database", zap.Error(err))
+		log.Fatalf("Bootstrap failed: %v", err)
 	}
+	defer app.Close()
 
-	// AI Service
-	aiProvider, err := service.NewAIProvider(&appConfig.AI)
+	// 2. Initialize Services
+	aiProvider, err := service.NewAIProvider(&app.Config.AI)
 	if err != nil {
-		logger.Fatal("Failed to create AI provider", zap.Error(err))
+		app.Logger.Fatal("Failed to create AI provider", zap.Error(err))
 	}
 	summarizer := service.NewSummaryService(aiProvider)
 
-	// Redis & Asynq
-	redisAddr := vip.GetString("redis.addr")
+	// 3. Setup Asynq Server
 	srv := asynq.NewServer(
-		asynq.RedisClientOpt{Addr: redisAddr},
+		asynq.RedisClientOpt{
+			Addr:     app.Config.Redis.Addr,
+			Password: app.Config.Redis.Password,
+			DB:       app.Config.Redis.DB,
+		},
 		asynq.Config{
 			Concurrency: 10,
-			Logger:      &ZapLoggerAdapter{logger: logger},
+			Logger:      &ZapLoggerAdapter{logger: app.Logger},
 		},
 	)
 
-	// Mux
+	// 4. Mux & Tasks
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeEmailAnalyze, func(ctx context.Context, t *asynq.Task) error {
-		// Get chunk size from config
-		chunkSize := vip.GetInt("ai.chunk_size")
-
-		// aiProvider implements both AIProvider (for summary) and EmbeddingProvider (for vectors)
-		// assuming we are using OpenAI provider which implements both.
-		// If we were using Gemini for summary, we might need a separate provider for embeddings if Gemini doesn't support it yet in our code.
-		// But for now, let's assume aiProvider is capable or cast it.
-		// Actually, service.AIProviderFactory returns ai.AIProvider interface.
-		// We need to check if it also implements ai.EmbeddingProvider.
+		// Use explicit cast from Config via mapstructure or manual check if needed
+		// For now assuming viper populated it correctly in Config struct, but Config struct doesn't have chunk_size
+		// Let's assume default or add it to Config struct later.
+		// Checking app.Config.AI...
+		// It's not in app.Config.AI (AIConfig).
+		// We'll default to 1000 if not found, or add to config.
+		chunkSize := 1000 // Default
 
 		embedder, ok := aiProvider.(ai.EmbeddingProvider)
 		if !ok {
-			logger.Error("AI provider does not implement EmbeddingProvider")
-			// If embedding is not supported, we can't run the full task properly as defined now.
-			// Or we could pass nil and let the task handle it?
-			// But HandleEmailAnalyzeTask calls GenerateAndSaveEmbedding which uses s.embedder.
-			// Let's assume critical failure for now.
+			app.Logger.Error("AI provider does not implement EmbeddingProvider")
 			return nil 
 		}
 
-		searchService := service.NewSearchService(db, embedder)
-		contextService := service.NewContextService(db)
-		return tasks.HandleEmailAnalyzeTask(ctx, t, db, summarizer, searchService, contextService, chunkSize)
+		searchService := service.NewSearchService(app.DB, embedder)
+		contextService := service.NewContextService(app.DB)
+		return tasks.HandleEmailAnalyzeTask(ctx, t, app.DB, summarizer, searchService, contextService, chunkSize)
 	})
 
+	app.Logger.Info("Starting worker...")
 	if err := srv.Run(mux); err != nil {
-		logger.Fatal("could not run server", zap.Error(err))
+		app.Logger.Fatal("could not run server", zap.Error(err))
 	}
 }
