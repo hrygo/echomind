@@ -18,10 +18,17 @@
 **Phase 6.2 - Week 1: Task Engine**
 - ✅ **Task Hub**: Internal Task System (Model, Service, API, Dashboard Integration)
 
+**Backend Infrastructure Optimization (v0.9.0)**
+- ✅ **CLI Configuration**: Environment variables & command-line parameters (`-config`, `-production`)
+- ✅ **Dependency Injection**: Centralized container pattern (`internal/app/container.go`)
+- ✅ **Graceful Shutdown**: SIGINT/SIGTERM handling for Server & Worker
+- ✅ **Router Modularization**: Extracted routes & middleware (`internal/router/`)
+- ✅ **Code Reduction**: 16% less code (409→345 lines across cmd programs)
+
 ### 🚧 Current Sprint (v0.9.0+)
 **Phase 6.2 - Week 2: Smart Contexts** | [Plan](docs/sprints/v0.9.0_actionable_intelligence/plan.md)
 - **Actionable Dashboard**: Interactive cards (Approve/Dismiss).
-- **Smart Contexts**: Project/Topic-based organization (`contexts` table planned).
+- **Smart Contexts**: Project/Topic-based organization (`contexts` table completed).
 - **Generative Widgets**: Chat-rendered UI components.
 
 ### 🔮 Future (6-Month Plan)

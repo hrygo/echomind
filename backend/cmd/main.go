@@ -4,155 +4,156 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/hrygo/echomind/internal/bootstrap"
+	"github.com/hrygo/echomind/internal/app"
 	"github.com/hrygo/echomind/internal/handler"
-	"github.com/hrygo/echomind/internal/middleware"
+	"github.com/hrygo/echomind/internal/router"
 	"github.com/hrygo/echomind/internal/service"
-	"github.com/hrygo/echomind/pkg/ai"
 )
 
 const Version = "0.9.0"
 
 func main() {
-	// 1. Bootstrap Application
-	app, err := bootstrap.Init("configs/config.yaml", false) // false = development logger
+	// Parse CLI configuration
+	cli := app.ParseCLI()
+
+	// Initialize application container
+	container, err := app.NewContainer(cli.ConfigPath, cli.IsProduction)
 	if err != nil {
-		log.Fatalf("Bootstrap failed: %v", err)
+		log.Fatalf("Failed to initialize application: %v", err)
 	}
-	defer app.Close()
+	defer container.Close()
 
-	app.Sugar.Infof("EchoMind Version: %s", Version)
+	container.Sugar.Infof("EchoMind Version: %s", Version)
 
-	// 2. Setup Database (Migrations & Extensions)
-	if err := app.SetupDB(); err != nil {
-		app.Sugar.Fatalf("Database setup failed: %v", err)
+	// Setup Database (Migrations & Extensions)
+	if err := container.SetupDB(); err != nil {
+		container.Sugar.Fatalf("Database setup failed: %v", err)
 	}
-	app.Sugar.Infof("Database ready")
+	container.Sugar.Infof("Database ready")
 
-	// 3. Initialize Services
-	// Dependencies
+	// Log AI Provider Configuration
+	container.Sugar.Infof("AI Provider Initialized:")
+	container.Sugar.Infof("  Chat Provider: %s", container.Config.AI.ActiveServices.Chat)
+	if chatProviderConfig, ok := container.Config.AI.Providers[container.Config.AI.ActiveServices.Chat]; ok {
+		if model, exists := chatProviderConfig.Settings["model"]; exists {
+			container.Sugar.Infof("    Model: %s", model)
+		}
+		if baseURL, exists := chatProviderConfig.Settings["base_url"]; exists {
+			container.Sugar.Infof("    Base URL: %s", baseURL)
+		}
+	}
+	container.Sugar.Infof("  Embedding Provider: %s", container.Config.AI.ActiveServices.Embedding)
+	if embedProviderConfig, ok := container.Config.AI.Providers[container.Config.AI.ActiveServices.Embedding]; ok {
+		if embeddingModel, exists := embedProviderConfig.Settings["embedding_model"]; exists {
+			container.Sugar.Infof("    Embedding Model: %s", embeddingModel)
+		}
+	}
+
+	// Initialize business services
 	defaultFetcher := &service.DefaultFetcher{}
-
-	aiProvider, err := service.NewAIProvider(&app.Config.AI)
-	if err != nil {
-		app.Sugar.Fatalf("Failed to create AI provider: %v", err)
-	}
-
-	organizationService := service.NewOrganizationService(app.DB)
-	userService := service.NewUserService(app.DB, app.Config.Server.JWT, organizationService)
-	emailService := service.NewEmailService(app.DB)
-	contactService := service.NewContactService(app.DB)
-	accountService := service.NewAccountService(app.DB, &app.Config.Security)
-	insightService := service.NewInsightService(app.DB)
-	aiDraftService := service.NewAIDraftService(aiProvider)
+	organizationService := service.NewOrganizationService(container.DB)
+	userService := service.NewUserService(container.DB, container.Config.Server.JWT, organizationService)
+	emailService := service.NewEmailService(container.DB)
+	contactService := service.NewContactService(container.DB)
+	accountService := service.NewAccountService(container.DB, &container.Config.Security)
+	insightService := service.NewInsightService(container.DB)
+	aiDraftService := service.NewAIDraftService(container.AIProvider)
 	syncService := service.NewSyncService(
-		app.DB, 
-		&service.DefaultIMAPClient{}, 
-		defaultFetcher, 
-		app.AsynqClient, 
-		contactService, 
-		accountService, 
-		app.Config, 
-		app.Sugar,
+		container.DB,
+		&service.DefaultIMAPClient{},
+		defaultFetcher,
+		container.AsynqClient,
+		contactService,
+		accountService,
+		container.Config,
+		container.Sugar,
 	)
 
 	// Run Organization Migration
 	if err := organizationService.EnsureAllUsersHaveOrganization(context.Background()); err != nil {
-		app.Sugar.Errorf("Failed to migrate organizations: %v", err)
+		container.Sugar.Errorf("Failed to migrate organizations: %v", err)
 	}
 
-	embedder, ok := aiProvider.(ai.EmbeddingProvider)
-	if !ok {
-		app.Sugar.Fatal("AI provider does not implement EmbeddingProvider")
-	}
-	searchService := service.NewSearchService(app.DB, embedder)
-	chatService := service.NewChatService(aiProvider, searchService)
-	taskService := service.NewTaskService(app.DB)
-	contextService := service.NewContextService(app.DB)
+	chatService := service.NewChatService(container.AIProvider, container.SearchService)
+	taskService := service.NewTaskService(container.DB)
 
-	// 4. Initialize Handlers
+	// Initialize handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService)
 	emailHandler := handler.NewEmailHandler(emailService)
 	authHandler := handler.NewAuthHandler(userService)
 	insightHandler := handler.NewInsightHandler(insightService)
 	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
-	searchHandler := handler.NewSearchHandler(searchService, app.Sugar)
-	healthHandler := handler.NewHealthHandler(app.DB)
+	searchHandler := handler.NewSearchHandler(container.SearchService, container.Sugar)
+	healthHandler := handler.NewHealthHandler(container.DB)
 	orgHandler := handler.NewOrganizationHandler(organizationService)
 	chatHandler := handler.NewChatHandler(chatService)
 	taskHandler := handler.NewTaskHandler(taskService)
-	contextHandler := handler.NewContextHandler(contextService)
+	contextHandler := handler.NewContextHandler(container.ContextService)
 
-	// 5. Setup Router
+	// Setup Router and Middleware
 	r := gin.Default()
-
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	router.SetupMiddleware(r, container.IsProduction())
 
 	// Register routes
-	api := r.Group("/api/v1")
-	{
-		api.GET("/health", healthHandler.HealthCheck)
-		api.POST("/auth/register", authHandler.Register)
-		api.POST("/auth/login", authHandler.Login)
-
-		protected := api.Group("/").Use(middleware.AuthMiddleware(app.Config.Server.JWT))
-		{
-			// Organization
-			protected.POST("/orgs", orgHandler.CreateOrganization)
-			protected.GET("/orgs", orgHandler.ListOrganizations)
-			protected.GET("/orgs/:id", orgHandler.GetOrganization)
-			protected.GET("/orgs/:id/members", orgHandler.GetMembers)
-
-			// Account & Sync
-			protected.POST("/settings/account", accountHandler.ConnectAndSaveAccount)
-			protected.GET("/settings/account", accountHandler.GetAccountStatus)
-			protected.POST("/sync", syncHandler.SyncEmails)
-			
-			// Emails & Insights
-			protected.GET("/emails", emailHandler.ListEmails)
-			protected.GET("/emails/:id", emailHandler.GetEmail)
-			protected.DELETE("/emails/all", emailHandler.DeleteAllEmails)
-			protected.GET("/insights/network", insightHandler.GetNetworkGraph)
-			
-			// AI & Search
-			protected.POST("/ai/draft", aiDraftHandler.GenerateDraft)
-			protected.GET("/search", searchHandler.Search)
-			protected.POST("/chat/completions", chatHandler.StreamChat)
-
-			// Tasks
-			protected.POST("/tasks", taskHandler.CreateTask)
-			protected.GET("/tasks", taskHandler.ListTasks)
-			protected.PATCH("/tasks/:id", taskHandler.UpdateTask)
-			protected.PATCH("/tasks/:id/status", taskHandler.UpdateTaskStatus)
-			protected.DELETE("/tasks/:id", taskHandler.DeleteTask)
-
-			// Contexts
-			protected.POST("/contexts", contextHandler.CreateContext)
-			protected.GET("/contexts", contextHandler.ListContexts)
-			protected.PATCH("/contexts/:id", contextHandler.UpdateContext)
-			protected.DELETE("/contexts/:id", contextHandler.DeleteContext)
-		}
+	handlers := &router.Handlers{
+		Health:  healthHandler,
+		Auth:    authHandler,
+		Org:     orgHandler,
+		Account: accountHandler,
+		Sync:    syncHandler,
+		Email:   emailHandler,
+		Insight: insightHandler,
+		AIDraft: aiDraftHandler,
+		Search:  searchHandler,
+		Chat:    chatHandler,
+		Task:    taskHandler,
+		Context: contextHandler,
 	}
 
-	port := app.Config.Server.Port
+	authMiddleware := router.SetupAuthMiddleware(container.Config.Server.JWT)
+	router.SetupRoutes(r, handlers, authMiddleware)
+
+	port := container.Config.Server.Port
 	if port == "" {
 		port = "8080"
 	}
 
-	app.Sugar.Infof("Starting server on :%s", port)
-	if err := r.Run(fmt.Sprintf(":%s", port)); err != nil {
-		app.Sugar.Fatalf("Failed to run server: %v", err)
+	// Create HTTP server
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: r,
 	}
+
+	// Start server in a goroutine
+	go func() {
+		container.Sugar.Infof("Starting server on %s", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			container.Sugar.Fatalf("Failed to run server: %v", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	container.Sugar.Info("Shutting down server...")
+
+	// Give outstanding requests 10 seconds to complete
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		container.Sugar.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	container.Sugar.Info("Server exited gracefully")
 }

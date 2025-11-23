@@ -5,7 +5,7 @@
 
 EchoMind is a Personal Neural Interface designed for executives, managers, and dealmakers. It acts as an AI cognitive layer on top of your existing communication streams (Email, Calendar), transforming unstructured noise into structured insights, actionable tasks, and strategic intelligence.
 
-> **Current Status**: v0.8.0 (Beta) - Phase 6.0 Personal Intelligence Complete
+> **Current Status**: v0.9.0 (Beta) - Phase 6.2: Smart Contexts & Actionable Intelligence
 
 ## 🚀 Core Capabilities
 
@@ -61,11 +61,20 @@ make init
 
 ### 3. Configuration
 
-1.  **Secure Config**: Copy `backend/configs/config.example.yaml` to `backend/configs/config.yaml`.
-2.  **Set Secrets**: Update `config.yaml` with your Database credentials and AI API Keys (OpenAI/DeepSeek).
+1.  **Copy Config Template**: 
+    ```bash
+    cp backend/configs/config.example.yaml backend/configs/config.yaml
+    ```
+    
+2.  **Update Secrets**: Edit `backend/configs/config.yaml`:
+    *   Database credentials (`database.dsn`)
+    *   JWT secret (`server.jwt.secret`)
+    *   Encryption key (`security.encryption_key`)
+    *   AI API Keys (`ai.providers.*.settings.api_key`)
 
 ### 4. Run Locally
-Start the entire stack (DB, Backend, Worker, Frontend) with one command:
+
+Start the entire stack (DB, Backend, Worker, Frontend):
 
 ```bash
 make dev
@@ -73,21 +82,60 @@ make dev
 
 Visit `http://localhost:3000` to access the Neural Interface.
 
+### 5. Advanced Usage
+
+**CLI Parameters** (Introduced in v0.9.0):
+```bash
+# Production mode
+./bin/server -production=true
+
+# Custom config file
+CONFIG_PATH=/path/to/config.yaml ./bin/server
+
+# View all options
+./bin/server -h
+
+# Graceful shutdown
+# Press Ctrl+C or send SIGTERM to gracefully stop services
+```
+
 ## 🧪 Quality Assurance
 
 *   **Backend Tests**: `make test`
 *   **Frontend Tests**: `cd frontend && pnpm test`
+*   **Type Checking**: `cd frontend && pnpm type-check`
 
 ## 📂 Project Structure
 
 ```text
 /echomind
 ├── backend/           # Go API, RAG Engine & Async Workers
-│   ├── cmd/           # Entry points (server, worker, reindexer)
+│   ├── cmd/           # Entry points (server, worker, reindex, backfill_contexts)
 │   ├── internal/      # Core domain logic (Clean Architecture)
+│   │   ├── app/       # Dependency injection & CLI config (NEW in v0.9.0)
+│   │   ├── router/    # Route & middleware management (NEW in v0.9.0)
+│   │   └── ...
 │   └── pkg/           # Shared libraries (AI Providers, IMAP)
 ├── frontend/          # Next.js 16 Web Application
 ├── deploy/            # Docker & Deployment configs
 ├── docs/              # Architecture & Product specs
 └── scripts/           # Dev utilities
 ```
+
+## 🔄 Recent Updates (v0.9.0)
+
+**Backend Optimizations:**
+- ✅ CLI parameter support (`-config`, `-production`)
+- ✅ Graceful shutdown (SIGINT/SIGTERM handling)
+- ✅ Dependency injection container
+- ✅ Router modularization
+- ✅ Configuration centralization
+
+**Feature Enhancements:**
+- ✅ Smart Contexts (project/topic organization)
+- ✅ Task management system
+- ✅ Enhanced logging with request ID tracing
+
+---
+
+**Built with ❤️ for executives who value clarity over chaos.**

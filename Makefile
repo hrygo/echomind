@@ -38,6 +38,16 @@ help:
 	@echo "    make ci-status     - Check latest GitHub CI/CD pipeline status"
 	@echo "    make logs          - View logs"
 	@echo "    make watch-logs    - Follow logs"
+	@echo ""
+	@echo "  Advanced:"
+	@echo "    make run-backend-prod   - Run backend in production mode"
+	@echo "    make build              - Build backend binaries"
+	@echo "    make reindex            - Reindex all emails"
+	@echo ""
+	@echo "  CLI Parameters (for manual runs):"
+	@echo "    ./bin/server -h              - Show backend CLI help"
+	@echo "    ./bin/server -production     - Run in production mode"
+	@echo "    ./bin/server -config=path    - Custom config file"
 
 ensure-log-dir:
 	@mkdir -p $(LOG_DIR)

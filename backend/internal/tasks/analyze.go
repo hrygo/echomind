@@ -54,12 +54,22 @@ type ContextMatcher interface {
 
 // HandleEmailAnalyzeTask handles the email analysis task for a specific user.
 func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder EmbeddingGenerator, contextMatcher ContextMatcher, chunkSize int) error {
+	startTime := time.Now()
+
 	var p EmailAnalyzePayload
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	log.Printf("Analyzing email ID: %s for User ID: %s", p.EmailID, p.UserID)
+	log.Printf("[Task Started] Email Analysis - EmailID: %s, UserID: %s, TaskType: %s",
+		p.EmailID, p.UserID, t.Type())
+
+	// Defer logging task completion and duration
+	defer func() {
+		duration := time.Since(startTime)
+		log.Printf("[Task Completed] Email Analysis - EmailID: %s, UserID: %s, Duration: %.2fs",
+			p.EmailID, p.UserID, duration.Seconds())
+	}()
 
 	// 1. Fetch Email from DB, ensure it belongs to the user
 	var email model.Email
@@ -110,7 +120,8 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("failed to save analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
 	}
 
-	log.Printf("Analysis complete for email %s (user %s). Category: %s, Sentiment: %s", p.EmailID, p.UserID, email.Category, email.Sentiment)
+	log.Printf("[Email Analyzed] EmailID: %s, UserID: %s, Category: %s, Sentiment: %s, Urgency: %s",
+		p.EmailID, p.UserID, email.Category, email.Sentiment, email.Urgency)
 
 	// 6. Update Contact Statistics for the sender
 	if err := updateContactStats(ctx, db, p.UserID, email.Sender, email.Sentiment, email.Date); err != nil {

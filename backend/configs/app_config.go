@@ -2,15 +2,17 @@ package configs
 
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`	
+	Database DatabaseConfig `mapstructure:"database"`
 	Redis    RedisConfig    `mapstructure:"redis"`
 	AI       AIConfig       `mapstructure:"ai"`
-	Security SecurityConfig `mapstructure:"security"` // New security config
+	Security SecurityConfig `mapstructure:"security"`
+	Worker   WorkerConfig   `mapstructure:"worker"` // Worker configuration
 }
 
 type ServerConfig struct {
-	Port string `mapstructure:"port"`
-	JWT  JWTConfig `mapstructure:"jwt"`
+	Port        string    `mapstructure:"port"`
+	Environment string    `mapstructure:"environment"` // "development" | "production"
+	JWT         JWTConfig `mapstructure:"jwt"`
 }
 
 type SecurityConfig struct {
@@ -26,6 +28,10 @@ type DatabaseConfig struct {
 	DSN string `mapstructure:"dsn"`
 }
 
+type WorkerConfig struct {
+	Concurrency int `mapstructure:"concurrency"` // Number of concurrent workers
+}
+
 type RedisConfig struct {
 	Addr     string `mapstructure:"addr"`
 	Password string `mapstructure:"password"`
@@ -36,6 +42,7 @@ type AIConfig struct {
 	ActiveServices ServiceRoute              `mapstructure:"active_services"`
 	Providers      map[string]ProviderConfig `mapstructure:"providers"`
 	Prompts        PromptConfig              `mapstructure:"prompts"`
+	ChunkSize      int                       `mapstructure:"chunk_size"` // Max tokens per chunk for RAG processing
 }
 
 type ServiceRoute struct {

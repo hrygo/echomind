@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/hibiken/asynq"
-	"github.com/hrygo/echomind/internal/bootstrap"
-	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/internal/app"
 	"github.com/hrygo/echomind/internal/tasks"
-	"github.com/hrygo/echomind/pkg/ai"
 	"go.uber.org/zap"
 )
 
@@ -38,57 +39,62 @@ func (l *ZapLoggerAdapter) Fatal(args ...interface{}) {
 }
 
 func main() {
-	// 1. Bootstrap Application
-	app, err := bootstrap.Init("configs/config.yaml", false)
-	if err != nil {
-		log.Fatalf("Bootstrap failed: %v", err)
-	}
-	defer app.Close()
+	// Parse CLI configuration
+	cli := app.ParseCLI()
 
-	// 2. Initialize Services
-	aiProvider, err := service.NewAIProvider(&app.Config.AI)
+	// Initialize application container
+	container, err := app.NewContainer(cli.ConfigPath, cli.IsProduction)
 	if err != nil {
-		app.Logger.Fatal("Failed to create AI provider", zap.Error(err))
+		log.Fatalf("Failed to initialize application: %v", err)
 	}
-	summarizer := service.NewSummaryService(aiProvider)
+	defer container.Close()
 
-	// 3. Setup Asynq Server
+	// Setup Asynq Server
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{
-			Addr:     app.Config.Redis.Addr,
-			Password: app.Config.Redis.Password,
-			DB:       app.Config.Redis.DB,
+			Addr:     container.Config.Redis.Addr,
+			Password: container.Config.Redis.Password,
+			DB:       container.Config.Redis.DB,
 		},
 		asynq.Config{
-			Concurrency: 10,
-			Logger:      &ZapLoggerAdapter{logger: app.Logger},
+			Concurrency: container.WorkerConcurrency(),
+			Logger:      &ZapLoggerAdapter{logger: container.Logger},
 		},
 	)
 
-	// 4. Mux & Tasks
+	// Register task handlers
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeEmailAnalyze, func(ctx context.Context, t *asynq.Task) error {
-		// Use explicit cast from Config via mapstructure or manual check if needed
-		// For now assuming viper populated it correctly in Config struct, but Config struct doesn't have chunk_size
-		// Let's assume default or add it to Config struct later.
-		// Checking app.Config.AI...
-		// It's not in app.Config.AI (AIConfig).
-		// We'll default to 1000 if not found, or add to config.
-		chunkSize := 1000 // Default
-
-		embedder, ok := aiProvider.(ai.EmbeddingProvider)
-		if !ok {
-			app.Logger.Error("AI provider does not implement EmbeddingProvider")
-			return nil 
-		}
-
-		searchService := service.NewSearchService(app.DB, embedder)
-		contextService := service.NewContextService(app.DB)
-		return tasks.HandleEmailAnalyzeTask(ctx, t, app.DB, summarizer, searchService, contextService, chunkSize)
+		return tasks.HandleEmailAnalyzeTask(
+			ctx, t,
+			container.DB,
+			container.Summarizer,
+			container.SearchService,
+			container.ContextService,
+			container.ChunkSize(),
+		)
 	})
 
-	app.Logger.Info("Starting worker...")
-	if err := srv.Run(mux); err != nil {
-		app.Logger.Fatal("could not run server", zap.Error(err))
+	container.Logger.Info("Starting worker...")
+
+	// Run worker in a goroutine
+	done := make(chan error, 1)
+	go func() {
+		done <- srv.Run(mux)
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the worker
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case <-quit:
+		container.Logger.Info("Shutting down worker...")
+		srv.Shutdown()
+		container.Logger.Info("Worker stopped gracefully")
+	case err := <-done:
+		if err != nil {
+			container.Logger.Fatal("Worker failed", zap.Error(err))
+		}
 	}
 }

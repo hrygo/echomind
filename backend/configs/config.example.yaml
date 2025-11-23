@@ -1,19 +1,23 @@
 server:
   port: 8080
+  environment: development  # Options: development, production
   jwt:
-    secret: "YOUR_JWT_SECRET"
+    secret: "your-jwt-secret-here-change-in-production"
     expiration_hours: 72
 
 database:
-  dsn: "host=localhost user=YOUR_DB_USER password=YOUR_DB_PASSWORD dbname=echomind_db port=5432 sslmode=disable"
+  dsn: "host=localhost user=your_db_user password=your_db_password dbname=echomind_db port=5432 sslmode=disable"
 
 security:
-  encryption_key: "YOUR_ENCRYPTION_KEY_64_CHARS_HEX" # IMPORTANT: Change this to a random 32-byte (64-char hex) string in production!
+  encryption_key: "your-64-char-hex-encryption-key-here-change-in-production-32bytes" # 64-char hex key (32 bytes)
 
 redis:
   addr: "localhost:6380"
-  password: "YOUR_REDIS_PASSWORD"
+  password: ""
   db: 0
+
+worker:
+  concurrency: 10  # Number of concurrent task workers
 
 # ==============================================================================
 # AI Service Configuration (AI 服务配置)
@@ -28,7 +32,7 @@ ai:
     chat: "deepseek"         # Responsible for Summarize, Classify, Draft Reply
     embedding: "gemini_flash"   # Responsible for Vector Embeddings (RAG)
 
-  chunk_size: 1000 # Max tokens per chunk for RAG processing.
+  chunk_size: 1000  # Max tokens per chunk for RAG processing
 
   # ---------------------------------------------------------------------------
   # 2. Provider Registry (能力注册表)
@@ -43,7 +47,7 @@ ai:
       protocol: "openai"
       settings:
         base_url: "https://api.deepseek.com/v1"
-        api_key: "${DEEPSEEK_API_KEY}"
+        api_key: "sk-your-deepseek-api-key-here"
         model: "deepseek-chat"
 
     # [Use Case: Industry Standard]
@@ -51,7 +55,7 @@ ai:
     openai_small:
       protocol: "openai"
       settings:
-        api_key: "${OPENAI_API_KEY}"
+        api_key: "sk-your-openai-api-key-here"
         # This provider supports both Chat and Embedding
         model: "gpt-4o-mini"
         embedding_model: "text-embedding-3-small"
@@ -61,8 +65,8 @@ ai:
     gemini_flash:
       protocol: "gemini"
       settings:
-        api_key: "${GEMINI_API_KEY}"
-        model: "gemini-2.5-flash"
+        api_key: "your-google-ai-studio-api-key-here"
+        model: "gemini-2.0-flash-exp"
         embedding_model: "text-embedding-004"
 
     # [Use Case: Local Privacy / Offline]
@@ -82,7 +86,7 @@ ai:
       protocol: "openai"
       settings:
         base_url: "https://api.moonshot.cn/v1"
-        api_key: "${MOONSHOT_API_KEY}"
+        api_key: "your-moonshot-api-key-here"
         model: "moonshot-v1-8k"
 
     # [Use Case: Testing]
@@ -107,6 +111,33 @@ ai:
       - "sentiment": 确定整体情感：'Positive' (积极), 'Neutral' (中性), 'Negative' (消极)。请返回英文情感名称。
       - "urgency": 确定紧急程度：'High' (高), 'Medium' (中), 'Low' (低)。请返回英文紧急程度名称。
       - "action_items": 提取邮件中的待办事项或行动项列表（中文）。如果没有，返回空数组。
+      - "smart_actions": 分析邮件中是否包含具体的会议邀请、任务截止日期或需要添加到日历/待办的事项。如果是，请生成一个对象数组。支持的类型：'calendar_event' (日历事件), 'create_task' (创建任务)。如果没有，返回空数组。
+      
+      Smart Action 格式示例：
+      ```json
+      {
+        "smart_actions": [
+          {
+            "type": "calendar_event",
+            "label": "添加到日历",
+            "data": {
+              "title": "项目周会",
+              "start": "2023-10-27 10:00",
+              "end": "2023-10-27 11:00",
+              "location": "Zoom"
+            }
+          },
+          {
+            "type": "create_task",
+            "label": "创建待办",
+            "data": {
+              "title": "提交财务报表",
+              "deadline": "2023-10-30"
+            }
+          }
+        ]
+      }
+      ```
       请勿包含任何对话填充词。示例输出：
       ```json
       {
@@ -114,7 +145,8 @@ ai:
         "category": "Work",
         "sentiment": "Neutral",
         "urgency": "Medium",
-        "action_items": ["跟进项目X", "安排与Y团队的会议"]
+        "action_items": ["跟进项目X"],
+        "smart_actions": []
       }
       ```
 
