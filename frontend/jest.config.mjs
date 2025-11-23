@@ -14,6 +14,7 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testEnvironment: 'jest-environment-jsdom',
+  testPathIgnorePatterns: ['<rootDir>/tests/e2e/', '<rootDir>/node_modules/'],
   // Add more setup options before each test is run
   // setupFiles: ['<rootDir>/jest.setup.js'],
 };
