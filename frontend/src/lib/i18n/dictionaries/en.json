@@ -125,6 +125,10 @@
         "snoozeNextWeek": "Snooze until next week",
         "dismiss": "Dismiss"
     },
+    "chat": {
+        "askCopilot": "Ask Copilot",
+        "contextLoaded": "Loaded {count} emails into context. How can I help you?"
+    },
     "createContextModal": {
         "title": "Create Smart Context",
         "nameLabel": "Context Name",

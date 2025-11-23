@@ -125,6 +125,10 @@
         "snoozeNextWeek": "小睡到下周",
         "dismiss": "忽略"
     },
+    "chat": {
+        "askCopilot": "询问 AI",
+        "contextLoaded": "已加载 {count} 封邮件作为上下文。您想了解什么？"
+    },
     "createContextModal": {
         "title": "创建智能情境",
         "nameLabel": "情境名称",

@@ -1,10 +1,13 @@
 "use client";
 
 import { SearchResult } from "@/lib/api";
-import { Mail, Calendar, User } from "lucide-react";
+import { Mail, Calendar, User, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { Button } from '@/components/ui/Button';
+import { useChatStore } from '@/lib/store/chat';
+import { Email } from '@/lib/api/emails';
 
 interface SearchResultsProps {
     results: SearchResult[];
@@ -17,10 +20,33 @@ interface SearchResultsProps {
 export function SearchResults({ results, isLoading, error, query, onClose }: SearchResultsProps) {
     const router = useRouter();
     const { t } = useLanguage();
+    const { setOpen, setActiveContextEmails, addMessage } = useChatStore();
 
     const handleResultClick = (emailId: string) => {
         router.push(`/dashboard/emails/${emailId}`);
         onClose();
+    };
+
+    const handleAskCopilot = () => {
+        const emailsForContext: Email[] = results.map(result => ({
+            ID: result.email_id,
+            Subject: result.subject || "(No Subject)",
+            Sender: result.sender,
+            Snippet: result.snippet,
+            BodyText: result.snippet, // Placeholder, full body would need another API call
+            Date: result.date,
+            Summary: result.snippet, // Placeholder
+            Category: "", // Not available in SearchResult
+            Sentiment: "", // Not available in SearchResult
+            Urgency: "", // Not available in SearchResult
+            IsRead: true, // Assuming read if it's in search results
+            ActionItems: [],
+            SmartActions: null,
+        }));
+        setActiveContextEmails(emailsForContext);
+        setOpen(true);
+        addMessage({ role: 'system', content: t('chat.contextLoaded').replace('{count}', emailsForContext.length.toString()) });
+        onClose(); // Close search results overlay
     };
 
     const highlightText = (text: string, query: string) => {
@@ -148,6 +174,17 @@ export function SearchResults({ results, isLoading, error, query, onClose }: Sea
                     </button>
                 ))}
             </div>
+            {results.length > 0 && (
+                <div className="p-2 border-t border-slate-100 bg-slate-50">
+                    <Button 
+                        onClick={handleAskCopilot} 
+                        variant="ghost" 
+                        className="w-full justify-center text-blue-600 hover:text-blue-700 gap-2"
+                    >
+                        <Sparkles className="w-4 h-4" /> {t('chat.askCopilot')}
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
