@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs
+.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status
 
 # Version
 VERSION := 0.9.0
@@ -34,7 +34,8 @@ help:
 	@echo "    make reindex       - Reindex all emails (generate embeddings)"
 	@echo ""
 	@echo "  Observability:"
-	@echo "    make status        - Check status"
+	@echo "    make status        - Check service status"
+	@echo "    make ci-status     - Check latest GitHub CI/CD pipeline status"
 	@echo "    make logs          - View logs"
 	@echo "    make watch-logs    - Follow logs"
 
@@ -157,6 +158,9 @@ watch-worker:
 
 watch-frontend:
 	@tail -f $(FRONTEND_LOG)
+
+ci-status:
+	@./scripts/check_ci.sh
 
 # Code Quality
 test:
