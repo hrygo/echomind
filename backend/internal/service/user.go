@@ -79,25 +79,39 @@ func (s *UserService) RegisterUser(ctx context.Context, email, password, name st
 }
 
 // LoginUser authenticates a user and generates a JWT token.
-func (s *UserService) LoginUser(ctx context.Context, email, password string) (string, *model.User, error) {
+func (s *UserService) LoginUser(ctx context.Context, email, password string) (string, *model.User, bool, error) {
 	var user model.User
 	if err := s.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", nil, ErrInvalidCredentials
+			return "", nil, false, ErrInvalidCredentials
 		}
-		return "", nil, err
+		return "", nil, false, err
 	}
 
 	if !utils.CheckPasswordHash(password, user.PasswordHash) {
-		return "", nil, ErrInvalidCredentials
+		return "", nil, false, ErrInvalidCredentials
 	}
 
 	token, err := utils.GenerateToken(user.ID, s.jwtCfg.Secret, s.jwtCfg.ExpirationHours)
 	if err != nil {
-		return "", nil, err
+		return "", nil, false, err
 	}
 
-	return token, &user, nil
+	// Check if user has a connected email account
+	var hasAccount bool
+	var count int64
+	if err := s.db.WithContext(ctx).Model(&model.EmailAccount{}).Where("user_id = ?", user.ID).Count(&count).Error; err != nil {
+		// Log error but don't fail login
+		_ = err
+	}
+	hasAccount = count > 0
+
+	return token, &user, hasAccount, nil
+}
+
+// UpdateUserRole updates the role of a user.
+func (s *UserService) UpdateUserRole(ctx context.Context, userID uuid.UUID, role string) error {
+	return s.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", userID).Update("role", role).Error
 }
 
 // GetUserByID retrieves a user by their ID.

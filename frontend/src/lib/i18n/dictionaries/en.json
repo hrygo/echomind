@@ -24,7 +24,8 @@
         "searchTip3": "Search for sender name or email address",
         "searchTip4": "Use filters to narrow down by date",
         "foundResults": "Found {count} result{plural} for \"{query}\"",
-        "undo": "Undo"
+        "undo": "Undo",
+        "developing": "is under development"
     },
     "sidebar": {
         "intelligence": "Intelligence",
@@ -190,7 +191,25 @@
         "imapPort": "IMAP Port",
         "smtpPort": "SMTP Port",
         "configureMailbox": "Configure Mailbox",
-        "mailboxConfigDesc": "Configure IMAP/SMTP server information for email synchronization"
+        "mailboxConfigDesc": "Configure IMAP/SMTP server information for email synchronization",
+        "profile": {
+            "title": "Profile Settings",
+            "uploadAvatar": "Upload new picture",
+            "saveChanges": "Save Changes"
+        },
+        "connection": {
+            "title": "Mailbox Connection",
+            "statusConnected": "Connected",
+            "statusDisconnected": "Disconnected",
+            "lastSynced": "Last synced: {time}",
+            "reconfigure": "Reconfigure Connection",
+            "autoSync": "Auto-sync every 15 mins",
+            "syncStarted": "Sync initiated successfully",
+            "notConfigured": "No mailbox configured. Please set up your email account.",
+            "syncFailed": "Sync failed. Please try again.",
+            "configureMailboxDesc": "Configure IMAP/SMTP server information for email synchronization",
+            "configureMailbox": "Configure Mailbox"
+        }
     },
     "emailDetail": {
         "addToCalendar": "Add to Calendar",
@@ -206,23 +225,31 @@
         "createTaskDefault": "New Task from Email"
     },
     "auth": {
-        "signInTitle": "Sign in to EchoMind",
-        "signInDesc": "Enter your email and password to access your account",
-        "emailLabel": "Email",
-        "passwordLabel": "Password",
-        "signInButton": "Sign In",
-        "noAccount": "Don't have an account?",
-        "signUpLink": "Sign up",
-        "invalidCredentials": "Invalid email or password. Please try again.",
-        "signUpTitle": "Create an Account",
-        "signUpDesc": "Enter your information to create your account",
-        "nameLabel": "Full Name",
-        "confirmPasswordLabel": "Confirm Password",
-        "signUpButton": "Create Account",
-        "alreadyHaveAccount": "Already have an account?",
-        "signInLink": "Sign in",
-        "passwordMismatch": "Passwords do not match",
-        "registrationFailed": "Registration failed. Please try again."
+        "welcomeBack": "Welcome back",
+        "createAccount": "Create an account",
+        "tagline": "Your AI Chief of Staff",
+        "emailPlaceholder": "name@work-email.com",
+        "passwordPlaceholder": "Password",
+        "namePlaceholder": "Full Name",
+        "forgotPassword": "Forgot password?",
+        "continue": "Continue",
+        "loggingIn": "Logging in...",
+        "signingUp": "Creating account...",
+        "orSeparator": "OR",
+        "terms": "By clicking continue, you agree to our Terms of Service.",
+        "feature1": "AI-powered Smart Summaries",
+        "feature2": "Context-aware AI Chat Copilot",
+        "feature3": "Automated Action Item Extraction",
+        "errors": {
+            "emailRequired": "Email is required",
+            "emailInvalid": "Please enter a valid email",
+            "passwordLength": "Password must be at least 8 characters",
+            "invalidCredentials": "Invalid email or password. Please try again.",
+            "passwordMismatch": "Passwords do not match",
+            "registrationFailed": "Registration failed. Please try again.",
+            "nameRequired": "Full Name is required",
+            "emailTaken": "This email is already registered."
+        }
     },
     "copilot": {
         "placeholderChat": "Ask Copilot anything...",
@@ -236,5 +263,38 @@
         "noResults": "No results found. Try a different query.",
         "match": "match",
         "welcomeMessage": "How can I help you today?"
+    },
+    "onboarding": {
+        "step1": {
+            "title": "Tell us about your role",
+            "subtitle": "We'll tailor your experience based on your focus.",
+            "roleExecutive": "Executive",
+            "descExecutive": "Strategic decisions & risk management",
+            "roleManager": "Manager",
+            "descManager": "Team coordination & task tracking",
+            "roleDealmaker": "Dealmaker",
+            "descDealmaker": "Sales pipeline & relationships",
+            "next": "Next Step"
+        },
+        "step2": {
+            "title": "Connect your neural network",
+            "subtitle": "Link your primary work email to start analyzing.",
+            "emailLabel": "Email Address",
+            "passwordLabel": "Password / App Password",
+            "passwordHint": "Using {provider}? You likely need an App Password.",
+            "advancedSettings": "Advanced Server Settings",
+            "imapHost": "IMAP Host",
+            "imapPort": "IMAP Port",
+            "smtpHost": "SMTP Host",
+            "smtpPort": "SMTP Port",
+            "connect": "Connect Mailbox",
+            "connecting": "Verifying credentials...",
+            "success": "Connected successfully!"
+        },
+        "step3": {
+            "title": "Initializing EchoMind",
+            "subtitle": "Syncing recent emails and building your knowledge graph...",
+            "enterDashboard": "Enter Dashboard"
+        }
     }
 }

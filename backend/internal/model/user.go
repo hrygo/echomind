@@ -12,6 +12,7 @@ type User struct {
 	Email        string    `gorm:"type:varchar(255);uniqueIndex;not null"`
 	PasswordHash string    `gorm:"type:varchar(255);not null"` // bcrypt hash
 	Name         string    `gorm:"type:varchar(100)"`
+	Role         string    `gorm:"type:varchar(50);default:'manager';not null"` // Add Role field
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 

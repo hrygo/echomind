@@ -24,7 +24,8 @@
         "searchTip3": "搜索发件人姓名或邮箱地址",
         "searchTip4": "使用过滤器按日期筛选",
         "foundResults": "为您找到 {count} 条关于 “{query}” 的结果",
-        "undo": "撤销"
+        "undo": "撤销",
+        "developing": "正在开发中"
     },
     "sidebar": {
         "intelligence": "智能驾驶舱",
@@ -190,7 +191,20 @@
         "imapPort": "IMAP 端口",
         "smtpPort": "SMTP 端口",
         "configureMailbox": "配置邮箱",
-        "mailboxConfigDesc": "配置用于同步邮件的 IMAP/SMTP 服务器信息"
+        "mailboxConfigDesc": "配置用于同步邮件的 IMAP/SMTP 服务器信息",
+        "profile": {
+            "title": "个人资料设置",
+            "uploadAvatar": "上传新头像",
+            "saveChanges": "保存更改"
+        },
+        "connection": {
+            "title": "邮箱连接管理",
+            "statusConnected": "已连接",
+            "statusDisconnected": "未连接",
+            "lastSynced": "上次同步：{time}",
+            "reconfigure": "重新配置连接",
+            "autoSync": "每15分钟自动同步"
+        }
     },
     "emailDetail": {
         "addToCalendar": "添加到日历",
@@ -206,23 +220,34 @@
         "createTaskDefault": "来自邮件的新任务"
     },
     "auth": {
-        "signInTitle": "登录 EchoMind",
-        "signInDesc": "输入您的邮箱和密码以访问账号",
-        "emailLabel": "邮箱",
-        "passwordLabel": "密码",
-        "signInButton": "登录",
-        "noAccount": "还没有账号？",
-        "signUpLink": "注册",
-        "invalidCredentials": "邮箱或密码错误，请重试。",
-        "signUpTitle": "创建账号",
-        "signUpDesc": "输入您的信息以创建新账号",
-        "nameLabel": "全名",
-        "confirmPasswordLabel": "确认密码",
-        "signUpButton": "创建账号",
+        "welcomeBack": "欢迎回来",
+        "createAccount": "创建新账号",
+        "tagline": "您的 AI 智能助理",
+        "emailPlaceholder": "name@work-email.com",
+        "passwordPlaceholder": "密码",
+        "namePlaceholder": "您的全名",
+        "forgotPassword": "忘记密码？",
+        "continue": "继续",
+        "loggingIn": "登录中...",
+        "signingUp": "创建账号中...",
+        "orSeparator": "或",
+        "terms": "点击继续表示您同意我们的服务条款。",
+        "feature1": "AI 智能邮件摘要",
+        "feature2": "上下文感知 AI 对话",
+        "feature3": "自动提取待办事项",
+        "errors": {
+            "emailRequired": "邮箱地址不能为空",
+            "emailInvalid": "请输入有效的邮箱地址",
+            "passwordLength": "密码长度至少为8个字符",
+            "invalidCredentials": "邮箱或密码错误，请重试。",
+            "passwordMismatch": "两次输入的密码不一致",
+            "registrationFailed": "注册失败，请重试。",
+            "nameRequired": "全名不能为空",
+            "emailTaken": "此邮箱已被注册。"
+        },
+        "dontHaveAccount": "还没有账号？",
         "alreadyHaveAccount": "已有账号？",
-        "signInLink": "登录",
-        "passwordMismatch": "两次输入的密码不一致",
-        "registrationFailed": "注册失败，请重试。"
+        "signInTitle": "登录"
     },
     "copilot": {
         "placeholderChat": "问 Copilot 任何问题...",
@@ -236,5 +261,38 @@
         "noResults": "未找到结果。请尝试不同的查询。",
         "match": "匹配度",
         "welcomeMessage": "今天我能为您做什么？"
+    },
+    "onboarding": {
+        "step1": {
+            "title": "请告诉我们您的角色",
+            "subtitle": "我们将根据您的专注点为您定制体验。",
+            "roleExecutive": "高管",
+            "descExecutive": "战略决策与风险管理",
+            "roleManager": "经理",
+            "descManager": "团队协调与任务跟踪",
+            "roleDealmaker": "销售",
+            "descDealmaker": "销售线索与客户关系管理",
+            "next": "下一步"
+        },
+        "step2": {
+            "title": "连接您的神经网络",
+            "subtitle": "关联您的主工作邮箱，开始智能分析。",
+            "emailLabel": "邮箱地址",
+            "passwordLabel": "密码 / 应用专用密码",
+            "passwordHint": "使用 {provider} 邮箱？您可能需要一个应用专用密码。",
+            "advancedSettings": "高级服务器设置",
+            "imapHost": "IMAP 主机",
+            "imapPort": "IMAP 端口",
+            "smtpHost": "SMTP 主机",
+            "smtpPort": "SMTP 端口",
+            "connect": "连接邮箱",
+            "connecting": "正在验证凭据...",
+            "success": "连接成功！"
+        },
+        "step3": {
+            "title": "初始化 EchoMind",
+            "subtitle": "正在同步近期邮件并构建您的知识图谱...",
+            "enterDashboard": "进入仪表盘"
+        }
     }
 }

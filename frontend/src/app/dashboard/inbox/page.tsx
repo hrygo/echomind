@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button"; // Assuming a global Button component with good styling
-
+import { isAxiosError } from 'axios';
 
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -87,15 +87,14 @@ export default function DashboardPage() {
       await api.post<{ message: string }>("/sync");
       alert("同步任务已启动");
       fetchEmails();
-    } catch (err: any) {
-      console.error("Sync error:", err);
-      if (err.response && err.response.status === 400) {
-        // Prompt user to configure settings if account is not configured
+    } catch (error: unknown) {
+      console.error("Sync error:", error);
+      if (isAxiosError(error) && error.response?.status === 400) {
         if (confirm("您尚未配置邮箱账户。是否立即前往设置页面进行配置？")) {
           router.push('/dashboard/settings');
         }
-      } else if (err instanceof Error) {
-        alert(`同步失败：${err.message}`);
+      } else if (error instanceof Error) {
+        alert(`同步失败：${error.message}`);
       } else {
         alert("同步失败：发生未知错误。");
       }

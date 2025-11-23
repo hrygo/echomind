@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import AuthGuard from "@/components/auth/AuthGuard";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { ToastContainer } from '@/components/ui/Toast'; // Import ToastContainer
 
@@ -18,10 +17,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-100 text-gray-900 antialiased">
         <LanguageProvider>
-          <AuthGuard>
-            {children}
-            <ToastContainer />
-          </AuthGuard>
+          {children}
+          <ToastContainer />
         </LanguageProvider>
       </body>
     </html>
