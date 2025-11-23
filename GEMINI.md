@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.9.1 (Beta) | **Active Sprint**: Phase 6.2 - Week 3: Polish & Completion
+> **Stage**: v0.9.2 (Beta) | **Active Sprint**: Phase 6.3 - Stage 2: Omni-Bar
 
 ---
 
@@ -14,22 +14,22 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.9.0 → v0.9.1)
-**Phase 6.2 - Week 2: Actionable Intelligence**
-- ✅ **Smart Contexts**: Project/Topic-based organization (`contexts` table, CRUD, Sidebar UI, Auto-tagging).
-- ✅ **Actionable Dashboard**: "Smart Feed" with optimistic UI updates.
-- ✅ **Actions System**: Approve/Snooze/Dismiss logic (`ActionService`, `useActionStore`, Undo Toast).
-- ✅ **Backend Refactor**: Unified `bootstrap` package for consistent startup.
-- ✅ **i18n**: Full bilingual support for new features.
+### ✅ Recent Completion (v0.9.1 → v0.9.2)
+**Phase 6.3 - Stage 1: Context Bridge**
+- ✅ **Integration**: Chat Store now supports `activeContextEmails` state.
+- ✅ **UI**: "Ask Copilot" button added to `SearchResults` component.
+- ✅ **Chat**: `ChatSidebar` consumes `activeContextEmails` and prepends to system prompt.
+- ✅ **Bugfix**: Dashboard search input responsiveness improved.
+- ✅ **Bugfix**: AI Chat page duplicate 'X' close button removed.
 
-### 🚧 Current Sprint (v0.9.2 Target)
-**Phase 6.2 - Week 3: Polish & Completion**
-- **Dashboard Stats**: Connect Executive View stats to real backend data (removing mocks).
-- **AI Reply Flow**: Implement "Reply with AI" modal and draft generation integration.
-- **Chat Integration**: Render Task Cards in chat stream.
-- **Task Hub**: Finalize Task Widget UI in Manager View.
+### 🚧 Current Sprint (v0.9.3 Target)
+**Phase 6.3 - Stage 2: Omni-Bar**
+- **Smart Routing**: Implement logic in Header search to distinguish between search queries and chat prompts, automatically opening the chat sidebar for questions.
+- **Mixed Mode**: Enhance search results to allow advanced actions directly from the results, triggering context-aware AI interactions.
 
 ### 🔮 Future (6-Month Plan)
+- **Phase 6.3 - Stage 3: Generative Widgets** (v0.9.4)
+  - **Widget Rendering**: Chat stream dynamically renders UI components (e.g., Task Cards, Search Result Cards) based on AI responses.
 - **Phase 7** (2026.03-04): WeChat Integration (Official Account)
 - **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
 - **Phase 9** (TBD): Team Collaboration (重新评估优先级)
