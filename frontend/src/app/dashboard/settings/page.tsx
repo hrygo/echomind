@@ -48,11 +48,22 @@ export default function SettingsPage() {
   };
 
   const handleSaveMailboxConfig = async () => {
+    if (!mailboxConfig.email || !mailboxConfig.password || !mailboxConfig.imapServer || !mailboxConfig.imapPort) {
+      alert("请填写所有必填项");
+      return;
+    }
+
+    const port = parseInt(mailboxConfig.imapPort);
+    if (isNaN(port)) {
+        alert("端口必须是数字");
+        return;
+    }
+
     try {
       await api.post('/settings/account', {
         email: mailboxConfig.email,
         server_address: mailboxConfig.imapServer,
-        server_port: parseInt(mailboxConfig.imapPort),
+        server_port: port,
         username: mailboxConfig.email, // Assuming username is email
         password: mailboxConfig.password
       });

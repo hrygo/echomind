@@ -1,0 +1,190 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - button "Open Next.js Dev Tools" [ref=e6] [cursor=pointer]:
+    - img [ref=e7]
+  - alert
+  - generic:
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading [level=1]: EchoMind
+            - paragraph: Turn noise into decisions
+      - generic:
+        - navigation:
+          - generic: Intelligence
+          - link:
+            - /url: /dashboard
+            - img
+            - generic: Dashboard
+          - link:
+            - /url: /dashboard/inbox?filter=smart
+            - img
+            - generic: Smart Inbox
+          - link:
+            - /url: /dashboard/tasks
+            - img
+            - generic: Action Items
+          - link:
+            - /url: /dashboard/insights
+            - img
+            - generic: Network
+        - navigation:
+          - generic:
+            - generic: Smart Contexts
+            - button:
+              - img
+          - generic: + Create your first context
+        - navigation:
+          - generic: Mailbox
+          - link:
+            - /url: /dashboard/inbox
+            - img
+            - generic: Inbox
+          - link:
+            - /url: /dashboard/inbox?folder=sent
+            - img
+            - generic: Sent
+          - link:
+            - /url: /dashboard/inbox?folder=drafts
+            - img
+            - generic: Drafts
+          - link:
+            - /url: /dashboard/inbox?folder=trash
+            - img
+            - generic: Trash
+        - navigation:
+          - generic: Labels
+          - link:
+            - /url: /dashboard/inbox?category=Work
+            - img
+            - generic: Work
+          - link:
+            - /url: /dashboard/inbox?category=Personal
+            - img
+            - generic: Personal
+          - link:
+            - /url: /dashboard/inbox?category=Newsletter
+            - img
+            - generic: Newsletter
+          - link:
+            - /url: /dashboard/inbox?category=Finance
+            - img
+            - generic: Finance
+          - link:
+            - /url: /dashboard/inbox?category=Notification
+            - img
+            - generic: Notification
+    - main:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - img
+              - textbox:
+                - /placeholder: Search emails, contacts, or tasks...
+          - generic:
+            - generic:
+              - generic:
+                - generic: Recent Searches
+                - button:
+                  - img
+                  - text: Clear
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                    - generic: project alpha
+                  - button:
+                    - img
+          - generic:
+            - button:
+              - img
+            - button:
+              - img
+            - button:
+              - img
+            - generic:
+              - button:
+                - generic: U
+                - generic:
+                  - paragraph: User
+                  - paragraph: Free Plan
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - generic: AI Morning Briefing
+                - heading [level=1]: Good evening, Alex.
+                - paragraph: You have 3 high-risk emails and 5 pending decisions today.
+            - generic:
+              - button:
+                - img
+                - text: Executive View
+              - button:
+                - img
+                - text: Manager View
+              - button:
+                - img
+                - text: Dealmaker View
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                        - generic: High Risk
+                      - heading [level=3]: Risk Warning
+                      - paragraph: "3"
+                      - paragraph: Critical feedback detected
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                        - generic: +12%
+                      - heading [level=3]: Weekly Interaction
+                      - paragraph: "128"
+                      - paragraph: Key stakeholder engagement
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                        - generic: Today
+                      - heading [level=3]: Pending Decisions
+                      - paragraph: "5"
+                      - paragraph: Approval & Budget Review
+                - generic:
+                  - generic:
+                    - generic:
+                      - heading [level=3]:
+                        - text: Smart Feed
+                        - generic: Priority Only
+                      - link:
+                        - /url: /dashboard/inbox?filter=smart
+                        - text: View All
+                        - img
+                    - generic:
+                      - generic: No urgent items found in this context.
+  - dialog "EchoMind Copilot" [ref=e11]:
+    - generic [ref=e13]:
+      - img [ref=e14]
+      - heading "EchoMind Copilot" [level=2] [ref=e17]
+    - paragraph [ref=e22]: status
+    - generic [ref=e24]:
+      - textbox "Ask anything..." [active] [ref=e25]
+      - button [disabled] [ref=e26]:
+        - img [ref=e27]
+    - button "Close" [ref=e30]:
+      - img [ref=e31]
+      - generic [ref=e34]: Close
+```

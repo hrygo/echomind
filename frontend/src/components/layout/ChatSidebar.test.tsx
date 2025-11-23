@@ -10,13 +10,22 @@ jest.mock('@/store/auth', () => ({
         getState: jest.fn(),
     },
 }));
-jest.mock('react-markdown', () => ({ children }: { children: React.ReactNode }) => <div>{children}</div>);
-jest.mock('@/components/ui/Sheet', () => ({
-  Sheet: ({ children, open }: { children: React.ReactNode; open: boolean }) => open ? <div>{children}</div> : null,
-  SheetContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SheetHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SheetTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock('react-markdown', () => {
+  const ReactMarkdown = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  ReactMarkdown.displayName = 'ReactMarkdown';
+  return ReactMarkdown;
+});
+jest.mock('@/components/ui/Sheet', () => {
+  const Sheet = ({ children, open }: { children: React.ReactNode; open: boolean }) => open ? <div>{children}</div> : null;
+  Sheet.displayName = 'Sheet';
+  const SheetContent = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  SheetContent.displayName = 'SheetContent';
+  const SheetHeader = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  SheetHeader.displayName = 'SheetHeader';
+  const SheetTitle = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  SheetTitle.displayName = 'SheetTitle';
+  return { Sheet, SheetContent, SheetHeader, SheetTitle };
+});
 jest.mock('@/lib/i18n/LanguageContext', () => ({
   useLanguage: () => ({ 
     t: (key: string) => {

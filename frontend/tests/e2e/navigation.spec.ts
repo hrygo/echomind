@@ -2,26 +2,21 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard Navigation', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock Login
-    await page.route(url => url.href.includes('/api/v1/auth/login'), async (route) => {
-      const json = {
-        token: 'mock-jwt-token',
-        user: { id: 'mock-user-id', email: 'test@example.com', name: 'Test User' },
-      };
-      await route.fulfill({ json });
-    });
-
-    // Mock Orgs
-    await page.route(url => url.href.includes('/api/v1/orgs'), async (route) => {
-      const json = [
-        { id: 'org-1', name: 'Personal Workspace', slug: 'personal-workspace', owner_id: 'mock-user-id' },
-      ];
-      await route.fulfill({ json });
-    });
-
-    // Mock Inbox (for Smart Inbox nav)
-    await page.route(url => url.href.includes('/api/v1/emails'), async (route) => {
-        await route.fulfill({ json: [] });
+    // Universal Mock Handler
+    await page.route('**/api/v1/**', async (route) => {
+        const url = route.request().url();
+        if (url.includes('/auth/login')) {
+            return route.fulfill({ json: { token: 'mock', user: { id: '1', email: 'test@test.com' } } });
+        }
+        if (url.includes('/orgs')) {
+             return route.fulfill({ json: [{ id: 'org-1', name: 'Personal', slug: 'personal', owner_id: '1' }] });
+        }
+        // Return empty lists for other resources
+        if (url.includes('/emails') || url.includes('/contexts') || url.includes('/tasks') || url.includes('/insights')) {
+             return route.fulfill({ json: [] });
+        }
+        // Catch-all
+        return route.fulfill({ status: 200, json: {} });
     });
 
     // Force English

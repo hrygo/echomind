@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/Sheet';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { TaskWidget } from '@/components/widgets/TaskWidget';
-import { SearchResultWidget } from '@/components/widgets/SearchResultWidget';
+import { TaskWidget, TaskWidgetProps } from '@/components/widgets/TaskWidget';
+import { SearchResultWidget, SearchResultWidgetProps } from '@/components/widgets/SearchResultWidget';
 
 
 export function ChatSidebar() {
@@ -29,7 +29,7 @@ export function ChatSidebar() {
     // Handle activeContextEmails when they are set
     useEffect(() => {
         if (activeContextEmails.length > 0) {
-            const contextSummary = activeContextEmails.map(email => 
+            const contextSummary = activeContextEmails.map(email =>
                 `Subject: ${email.Subject}\nSender: ${email.Sender}\nSnippet: ${email.Snippet}`
             ).join('\n\n');
 
@@ -49,7 +49,7 @@ export function ChatSidebar() {
         setInput('');
 
         const conversationMessages = [...messages, { role: 'user', content: userMessageContent }];
-        
+
         // If there's active context, prepend it as a system message for the API call
         // Note: The context has already been added to `messages` by the useEffect above.
         // So, we just need to ensure the `apiMessages` correctly represents the full conversation history.
@@ -192,7 +192,7 @@ export function ChatSidebar() {
                         </div>
                     )}
 
-                    {messages.map((msg, idx) => (
+                    {messages.filter(msg => msg.role !== 'system').map((msg, idx) => (
                         <div
                             key={idx}
                             className={cn(
@@ -210,12 +210,11 @@ export function ChatSidebar() {
                             >
                                 <div className="prose prose-sm max-w-none dark:prose-invert">
                                     {msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>}
-                                    {msg.widget && (
-                                        msg.widget.type === 'task_card' ? <TaskWidget data={msg.widget.data as any} /> :
-                                        msg.widget.type === 'search_result_card' ? <SearchResultWidget data={msg.widget.data as any} /> :
-                                        null
-                                    )}
-                                </div>
+                                                                        {msg.widget && (
+                                                                            msg.widget.type === 'task_card' ? <TaskWidget data={msg.widget.data as unknown as TaskWidgetProps['data']} /> :
+                                                                            msg.widget.type === 'search_result_card' ? <SearchResultWidget data={msg.widget.data as unknown as SearchResultWidgetProps['data']} /> :
+                                                                            null
+                                                                        )}                                </div>
                             </div>
                         </div>
                     ))}

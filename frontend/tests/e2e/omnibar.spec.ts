@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Omni-Bar Functionality', () => {
   test.beforeEach(async ({ page }) => {
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     // Universal Mock Handler
     await page.route('**/api/v1/**', async (route) => {
         const url = route.request().url();

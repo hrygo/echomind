@@ -1,6 +1,6 @@
 import { User, Calendar } from 'lucide-react';
 
-interface SearchResultWidgetProps {
+export interface SearchResultWidgetProps {
     data: {
         results: Array<{
             subject: string;

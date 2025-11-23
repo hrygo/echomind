@@ -1,7 +1,7 @@
 import { CheckCircle, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface TaskWidgetProps {
+export interface TaskWidgetProps {
     data: {
         title: string;
         dueDate?: string;

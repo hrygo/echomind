@@ -3,7 +3,7 @@ import { Email } from '@/lib/api/emails';
 
 export interface WidgetData {
   type: string; // e.g., 'task_card', 'search_result_card'
-  data: Record<string, any>; // Arbitrary data for the widget
+  data: Record<string, unknown>; // Arbitrary data for the widget
 }
 
 interface Message {

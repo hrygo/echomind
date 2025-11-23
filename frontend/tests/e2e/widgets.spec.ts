@@ -21,7 +21,6 @@ test.describe('Generative Widgets', () => {
         }
 
         if (url.includes('/chat/completions')) {
-            console.log('MOCK HIT: Chat Completions with Widget');
             // Mock a streaming response with a widget
             // Data must be SSE formatted
             const widgetData = {

@@ -64,28 +64,28 @@ export function Header() {
         return { type: 'search', searchPart: query };
     };
 
-                const handleSearch = async (currentSearchQuery: string, queryOverride?: string) => {
+    const handleSearch = async (currentSearchQuery: string, queryOverride?: string) => {
 
-                    const query = typeof queryOverride === 'string' ? queryOverride : currentSearchQuery;
+        const query = typeof queryOverride === 'string' ? queryOverride : currentSearchQuery;
 
-                    if (!query.trim()) {
+        if (!query.trim()) {
 
-                        setShowResults(false);
+            setShowResults(false);
 
-                        return;
+            return;
 
-                    }
+        }
 
-            
 
-                    const intent = classifyQueryIntent(query);        if (intent.type === 'chat') {
+
+        const intent = classifyQueryIntent(query); if (intent.type === 'chat') {
             addMessage({ role: 'user', content: intent.chatPart! });
             setOpen(true);
             setSearchQuery('');
             setShowResults(false);
             return;
-        } 
-        
+        }
+
         if (intent.type === 'mixed') {
             addToHistory(intent.searchPart!); // Add search part to history
             setIsSearching(true);
@@ -151,6 +151,14 @@ export function Header() {
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission if inside a form
+            handleSearch(searchQuery);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
             handleSearch(searchQuery);
         }
     };
@@ -183,6 +191,7 @@ export function Header() {
                                 if (!e.target.value) setShowResults(false);
                             }}
                             onKeyPress={handleKeyPress}
+                            onKeyDown={handleKeyDown}
                             className="block w-full pl-4 pr-10 py-2 bg-slate-100 border-none rounded-full text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-sm"
                             placeholder={t('common.searchPlaceholder')}
                         />
@@ -248,13 +257,14 @@ export function Header() {
                                 if (!e.target.value) setShowResults(false);
                             }}
                             onKeyPress={handleKeyPress}
+                            onKeyDown={handleKeyDown}
                             onFocus={() => {
-                                setShowResults(true); 
+                                setShowResults(true);
                             }}
                             onBlur={() => {
                                 setTimeout(() => {
                                     setShowResults(false);
-                                }, 200); 
+                                }, 200);
                             }}
                             className="block w-full pl-10 pr-3 py-2.5 border-none rounded-xl bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200 text-sm font-medium"
                             placeholder={t('common.searchPlaceholder')}
