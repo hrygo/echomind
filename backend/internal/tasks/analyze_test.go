@@ -44,12 +44,31 @@ func (m *MockEmbeddingGenerator) GenerateAndSaveEmbedding(ctx context.Context, e
 	return m.GenerateError
 }
 
+// MockContextMatcher implements ContextMatcher for testing.
+type MockContextMatcher struct {
+	MatchError  error
+	AssignError error
+	Matches     []model.Context
+	MatchCount  int
+	AssignCount int
+}
+
+func (m *MockContextMatcher) MatchContexts(email *model.Email) ([]model.Context, error) {
+	m.MatchCount++
+	return m.Matches, m.MatchError
+}
+
+func (m *MockContextMatcher) AssignContextsToEmail(emailID uuid.UUID, contextIDs []uuid.UUID) error {
+	m.AssignCount++
+	return m.AssignError
+}
+
 func setupTestDB(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}
-	if err := db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailEmbedding{}); err != nil {
+	if err := db.AutoMigrate(&model.Email{}, &model.Contact{}, &model.EmailEmbedding{}, &model.Context{}, &model.EmailContext{}); err != nil {
 		t.Fatalf("Failed to auto migrate database: %v", err)
 	}
 	return db
@@ -143,13 +162,16 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 	}
 
 	mockEmbedder := &MockEmbeddingGenerator{}
+	mockContextMatcher := &MockContextMatcher{
+		Matches: []model.Context{{ID: uuid.New(), Name: "Test Context"}},
+	}
 
 	// Create the task payload
 	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, 1000)
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, mockContextMatcher, 1000)
 	assert.NoError(t, err)
 
 	// Verify email was updated
@@ -170,6 +192,10 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 
 	// Verify embedder was called
 	assert.Equal(t, 1, mockEmbedder.CallCount)
+	
+	// Verify context matching was called
+	assert.Equal(t, 1, mockContextMatcher.MatchCount)
+	assert.Equal(t, 1, mockContextMatcher.AssignCount)
 }
 
 func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
@@ -196,13 +222,14 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 	// Mock the summarizer
 	mockSummarizer := &MockSummarizer{}
 	mockEmbedder := &MockEmbeddingGenerator{}
+	mockContextMatcher := &MockContextMatcher{}
 
 	// Create the task payload
 	payload, _ := json.Marshal(EmailAnalyzePayload{EmailID: emailID, UserID: userID})
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, 1000)
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, mockContextMatcher, 1000)
 	assert.NoError(t, err)
 
 	// Verify email was updated as spam
@@ -218,4 +245,7 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 	
 	// Verify Embedder was NOT called (spam check comes first)
 	assert.Equal(t, 0, mockEmbedder.CallCount)
+	
+	// Verify Context Matcher was NOT called
+	assert.Equal(t, 0, mockContextMatcher.MatchCount)
 }
