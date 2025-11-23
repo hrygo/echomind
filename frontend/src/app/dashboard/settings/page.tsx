@@ -24,7 +24,7 @@ export default function SettingsPage() {
   return (
     <div className="flex h-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
       {/* Settings Sidebar / Tabs List */}
-      <Tabs.Root value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="flex w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="flex w-full">
         <TabsList className="w-64 bg-slate-50 border-r border-slate-100 flex flex-col p-3 space-y-1">
           <div className="p-3 border-b border-slate-100 mb-2">
             <h2 className="text-lg font-bold text-slate-800">{t('settings.title')}</h2>
@@ -90,7 +90,7 @@ export default function SettingsPage() {
             </TabsContent>
           </div>
         </div>
-      </Tabs.Root>
+      </Tabs>
     </div>
   );
 }

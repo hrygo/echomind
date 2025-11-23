@@ -24,7 +24,7 @@ export default function AuthPage() {
     // Update URL query param when mode changes
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set('mode', mode);
-    router.replace(`/auth?${newSearchParams.toString()}`, { shallow: true });
+    router.replace(`/auth?${newSearchParams.toString()}`);
   }, [mode, router, searchParams]);
 
   const handleModeChange = (newMode: 'login' | 'register') => {

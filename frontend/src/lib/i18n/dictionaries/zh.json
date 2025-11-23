@@ -203,7 +203,12 @@
             "statusDisconnected": "未连接",
             "lastSynced": "上次同步：{time}",
             "reconfigure": "重新配置连接",
-            "autoSync": "每15分钟自动同步"
+            "autoSync": "每15分钟自动同步",
+            "syncStarted": "同步任务已启动",
+            "notConfigured": "未配置邮箱。请设置您的邮箱账户。",
+            "syncFailed": "同步失败。请重试。",
+            "configureMailboxDesc": "配置用于同步邮件的 IMAP/SMTP 服务器信息",
+            "configureMailbox": "配置邮箱"
         }
     },
     "emailDetail": {
