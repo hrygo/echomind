@@ -5,8 +5,10 @@ import { Search, Sparkles, X } from 'lucide-react';
 import { useCopilotStore } from '@/store'; // Updated import
 import { cn } from '@/lib/utils'; // Assuming this exists, standard in shadcn/ui projects
 import { useAuthStore } from '@/store/auth'; // Import useAuthStore
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export function CopilotInput() {
+  const { t } = useLanguage();
   const { 
     query, 
     setQuery, 
@@ -96,7 +98,7 @@ export function CopilotInput() {
         <input
           type="text"
           className="flex-1 bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
-          placeholder={mode === 'chat' ? "Ask Copilot anything..." : "Search emails, tasks, or contacts..."}
+          placeholder={mode === 'chat' ? t('copilot.placeholderChat') : t('copilot.placeholderSearch')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -118,7 +120,7 @@ export function CopilotInput() {
                 "p-2 rounded-lg transition-colors",
                 mode === 'chat' ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50 text-slate-400"
             )}
-            title="Switch to Copilot Chat"
+            title={t('copilot.switchToChat')}
            >
              <Sparkles className="w-4 h-4" />
            </button>

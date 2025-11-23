@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useContextStore } from "@/lib/store/contexts";
 import { ContextInput } from '@/lib/api/contexts';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface CreateContextModalProps {
   isOpen: boolean;

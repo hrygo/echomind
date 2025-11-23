@@ -223,5 +223,18 @@
         "signInLink": "登录",
         "passwordMismatch": "两次输入的密码不一致",
         "registrationFailed": "注册失败，请重试。"
+    },
+    "copilot": {
+        "placeholderChat": "问 Copilot 任何问题...",
+        "placeholderSearch": "搜索邮件、任务或联系人...",
+        "switchToChat": "切换到 Copilot 对话",
+        "thinking": "思考中...",
+        "contextAttached": "已附加上下文：{count} 项",
+        "errorResponse": "抱歉，连接服务器时出现错误，请重试。",
+        "searching": "搜索中...",
+        "topResults": "最佳结果",
+        "noResults": "未找到结果。请尝试不同的查询。",
+        "match": "匹配度",
+        "welcomeMessage": "今天我能为您做什么？"
     }
 }

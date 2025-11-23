@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { useCopilotStore, CopilotMessage } from '@/store';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function MessageBubble({ message }: { message: CopilotMessage }) {
   const isUser = message.role === 'user';
@@ -55,6 +56,7 @@ function MessageBubble({ message }: { message: CopilotMessage }) {
 }
 
 export function CopilotChat() {
+  const { t } = useLanguage();
   const { messages, isChatting, addMessage, searchResults } = useCopilotStore();
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
@@ -75,7 +77,7 @@ export function CopilotChat() {
                 hasInitialized.current = true;
                 
                 // Add placeholder for Assistant response
-                addMessage({ role: 'assistant', content: 'Thinking...' });
+                addMessage({ role: 'assistant', content: t('copilot.thinking') });
                 
                 try {
                     const token = useAuthStore.getState().token;
@@ -154,7 +156,7 @@ export function CopilotChat() {
                         const newMessages = [...state.messages];
                         newMessages[newMessages.length - 1] = {
                             role: 'assistant',
-                            content: "Sorry, I encountered an error connecting to the server. Please try again."
+                            content: t('copilot.errorResponse')
                         };
                         return { messages: newMessages };
                     });
@@ -174,7 +176,7 @@ export function CopilotChat() {
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2 opacity-50">
             <Bot className="w-12 h-12" />
-            <p>How can I help you today?</p>
+            <p>{t('copilot.welcomeMessage')}</p>
           </div>
         )}
         
@@ -188,7 +190,7 @@ export function CopilotChat() {
       {/* Chat Input Area (If we want a persistent input at bottom, 
           but currently we share the top input. This area could be for quick actions.) */}
       <div className="p-3 border-t border-slate-100 bg-slate-50/50 rounded-b-xl flex gap-2 text-xs text-slate-500">
-         <span>Context: {searchResults.length} items attached</span>
+         <span>{t('copilot.contextAttached').replace('{count}', searchResults.length.toString())}</span>
       </div>
     </div>
   );

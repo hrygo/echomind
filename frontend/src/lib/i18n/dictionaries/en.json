@@ -223,5 +223,18 @@
         "signInLink": "Sign in",
         "passwordMismatch": "Passwords do not match",
         "registrationFailed": "Registration failed. Please try again."
+    },
+    "copilot": {
+        "placeholderChat": "Ask Copilot anything...",
+        "placeholderSearch": "Search emails, tasks, or contacts...",
+        "switchToChat": "Switch to Copilot Chat",
+        "thinking": "Thinking...",
+        "contextAttached": "Context: {count} items attached",
+        "errorResponse": "Sorry, I encountered an error connecting to the server. Please try again.",
+        "searching": "Searching...",
+        "topResults": "Top Results",
+        "noResults": "No results found. Try a different query.",
+        "match": "match",
+        "welcomeMessage": "How can I help you today?"
     }
 }
