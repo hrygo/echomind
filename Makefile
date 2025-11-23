@@ -143,6 +143,10 @@ reindex:
 	@echo "Reindexing emails..."
 	@cd backend && go run cmd/reindex/main.go
 
+db-init: docker-up wait-for-db
+	@echo "Initializing database..."
+	@cd backend && go run cmd/db_init/main.go
+
 # Observability
 status:
 	@echo "--- Service Status ---"

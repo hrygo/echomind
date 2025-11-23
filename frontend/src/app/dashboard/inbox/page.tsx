@@ -87,11 +87,11 @@ export default function DashboardPage() {
       await api.post<{ message: string }>("/sync");
       alert("同步任务已启动");
       fetchEmails();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Sync error:", err);
       if (err.response && err.response.status === 400) {
-        if (confirm(err.response.data.error + "\n\n现在去设置？")) {
+        // Prompt user to configure settings if account is not configured
+        if (confirm("您尚未配置邮箱账户。是否立即前往设置页面进行配置？")) {
           router.push('/dashboard/settings');
         }
       } else if (err instanceof Error) {

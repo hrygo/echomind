@@ -19,12 +19,14 @@
 - ✅ Implemented and integrated the Smart Copilot, unifying search and chat with RAG capabilities and real-time streaming.
 
 ### 🚧 Current Sprint (v0.9.4 Target)
-**Phase 6.3 - Stage 3: Generative Widgets**
-- **Widget Protocol**: Standardize the JSON schema for widgets embedded in AI response streams.
-- **Frontend Renderer**: Implement a `WidgetRenderer` component to dynamically display `TaskCard`, `CalendarSlot`, and `SearchResultCard` within the chat stream.
-- **Backend Support**: Enhance `ChatService` to detect intent and inject widget data structures into the response stream.
+**Phase 6.4 - UX Redesign v2.0: Zero-Friction Onboarding**
+- **Unified Auth**: Redesign login/register pages with split-screen layout and smooth transitions.
+- **Onboarding Wizard**: Implement a 3-step setup process (Role Selection -> Smart Mailbox Connect -> Initial Sync).
+- **Smart Connect**: Auto-detect email providers (Gmail/Outlook) and pre-fill server settings.
+- **Settings Overhaul**: Refactor the Settings Center for better profile and connection management.
 
 ### 🔮 Future (6-Month Plan)
+- **Phase 6.5 - Generative Widgets** (v0.9.5): Chat stream dynamically renders UI components.
 - **Phase 7** (2026.03-04): WeChat Integration (Official Account)
 - **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
 - **Phase 9** (TBD): Team Collaboration (重新评估优先级)

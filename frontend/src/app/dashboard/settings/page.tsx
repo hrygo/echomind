@@ -4,23 +4,32 @@ import { useState, useEffect } from "react";
 import { User, Bell, Shield, CreditCard, Palette, Camera, RefreshCw, Mail, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
   const { t } = useLanguage();
+  const user = useAuthStore((state) => state.user); // Get user from store
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   // Mailbox configuration state
   const [mailboxConfig, setMailboxConfig] = useState({
-    email: "user@example.com",
+    email: user?.email || "", // Initialize with user email
     password: "",
     imapServer: "imap.gmail.com",
     imapPort: "993",
     smtpServer: "smtp.gmail.com",
     smtpPort: "587"
   });
+
+  // Update config if user loads late
+  useEffect(() => {
+    if (user?.email) {
+      setMailboxConfig(prev => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
 
   useEffect(() => {
     // Fetch account status to get last synced time (mock implementation for now)
@@ -71,10 +80,14 @@ export default function SettingsPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to save config:", error);
-      alert(
-        error.response?.data?.error ||
-          (error.message === 'Network Error' ? '网络错误，请检查API服务是否运行' : '保存失败，请检查配置')
-      );
+      const errorMsg = error.response?.data?.error;
+      if (errorMsg) {
+          alert(`配置失败: ${errorMsg}`);
+      } else if (error.message === 'Network Error') {
+          alert('网络错误，请检查API服务是否运行');
+      } else {
+          alert('保存失败，请检查配置');
+      }
     }
   };
 
