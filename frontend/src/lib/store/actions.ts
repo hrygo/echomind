@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { ActionAPI } from '../api/actions';
-import { Email } from '../api/emails'; // To temporarily store emails for undo
+import { ActionAPI } from '@/lib/api/actions';
 import { useEmailStore } from './emails'; // To trigger a re-fetch or direct update
 
 interface UndoToast {

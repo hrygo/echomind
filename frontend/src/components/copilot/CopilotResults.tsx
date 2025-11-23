@@ -3,7 +3,6 @@
 import React from 'react';
 import { Mail, Calendar, User } from 'lucide-react';
 import { useCopilotStore, SearchResult } from '@/store/useCopilotStore';
-import { formatDistanceToNow } from 'date-fns'; // Assuming date-fns is installed, if not I'll use native formatting
 
 function ResultItem({ result }: { result: SearchResult }) {
   return (

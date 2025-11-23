@@ -194,7 +194,6 @@ func (p *Provider) StreamChat(ctx context.Context, messages []ai.Message, ch cha
 			ch <- chunk
 		}
 	}
-	return nil // Should not be reached, but good for completeness
 }
 func extractText(resp *genai.GenerateContentResponse) string {
 	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {

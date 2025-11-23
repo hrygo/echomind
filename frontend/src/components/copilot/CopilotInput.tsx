@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, KeyboardEvent, useEffect } from 'react';
-import { Search, Sparkles, X, ArrowRight } from 'lucide-react';
-import { useCopilotStore } from '@/store';
+import React, { KeyboardEvent } from 'react';
+import { Search, Sparkles, X } from 'lucide-react';
+import { useCopilotStore } from '@/store'; // Updated import
 import { cn } from '@/lib/utils'; // Assuming this exists, standard in shadcn/ui projects
 import { useAuthStore } from '@/store/auth'; // Import useAuthStore
 

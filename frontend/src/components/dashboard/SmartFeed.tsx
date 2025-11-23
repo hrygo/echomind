@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, Clock, MoreVertical, BellOff, Trash2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { AlertTriangle, ArrowRight, CheckCircle2, MoreVertical, BellOff, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -8,7 +8,6 @@ import { Email } from '@/lib/api/emails';
 import { formatDistanceToNow } from 'date-fns';
 import { useActionStore } from '@/lib/store/actions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
-import { ToastContainer, Toast } from '@/components/ui/Toast';
 
 interface SmartFeedProps {
   contextId?: string | null;

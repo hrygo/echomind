@@ -55,7 +55,7 @@ function MessageBubble({ message }: { message: CopilotMessage }) {
 }
 
 export function CopilotChat() {
-  const { messages, isChatting, addMessage, setIsChatting, query, setQuery, searchResults } = useCopilotStore();
+  const { messages, isChatting, addMessage, searchResults } = useCopilotStore();
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
 

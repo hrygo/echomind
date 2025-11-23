@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from 'react';
-import { X, Plus, Hash, Users, Folder } from 'lucide-react';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { useContextStore } from '@/lib/store/contexts';
+import { X, Folder, Hash, Users } from "lucide-react";
+import { useState } from "react";
+import { useContextStore } from "@/lib/store/contexts";
 import { ContextInput } from '@/lib/api/contexts';
 import { cn } from '@/lib/utils';
 

@@ -8,7 +8,7 @@ import { CopilotChat } from './CopilotChat';
 import { cn } from '@/lib/utils';
 
 export function CopilotWidget() {
-  const { mode, isOpen, setIsOpen, reset } = useCopilotStore();
+  const { mode, reset } = useCopilotStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close when clicking outside

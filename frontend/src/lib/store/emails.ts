@@ -9,7 +9,7 @@ interface EmailState {
   fetchEmails: (params?: { limit?: number; offset?: number; context_id?: string; folder?: string; category?: string; filter?: string }) => Promise<void>;
 }
 
-export const useEmailStore = create<EmailState>((set, get) => ({
+export const useEmailStore = create<EmailState>((set) => ({
   emails: [],
   isLoading: false,
   error: null,
@@ -17,11 +17,10 @@ export const useEmailStore = create<EmailState>((set, get) => ({
   fetchEmails: async (params) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await EmailAPI.list(params);
-      set({ emails: data, isLoading: false });
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch emails';
-      set({ error: errorMessage, isLoading: false });
+      const emails = await EmailAPI.list(params);
+      set({ emails, isLoading: false });
+    } catch {
+      set({ error: 'Failed to fetch emails', isLoading: false });
     }
   },
 }));

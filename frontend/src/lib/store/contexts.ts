@@ -12,7 +12,7 @@ interface ContextState {
   deleteContext: (id: string) => Promise<void>;
 }
 
-export const useContextStore = create<ContextState>((set, get) => ({
+export const useContextStore = create<ContextState>((set) => ({
   contexts: [],
   isLoading: false,
   error: null,
@@ -20,11 +20,10 @@ export const useContextStore = create<ContextState>((set, get) => ({
   fetchContexts: async () => {
     set({ isLoading: true, error: null });
     try {
-      const data = await ContextAPI.list();
-      set({ contexts: data, isLoading: false });
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch contexts';
-      set({ error: errorMessage, isLoading: false });
+      const contexts = await ContextAPI.list();
+      set({ contexts, isLoading: false });
+    } catch {
+      set({ error: 'Failed to fetch contexts', isLoading: false });
     }
   },
 
