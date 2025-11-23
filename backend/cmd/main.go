@@ -81,50 +81,49 @@ func main() {
 		container.Sugar.Errorf("Failed to migrate organizations: %v", err)
 	}
 
-	chatService := service.NewChatService(container.AIProvider, container.SearchService)
-	taskService := service.NewTaskService(container.DB)
+		chatService := service.NewChatService(container.AIProvider, container.SearchService)
+		taskService := service.NewTaskService(container.DB)
 
-	// Initialize handlers
-	accountHandler := handler.NewAccountHandler(accountService)
-	syncHandler := handler.NewSyncHandler(syncService)
-	emailHandler := handler.NewEmailHandler(emailService)
-	authHandler := handler.NewAuthHandler(userService)
-	insightHandler := handler.NewInsightHandler(insightService)
-	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
-	searchHandler := handler.NewSearchHandler(container.SearchService, container.Sugar)
-	healthHandler := handler.NewHealthHandler(container.DB)
-	orgHandler := handler.NewOrganizationHandler(organizationService)
-	chatHandler := handler.NewChatHandler(chatService)
-	taskHandler := handler.NewTaskHandler(taskService)
-	contextHandler := handler.NewContextHandler(container.ContextService)
+		// Initialize handlers
+		accountHandler := handler.NewAccountHandler(accountService)
+		syncHandler := handler.NewSyncHandler(syncService)
+		emailHandler := handler.NewEmailHandler(emailService)
+		authHandler := handler.NewAuthHandler(userService)
+		insightHandler := handler.NewInsightHandler(insightService)
+		aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
+		searchHandler := handler.NewSearchHandler(container.SearchService, container.Sugar)
+		healthHandler := handler.NewHealthHandler(container.DB)
+		orgHandler := handler.NewOrganizationHandler(organizationService)
+		chatHandler := handler.NewChatHandler(chatService)
+		taskHandler := handler.NewTaskHandler(taskService)
+		contextHandler := handler.NewContextHandler(container.ContextService)
+		actionHandler := handler.NewActionHandler(container.ActionService)
 
-	// Setup Router and Middleware
-	r := gin.Default()
-	router.SetupMiddleware(r, container.IsProduction())
+		// Setup Router and Middleware
+		r := gin.Default()
+		router.SetupMiddleware(r, container.IsProduction())
 
-	// Register routes
-	handlers := &router.Handlers{
-		Health:  healthHandler,
-		Auth:    authHandler,
-		Org:     orgHandler,
-		Account: accountHandler,
-		Sync:    syncHandler,
-		Email:   emailHandler,
-		Insight: insightHandler,
-		AIDraft: aiDraftHandler,
-		Search:  searchHandler,
-		Chat:    chatHandler,
-		Task:    taskHandler,
-		Context: contextHandler,
-	}
+		// Register routes
+		handlers := &router.Handlers{
+			Health:  healthHandler,
+			Auth:    authHandler,
+			Org:     orgHandler,
+			Account: accountHandler,
+			Sync:    syncHandler,
+			Email:   emailHandler,
+			Insight: insightHandler,
+			AIDraft: aiDraftHandler,
+			Search:  searchHandler,
+			Chat:    chatHandler,
+			Task:    taskHandler,
+			Context: contextHandler,
+			Action:  actionHandler,
+		}
 
-	authMiddleware := router.SetupAuthMiddleware(container.Config.Server.JWT)
-	router.SetupRoutes(r, handlers, authMiddleware)
+		authMiddleware := router.SetupAuthMiddleware(container.Config.Server.JWT)
+		router.SetupRoutes(r, handlers, authMiddleware)
 
-	port := container.Config.Server.Port
-	if port == "" {
-		port = "8080"
-	}
+		port := container.Config.Server.Port
 
 	// Create HTTP server
 	srv := &http.Server{

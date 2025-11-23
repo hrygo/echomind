@@ -19,6 +19,7 @@ type Handlers struct {
 	Chat    *handler.ChatHandler
 	Task    *handler.TaskHandler
 	Context *handler.ContextHandler
+	Action  *handler.ActionHandler
 }
 
 // SetupRoutes registers all API routes
@@ -67,6 +68,11 @@ func SetupRoutes(router *gin.Engine, h *Handlers, authMiddleware gin.HandlerFunc
 			protected.GET("/contexts", h.Context.ListContexts)
 			protected.PATCH("/contexts/:id", h.Context.UpdateContext)
 			protected.DELETE("/contexts/:id", h.Context.DeleteContext)
+
+			// Actions
+			protected.POST("/actions/approve", h.Action.ApproveEmail)
+			protected.POST("/actions/snooze", h.Action.SnoozeEmail)
+			protected.POST("/actions/dismiss", h.Action.DismissEmail)
 		}
 	}
 }

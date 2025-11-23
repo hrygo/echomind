@@ -17,6 +17,7 @@ type Container struct {
 	SearchService  *service.SearchService
 	ContextService *service.ContextService
 	Summarizer     *service.SummaryService
+	ActionService  *service.ActionService
 }
 
 // NewContainer creates a new dependency injection container
@@ -46,6 +47,7 @@ func NewContainer(configPath string, isProduction bool) (*Container, error) {
 	searchService := service.NewSearchService(app.DB, embedder)
 	contextService := service.NewContextService(app.DB)
 	summarizer := service.NewSummaryService(aiProvider)
+	actionService := service.NewActionService(app.DB)
 
 	return &Container{
 		App:            app,
@@ -54,6 +56,7 @@ func NewContainer(configPath string, isProduction bool) (*Container, error) {
 		SearchService:  searchService,
 		ContextService: contextService,
 		Summarizer:     summarizer,
+		ActionService:  actionService,
 	}, nil
 }
 
