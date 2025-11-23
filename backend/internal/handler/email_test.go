@@ -148,7 +148,7 @@ func TestEmailHandler_GetEmail(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
 		var response map[string]string
-		json.Unmarshal(w.Body.Bytes(), &response)
+		_ = json.Unmarshal(w.Body.Bytes(), &response)
 		assert.Equal(t, "Email not found or not accessible", response["error"])
 		mockService.AssertExpectations(t)
 	})

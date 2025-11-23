@@ -20,7 +20,7 @@ import (
 
 func setupTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	db.AutoMigrate(&model.User{}, &model.Organization{}, &model.OrganizationMember{})
+	_ = db.AutoMigrate(&model.User{}, &model.Organization{}, &model.OrganizationMember{})
 	return db
 }
 
@@ -70,8 +70,8 @@ func TestListOrganizations(t *testing.T) {
 	db.Create(user)
 
 	// Create existing org
-	svc.CreateOrganization(toContext(), "Org A", userID)
-	svc.CreateOrganization(toContext(), "Org B", userID)
+	_, _ = svc.CreateOrganization(toContext(), "Org A", userID)
+	_, _ = svc.CreateOrganization(toContext(), "Org B", userID)
 
 	r := gin.Default()
 	r.Use(func(c *gin.Context) {
@@ -85,9 +85,9 @@ func TestListOrganizations(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var orgs []model.Organization
-	json.Unmarshal(w.Body.Bytes(), &orgs)
+	_ = json.Unmarshal(w.Body.Bytes(), &orgs)
 	assert.Len(t, orgs, 2)
 }
 

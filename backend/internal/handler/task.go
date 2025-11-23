@@ -32,10 +32,10 @@ type UpdateTaskStatusRequest struct {
 }
 
 type UpdateTaskRequest struct {
-	Title       *string         `json:"title"`
-	Description *string         `json:"description"`
+	Title       *string             `json:"title"`
+	Description *string             `json:"description"`
 	Priority    *model.TaskPriority `json:"priority"`
-	DueDate     *time.Time      `json:"due_date" time_format:"2006-01-02T15:04:05Z07:00"`
+	DueDate     *time.Time          `json:"due_date" time_format:"2006-01-02T15:04:05Z07:00"`
 }
 
 // CreateTask godoc
@@ -89,9 +89,13 @@ func (h *TaskHandler) ListTasks(c *gin.Context) {
 	offset := c.DefaultQuery("offset", "0")
 
 	parsedLimit := 20
-	fmt.Sscanf(limit, "%d", &parsedLimit)
+	if _, err := fmt.Sscanf(limit, "%d", &parsedLimit); err != nil {
+		parsedLimit = 20
+	}
 	parsedOffset := 0
-	fmt.Sscanf(offset, "%d", &parsedOffset)
+	if _, err := fmt.Sscanf(offset, "%d", &parsedOffset); err != nil {
+		parsedOffset = 0
+	}
 
 	tasks, err := h.taskService.ListTasks(c.Request.Context(), userID, status, priority, parsedLimit, parsedOffset)
 	if err != nil {
@@ -171,10 +175,18 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 	}
 
 	updateData := make(map[string]interface{})
-	if req.Title != nil { updateData["title"] = *req.Title }
-	if req.Description != nil { updateData["description"] = *req.Description }
-	if req.Priority != nil { updateData["priority"] = *req.Priority }
-	if req.DueDate != nil { updateData["due_date"] = *req.DueDate }
+	if req.Title != nil {
+		updateData["title"] = *req.Title
+	}
+	if req.Description != nil {
+		updateData["description"] = *req.Description
+	}
+	if req.Priority != nil {
+		updateData["priority"] = *req.Priority
+	}
+	if req.DueDate != nil {
+		updateData["due_date"] = *req.DueDate
+	}
 
 	if err := h.taskService.UpdateTask(c.Request.Context(), userID, taskID, updateData); err != nil {
 		if err.Error() == "task not found or unauthorized" {

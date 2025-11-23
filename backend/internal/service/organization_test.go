@@ -13,7 +13,7 @@ import (
 
 func setupTestDB() *gorm.DB {
 	db, _ := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	db.AutoMigrate(&model.User{}, &model.Organization{}, &model.OrganizationMember{})
+	_ = db.AutoMigrate(&model.User{}, &model.Organization{}, &model.OrganizationMember{})
 	return db
 }
 

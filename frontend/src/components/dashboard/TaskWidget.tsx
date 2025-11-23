@@ -25,20 +25,20 @@ export function TaskWidget({ initialStatus = 'todo', initialPriority }: TaskWidg
         const fetchedTasks = await listTasks(initialStatus, initialPriority);
         // Sort tasks: pending/in_progress first, then due date, then creation date
         const sortedTasks = fetchedTasks.sort((a, b) => {
-            // Prioritize non-done tasks
-            if (a.status !== 'done' && b.status === 'done') return -1;
-            if (a.status === 'done' && b.status !== 'done') return 1;
+          // Prioritize non-done tasks
+          if (a.status !== 'done' && b.status === 'done') return -1;
+          if (a.status === 'done' && b.status !== 'done') return 1;
 
-            // Then by due date
-            const dateA = a.due_date ? new Date(a.due_date).getTime() : Infinity;
-            const dateB = b.due_date ? new Date(b.due_date).getTime() : Infinity;
-            if (dateA !== dateB) return dateA - dateB;
+          // Then by due date
+          const dateA = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+          const dateB = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+          if (dateA !== dateB) return dateA - dateB;
 
-            // Finally by creation date (newest first for same due date)
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          // Finally by creation date (newest first for same due date)
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
         setTasks(sortedTasks);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to fetch tasks:", err);
         setError(t('common.error')); // Use i18n
       } finally {
@@ -56,7 +56,7 @@ export function TaskWidget({ initialStatus = 'todo', initialPriority }: TaskWidg
     try {
       await updateTaskStatus(task.id, newStatus);
       // If successful, UI is already updated
-    } catch (err: any) {
+    } catch (err: unknown) {
       // If API fails, revert UI and show error
       updateTask(task); // Revert to original status
       console.error("Failed to update task status:", err);
@@ -103,13 +103,13 @@ export function TaskWidget({ initialStatus = 'todo', initialPriority }: TaskWidg
           <label htmlFor={task.id} className="flex-1 font-medium text-slate-800 cursor-pointer">
             {task.title}
             {task.due_date && (
-                <span className={cn(
-                    "ml-2 text-xs flex items-center gap-1 text-slate-500",
-                    new Date(task.due_date) < new Date() && task.status !== 'done' && "text-red-500 font-semibold"
-                )}>
-                    <Calendar className="w-3 h-3" />
-                    {new Date(task.due_date).toLocaleDateString()}
-                </span>
+              <span className={cn(
+                "ml-2 text-xs flex items-center gap-1 text-slate-500",
+                new Date(task.due_date) < new Date() && task.status !== 'done' && "text-red-500 font-semibold"
+              )}>
+                <Calendar className="w-3 h-3" />
+                {new Date(task.due_date).toLocaleDateString()}
+              </span>
             )}
           </label>
           {/* Priority or other actions can go here */}

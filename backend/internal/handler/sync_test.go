@@ -1,8 +1,8 @@
 package handler_test
 
 import (
-	"encoding/json"
 	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -72,11 +72,11 @@ func setupSyncTest(t *testing.T) (*handler.SyncHandler, *gorm.DB, *configs.Confi
 
 	mockIMAPClient := &MockIMAPClient{
 		DialAndLoginFunc: func(addr, username, password string) (*clientimap.Client, error) {
-			return &clientimap.Client{}, nil 
+			return &clientimap.Client{}, nil
 		},
-		CloseFunc: func(c *clientimap.Client) { },
+		CloseFunc: func(c *clientimap.Client) {},
 	}
-	
+
 	syncService := service.NewSyncService(db, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
 	return handler.NewSyncHandler(syncService), db, mockConfig
 }
@@ -109,9 +109,9 @@ func TestSyncHandler_Success(t *testing.T) {
 	syncHandler.SyncEmails(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "Sync initiated successfully", response["message"])
 }
 
@@ -132,6 +132,6 @@ func TestSyncHandler_NoAccount(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "Please configure your email account in Settings first.", response["error"])
 }

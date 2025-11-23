@@ -51,12 +51,12 @@ func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 	if chatProviderName == "" {
 		chatProviderName = "mock" // Default fallback
 	}
-	
+
 	chatP, err := createProvider(chatProviderName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create chat provider '%s': %w", chatProviderName, err)
 	}
-	
+
 	if p, ok := chatP.(ai.AIProvider); ok {
 		mainProvider = p
 	} else {
@@ -73,15 +73,9 @@ func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 	if embedProviderName == chatProviderName {
 		if p, ok := chatP.(ai.EmbeddingProvider); ok {
 			embeddingProvider = p
-		} else {
-			// Configured same provider but it doesn't support embeddings? 
-			// Try re-instantiating (maybe it needs different settings? unlikely but safe)
-			// Actually, let's just error or fallback to mock? 
-			// Better to try creating it again or logging warning. 
-			// For now, let's assume if it's the same name, it SHOULD support it, or we try creating it.
 		}
 	}
-	
+
 	if embeddingProvider == nil {
 		embedP, err := createProvider(embedProviderName)
 		if err != nil {
@@ -103,9 +97,9 @@ func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 // toPromptMap converts a PromptConfig struct to a map[string]string.
 func toPromptMap(pc configs.PromptConfig) map[string]string {
 	return map[string]string{
-		"summary":    pc.Summary,
-		"classify":   pc.Classify,
-		"sentiment":  pc.Sentiment,
+		"summary":     pc.Summary,
+		"classify":    pc.Classify,
+		"sentiment":   pc.Sentiment,
 		"draft_reply": pc.DraftReply,
 	}
 }

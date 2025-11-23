@@ -40,6 +40,7 @@ func (s *ChatService) StreamChat(ctx context.Context, userID uuid.UUID, messages
 		searchResults, err = s.searchService.Search(ctx, userID, lastMsg.Content, SearchFilters{}, 3)
 		if err != nil {
 			// Log error but continue
+			_ = err
 		}
 	}
 

@@ -71,10 +71,10 @@ func (h *ChatHandler) StreamChat(c *gin.Context) {
 				if err := <-errCh; err != nil {
 					// Send error as JSON in data field
 					jsonError, _ := json.Marshal(gin.H{"error": err.Error()})
-					c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
+					_, _ = c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
 				} else {
 					// Send DONE signal
-					c.Writer.Write([]byte("data: [DONE]\n\n"))
+					_, _ = c.Writer.Write([]byte("data: [DONE]\n\n"))
 				}
 				return false
 			}
@@ -83,16 +83,18 @@ func (h *ChatHandler) StreamChat(c *gin.Context) {
 			if err != nil {
 				// If marshaling fails, send an error
 				jsonError, _ := json.Marshal(gin.H{"error": err.Error()})
-				c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
+				_, _ = c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
 				return false
 			}
-			c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonChunk)))
+			if _, err := c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonChunk))); err != nil {
+				return false
+			}
 			c.Writer.Flush()
 			return true
 		case err := <-errCh:
 			if err != nil {
 				jsonError, _ := json.Marshal(gin.H{"error": err.Error()})
-				c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
+				_, _ = c.Writer.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonError)))
 			}
 			return false
 		}

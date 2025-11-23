@@ -80,7 +80,7 @@ export default function EmailDetailPage() {
         });
         addTask(newTask); // Add task to Zustand store
         alert(t('emailDetail.taskCreatedSuccess')); // Use i18n for success message
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to create task:", err);
         alert(t('emailDetail.taskCreatedError')); // Use i18n for error message
       }
