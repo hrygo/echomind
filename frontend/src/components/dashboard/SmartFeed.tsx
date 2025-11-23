@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertTriangle, ArrowRight, CheckCircle2, Clock, MoreVertical, BellOff, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useEmailStore } from '@/lib/store/emails';
 import { Email } from '@/lib/api/emails';
 import { formatDistanceToNow } from 'date-fns';
+import { useActionStore } from '@/lib/store/actions';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
+import { ToastContainer, Toast } from '@/components/ui/Toast';
 
 interface SmartFeedProps {
   contextId?: string | null;
@@ -61,6 +64,7 @@ export function SmartFeed({ contextId }: SmartFeedProps) {
 
 function SmartFeedCard({ item }: { item: Email }) {
   const { t } = useLanguage();
+  const { approveEmail, snoozeEmail, dismissEmail } = useActionStore();
   const isHighRisk = item.Urgency === 'High';
   
   // Parse Date
@@ -106,22 +110,42 @@ function SmartFeedCard({ item }: { item: Email }) {
         {/* Action Footer */}
         <div className="mt-4 flex items-center justify-between">
             <div className="flex gap-2">
-                 {/* Mocking Smart Actions for now based on urgency */}
-                 {item.Urgency === 'High' && (
-                     <Button className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1.5 shadow-sm shadow-green-200 px-3">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> {t('dashboard.approve')}
-                     </Button>
-                 )}
+                 <Button 
+                    onClick={() => approveEmail(item.ID)}
+                    className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1.5 shadow-sm shadow-green-200 px-3"
+                 >
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {t('dashboard.approve')}
+                 </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="h-8 text-slate-600 border border-slate-200 hover:bg-slate-50 bg-transparent px-3"
+                    >
+                      <MoreVertical className="w-3.5 h-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48">
+                    <DropdownMenuItem onClick={() => snoozeEmail(item.ID, '4h')}>
+                      <BellOff className="w-3.5 h-3.5 mr-2 text-slate-500" /> {t('dashboard.snooze4h')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => snoozeEmail(item.ID, 'tomorrow')}>
+                      <BellOff className="w-3.5 h-3.5 mr-2 text-slate-500" /> {t('dashboard.snoozeTomorrow')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => snoozeEmail(item.ID, 'next_week')}>
+                      <BellOff className="w-3.5 h-3.5 mr-2 text-slate-500" /> {t('dashboard.snoozeNextWeek')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600 focus:bg-red-50 focus:text-red-700" onClick={() => dismissEmail(item.ID)}>
+                      <Trash2 className="w-3.5 h-3.5 mr-2" /> {t('dashboard.dismiss')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                  <Button className="h-8 text-slate-600 border border-slate-200 hover:bg-slate-50 bg-transparent px-3">
                     {t('dashboard.replyWithAI')}
                  </Button>
             </div>
-            
-            {/* Suggested Action Label */}
-            {/* <div className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                {t('dashboard.suggested')} <span className="text-slate-600">{t(`dashboard.${item.suggestedAction.toLowerCase()}`)}</span>
-            </div> */}
         </div>
       </div>
     </div>

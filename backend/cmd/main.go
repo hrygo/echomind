@@ -17,7 +17,7 @@ import (
 	"github.com/hrygo/echomind/internal/service"
 )
 
-const Version = "0.9.0"
+const Version = "0.9.1"
 
 func main() {
 	// Parse CLI configuration

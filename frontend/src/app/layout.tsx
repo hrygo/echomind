@@ -3,6 +3,7 @@ import "./globals.css";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
+import { ToastContainer } from '@/components/ui/Toast'; // Import ToastContainer
 
 export const metadata: Metadata = {
   title: "EchoMind",
@@ -21,6 +22,7 @@ export default function RootLayout({
           <AuthGuard>
             {children}
             <ChatSidebar />
+            <ToastContainer /> /* Add ToastContainer here */
           </AuthGuard>
         </LanguageProvider>
       </body>

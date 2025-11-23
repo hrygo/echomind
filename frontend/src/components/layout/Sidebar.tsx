@@ -143,7 +143,7 @@ export function Sidebar({ className }: { className?: string }) {
         <nav className="space-y-0.5 px-2 mb-6">
           <div className="flex items-center justify-between px-3 mt-2 mb-1 group">
             <span className="text-[10px] font-bold text-slate-400/80 uppercase tracking-widest">
-              SMART CONTEXTS
+              {t('sidebar.smartContexts')}
             </span>
             <button 
               onClick={() => setIsContextModalOpen(true)}
@@ -169,7 +169,7 @@ export function Sidebar({ className }: { className?: string }) {
                onClick={() => setIsContextModalOpen(true)}
                className="px-3 py-3 text-xs text-slate-400 italic cursor-pointer hover:text-blue-500 hover:bg-slate-50 rounded-md border border-dashed border-slate-200 mx-2 text-center"
              >
-               + Create your first context
+               {t('sidebar.createContext')}
              </div>
           )}
         </nav>
