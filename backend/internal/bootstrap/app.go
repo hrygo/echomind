@@ -72,7 +72,7 @@ func (app *App) SetupDB() error {
 	}
 
 	// Migrations
-	// Note: We include ALL models here to ensure consistency across apps
+	// Note: We include ALL models here to ensure consistency across apps. GORM AutoMigrate handles column additions like SnoozedUntil.
 	models := []interface{}{
 		&model.Email{}, 
 		&model.User{}, 

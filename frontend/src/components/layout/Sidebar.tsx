@@ -16,11 +16,16 @@ import {
   Newspaper,
   CreditCard,
   Bell,
-  Zap
+  Zap,
+  Plus,
+  Folder
 } from 'lucide-react';
 
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useContextStore } from "@/lib/store/contexts";
+import { CreateContextModal } from './CreateContextModal';
+import { useEffect, useState } from 'react';
 
 export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
@@ -28,12 +33,28 @@ export function Sidebar({ className }: { className?: string }) {
   const currentCategory = searchParams.get('category');
   const currentFilter = searchParams.get('filter');
   const currentFolder = searchParams.get('folder');
+  const currentContext = searchParams.get('context');
   const { t } = useLanguage();
+  
+  const { contexts, fetchContexts } = useContextStore();
+  const [isContextModalOpen, setIsContextModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchContexts();
+  }, [fetchContexts]);
+
+  const colorMap: Record<string, string> = {
+    blue: 'text-blue-500',
+    green: 'text-emerald-500',
+    purple: 'text-purple-500',
+    amber: 'text-amber-500',
+    rose: 'text-rose-500',
+  };
 
   // Active state logic
-  const isActive = (href: string, params?: { category?: string, filter?: string, folder?: string }) => {
+  const isActive = (href: string, params?: { category?: string, filter?: string, folder?: string, context?: string }) => {
     // Strict match for Dashboard
-    if (href === '/dashboard' && pathname === '/dashboard' && !currentCategory && !currentFilter && !currentFolder) {
+    if (href === '/dashboard' && pathname === '/dashboard' && !currentCategory && !currentFilter && !currentFolder && !currentContext) {
       return true;
     }
 
@@ -47,20 +68,23 @@ export function Sidebar({ className }: { className?: string }) {
       if (params.category && currentCategory !== params.category) return false;
       if (params.filter && currentFilter !== params.filter) return false;
       if (params.folder && currentFolder !== params.folder) return false;
+      if (params.context && currentContext !== params.context) return false;
 
       // If params are required but url has different ones (exclusive check)
       if (!params.category && currentCategory) return false;
       if (!params.filter && currentFilter) return false;
       if (!params.folder && currentFolder) return false;
+      if (!params.context && currentContext) return false;
 
       return true;
     }
 
     // Default match for simple paths (ensure no extra params strictly)
-    return !currentCategory && !currentFilter && !currentFolder;
+    return !currentCategory && !currentFilter && !currentFolder && !currentContext;
   };
 
   return (
+    <>
     <aside className={cn(
       "w-64 bg-white border-r border-slate-100 min-h-screen flex flex-col shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-40 fixed left-0 top-0 h-full",
       className
@@ -113,6 +137,41 @@ export function Sidebar({ className }: { className?: string }) {
             icon={Share2}
             active={isActive('/dashboard/insights')}
           />
+        </nav>
+        
+        {/* SECTION D: SMART CONTEXTS */}
+        <nav className="space-y-0.5 px-2 mb-6">
+          <div className="flex items-center justify-between px-3 mt-2 mb-1 group">
+            <span className="text-[10px] font-bold text-slate-400/80 uppercase tracking-widest">
+              SMART CONTEXTS
+            </span>
+            <button 
+              onClick={() => setIsContextModalOpen(true)}
+              className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          
+          {contexts.map((ctx) => (
+            <NavItem
+              key={ctx.ID}
+              href={`/dashboard?context=${ctx.ID}`}
+              label={ctx.Name}
+              icon={Folder}
+              active={isActive('/dashboard', { context: ctx.ID })}
+              iconColor={colorMap[ctx.Color] || 'text-slate-400'} 
+            />
+          ))}
+
+          {contexts.length === 0 && (
+             <div 
+               onClick={() => setIsContextModalOpen(true)}
+               className="px-3 py-3 text-xs text-slate-400 italic cursor-pointer hover:text-blue-500 hover:bg-slate-50 rounded-md border border-dashed border-slate-200 mx-2 text-center"
+             >
+               + Create your first context
+             </div>
+          )}
         </nav>
 
         {/* SECTION B: MAILBOX */}
@@ -182,6 +241,12 @@ export function Sidebar({ className }: { className?: string }) {
 
       {/* Footer: User Profile & Settings removed as it is in Header */}
     </aside>
+
+    <CreateContextModal 
+      isOpen={isContextModalOpen} 
+      onClose={() => setIsContextModalOpen(false)} 
+    />
+    </>
   );
 }
 

@@ -3,7 +3,7 @@ import { AlertTriangle, TrendingUp, Calendar } from 'lucide-react';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { SmartFeed } from './SmartFeed';
 
-export function ExecutiveView() {
+export function ExecutiveView({ contextId }: { contextId?: string | null }) {
     const { t } = useLanguage();
 
     return (
@@ -11,7 +11,7 @@ export function ExecutiveView() {
             {/* Daily Digest Section */}
             <section>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Risk Card */}
+                    {/* Risk Card - Context Aware Mocks for now */}
                     <div className="bg-white p-5 rounded-2xl border border-red-100 shadow-sm hover:shadow-md transition-all duration-200 group">
                         <div className="flex items-start justify-between mb-3">
                             <div className="p-2.5 bg-red-50 rounded-xl group-hover:bg-red-100 transition-colors">
@@ -20,7 +20,7 @@ export function ExecutiveView() {
                             <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wide">{t('dashboard.highRisk')}</span>
                         </div>
                         <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{t('dashboard.riskWarning')}</h3>
-                        <p className="text-3xl font-bold text-slate-800 tracking-tight">3</p>
+                        <p className="text-3xl font-bold text-slate-800 tracking-tight">{contextId ? '1' : '3'}</p>
                         <p className="text-xs text-slate-400 mt-2 font-medium">{t('dashboard.criticalFeedback')}</p>
                     </div>
 
@@ -33,7 +33,7 @@ export function ExecutiveView() {
                             <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">+12%</span>
                         </div>
                         <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{t('dashboard.weeklyInteraction')}</h3>
-                        <p className="text-3xl font-bold text-slate-800 tracking-tight">128</p>
+                        <p className="text-3xl font-bold text-slate-800 tracking-tight">{contextId ? '12' : '128'}</p>
                         <p className="text-xs text-slate-400 mt-2 font-medium">{t('dashboard.keyStakeholderEngagement')}</p>
                     </div>
 
@@ -46,7 +46,7 @@ export function ExecutiveView() {
                             <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">{t('dashboard.today')}</span>
                         </div>
                         <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{t('dashboard.pendingDecisions')}</h3>
-                        <p className="text-3xl font-bold text-slate-800 tracking-tight">5</p>
+                        <p className="text-3xl font-bold text-slate-800 tracking-tight">{contextId ? '0' : '5'}</p>
                         <p className="text-xs text-slate-400 mt-2 font-medium">{t('dashboard.approvalAndBudgetReview')}</p>
                     </div>
                 </div>
@@ -54,7 +54,7 @@ export function ExecutiveView() {
 
             {/* Smart Feed Section */}
             <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
-                <SmartFeed />
+                <SmartFeed contextId={contextId} />
             </section>
         </div>
     );

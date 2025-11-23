@@ -27,6 +27,7 @@ type Email struct {
 	Category    string         `gorm:"size:50"`    // Work, Newsletter, Personal, etc.
 	Sentiment   string         `gorm:"size:50"`    // Positive, Neutral, Negative
 	Urgency      string         `gorm:"size:50"`    // High, Medium, Low
+	SnoozedUntil *time.Time     `gorm:"index"`      // If set, hide from inbox until this time
 	ActionItems  datatypes.JSON `gorm:"type:jsonb"` // Extracted tasks
 	SmartActions datatypes.JSON `gorm:"type:jsonb"` // Structured smart actions
 }

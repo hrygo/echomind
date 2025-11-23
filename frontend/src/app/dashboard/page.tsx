@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ExecutiveView } from "@/components/dashboard/ExecutiveView";
 import { ManagerView } from "@/components/dashboard/ManagerView";
 import { DealmakerView } from "@/components/dashboard/DealmakerView";
@@ -12,6 +13,8 @@ type ViewType = "executive" | "manager" | "dealmaker";
 
 export default function DashboardHomePage() {
     const [currentView, setCurrentView] = useState<ViewType>("executive");
+    const searchParams = useSearchParams();
+    const contextId = searchParams.get('context');
     const { t } = useLanguage();
 
     return (
@@ -44,7 +47,7 @@ export default function DashboardHomePage() {
 
             {/* View Content */}
             <div className="flex-1 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                {currentView === "executive" && <ExecutiveView />}
+                {currentView === "executive" && <ExecutiveView contextId={contextId} />}
                 {currentView === "manager" && <ManagerView />}
                 {currentView === "dealmaker" && <DealmakerView />}
             </div>

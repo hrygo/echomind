@@ -27,6 +27,17 @@ func (s *EmailService) ListEmails(ctx context.Context, userID uuid.UUID, limit, 
 	var emails []model.Email
 	query := s.db.WithContext(ctx).Where("user_id = ?", userID)
 
+	// Default: Filter out snoozed emails (SnoozedUntil > Now)
+	// Unless a specific folder is requested (e.g. "snoozed" or "all")
+	if folder == "snoozed" {
+		query = query.Where("snoozed_until > NOW()")
+	} else if folder == "trash" {
+		// ... existing trash logic
+	} else {
+		// Normal inbox view: Hide snoozed
+		query = query.Where("snoozed_until IS NULL OR snoozed_until <= NOW()")
+	}
+
 	// Apply Context Filter
 	if contextID != "" {
 		query = query.Joins("JOIN email_contexts ON emails.id = email_contexts.email_id").Where("email_contexts.context_id = ?", contextID)
