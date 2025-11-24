@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -35,9 +36,10 @@ type SearchResult struct {
 }
 
 type SearchFilters struct {
-	Sender    string
-	StartDate *time.Time
-	EndDate   *time.Time
+	Sender     string
+	StartDate  *time.Time
+	EndDate    *time.Time
+	ContextID  *uuid.UUID
 }
 
 func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query string, filters SearchFilters, limit int) ([]SearchResult, error) {
@@ -48,8 +50,6 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 	}
 
 	// 2. Perform vector search using raw SQL
-	// Note: <=> is cosine distance operator in pgvector
-	// We join with emails table to filter by user_id and get metadata
 	var results []SearchResult
 
 	// Base query
@@ -63,22 +63,34 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 			1 - (ee.vector <=> ?) as score
 		FROM email_embeddings ee
 		JOIN emails e ON e.id = ee.email_id
-		WHERE e.user_id = ?
 	`
-	args := []interface{}{pgvector.NewVector(queryVector), userID}
+	args := []interface{}{pgvector.NewVector(queryVector)}
 
-	// Apply filters
+	// Add joins and where clauses dynamically
+	var whereClauses []string
+	whereClauses = append(whereClauses, "e.user_id = ?")
+	args = append(args, userID)
+
+	if filters.ContextID != nil {
+		sql += " JOIN email_contexts ec ON e.id = ec.email_id"
+		whereClauses = append(whereClauses, "ec.context_id = ?")
+		args = append(args, filters.ContextID)
+	}
 	if filters.Sender != "" {
-		sql += " AND e.sender ILIKE ?"
+		whereClauses = append(whereClauses, "e.sender ILIKE ?")
 		args = append(args, "%"+filters.Sender+"%")
 	}
 	if filters.StartDate != nil {
-		sql += " AND e.date >= ?"
+		whereClauses = append(whereClauses, "e.date >= ?")
 		args = append(args, filters.StartDate)
 	}
 	if filters.EndDate != nil {
-		sql += " AND e.date <= ?"
+		whereClauses = append(whereClauses, "e.date <= ?")
 		args = append(args, filters.EndDate)
+	}
+
+	if len(whereClauses) > 0 {
+		sql += " WHERE " + strings.Join(whereClauses, " AND ")
 	}
 
 	// Order by and Limit
@@ -86,7 +98,6 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 	args = append(args, pgvector.NewVector(queryVector), limit)
 
 	err = s.db.WithContext(ctx).Raw(sql, args...).Scan(&results).Error
-
 	if err != nil {
 		return nil, fmt.Errorf("search query failed: %w", err)
 	}
