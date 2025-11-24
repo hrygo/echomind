@@ -13,9 +13,9 @@ import (
 	"github.com/hrygo/echomind/internal/handler"
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/service"
+	"github.com/hrygo/echomind/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap"
 )
 
 // MockSearcher implements handler.Searcher
@@ -31,13 +31,30 @@ func (m *MockSearcher) Search(ctx context.Context, userID uuid.UUID, query strin
 	return args.Get(0).([]service.SearchResult), args.Error(1)
 }
 
+// NoopLogger implements logger.Logger for testing
+type NoopLogger struct{}
+
+func (n *NoopLogger) Debug(msg string, fields ...logger.Field)                             {}
+func (n *NoopLogger) Info(msg string, fields ...logger.Field)                              {}
+func (n *NoopLogger) Warn(msg string, fields ...logger.Field)                              {}
+func (n *NoopLogger) Error(msg string, fields ...logger.Field)                             {}
+func (n *NoopLogger) Fatal(msg string, fields ...logger.Field)                             {}
+func (n *NoopLogger) DebugContext(ctx context.Context, msg string, fields ...logger.Field) {}
+func (n *NoopLogger) InfoContext(ctx context.Context, msg string, fields ...logger.Field)  {}
+func (n *NoopLogger) WarnContext(ctx context.Context, msg string, fields ...logger.Field)  {}
+func (n *NoopLogger) ErrorContext(ctx context.Context, msg string, fields ...logger.Field) {}
+func (n *NoopLogger) FatalContext(ctx context.Context, msg string, fields ...logger.Field) {}
+func (n *NoopLogger) With(fields ...logger.Field) logger.Logger                            { return n }
+func (n *NoopLogger) SetLevel(level logger.Level)                                          {}
+func (n *NoopLogger) GetLevel() logger.Level                                               { return logger.DebugLevel }
+
 func TestSearchHandler_Search(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	logger := zap.NewNop().Sugar()
+	testLogger := &NoopLogger{}
 
 	t.Run("Success", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, logger)
+		h := handler.NewSearchHandler(mockSearcher, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -65,7 +82,7 @@ func TestSearchHandler_Search(t *testing.T) {
 
 	t.Run("Missing Query", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, logger)
+		h := handler.NewSearchHandler(mockSearcher, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -81,7 +98,7 @@ func TestSearchHandler_Search(t *testing.T) {
 
 	t.Run("Service Error", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, logger)
+		h := handler.NewSearchHandler(mockSearcher, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -96,10 +113,10 @@ func TestSearchHandler_Search(t *testing.T) {
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 	})
-	
+
 	t.Run("Unauthorized", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, logger)
+		h := handler.NewSearchHandler(mockSearcher, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)

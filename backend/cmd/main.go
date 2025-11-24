@@ -30,7 +30,6 @@ func main() {
 	}
 	defer container.Close()
 
-
 	// Setup Database (Migrations & Extensions)
 	if err := container.SetupDB(); err != nil {
 	}
@@ -72,7 +71,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(userService)
 	insightHandler := handler.NewInsightHandler(insightService)
 	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
-	searchHandler := &handler.SearchHandler{} // 暂时为空，需要后续修复
+	searchHandler := handler.NewSearchHandler(container.SearchService, container.Logger)
 	healthHandler := handler.NewHealthHandler(container.DB)
 	orgHandler := handler.NewOrganizationHandler(organizationService)
 	chatHandler := handler.NewChatHandler(chatService)
@@ -122,7 +121,6 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-
 
 	// Give outstanding requests 10 seconds to complete
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

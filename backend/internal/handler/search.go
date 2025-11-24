@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/service"
-	"go.uber.org/zap"
+	"github.com/hrygo/echomind/pkg/logger"
 )
 
 type Searcher interface {
@@ -19,13 +19,13 @@ type Searcher interface {
 
 type SearchHandler struct {
 	searchService Searcher
-	logger        *zap.SugaredLogger
+	logger        logger.Logger
 }
 
-func NewSearchHandler(searchService Searcher, logger *zap.SugaredLogger) *SearchHandler {
+func NewSearchHandler(searchService Searcher, log logger.Logger) *SearchHandler {
 	return &SearchHandler{
 		searchService: searchService,
-		logger:        logger,
+		logger:        log,
 	}
 }
 
@@ -35,14 +35,14 @@ func (h *SearchHandler) Search(c *gin.Context) {
 	// Extract user_id from context (set by auth middleware)
 	userIDValue, exists := c.Get(middleware.ContextUserIDKey)
 	if !exists {
-		h.logger.Warnw("Search attempt without authentication")
+		h.logger.Warn("Search attempt without authentication")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
 	userID, ok := userIDValue.(uuid.UUID)
 	if !ok {
-		h.logger.Errorw("Invalid user ID format in context", "userIDValue", userIDValue)
+		h.logger.Error("Invalid user ID format in context", logger.Any("userIDValue", userIDValue))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user ID format"})
 		return
 	}
@@ -57,12 +57,19 @@ func (h *SearchHandler) Search(c *gin.Context) {
 	// Parse filters
 	var filters service.SearchFilters
 	filters.Sender = c.Query("sender")
+	if contextIDStr := c.Query("context_id"); contextIDStr != "" {
+		if contextID, err := uuid.Parse(contextIDStr); err == nil {
+			filters.ContextID = &contextID
+		} else {
+			h.logger.Warn("Invalid context_id format", logger.String("context_id", contextIDStr))
+		}
+	}
 
 	if startDateStr := c.Query("start_date"); startDateStr != "" {
 		if t, err := time.Parse(time.DateOnly, startDateStr); err == nil {
 			filters.StartDate = &t
 		} else {
-			h.logger.Warnw("Invalid start_date format", "start_date", startDateStr)
+			h.logger.Warn("Invalid start_date format", logger.String("start_date", startDateStr))
 		}
 	}
 
@@ -72,7 +79,7 @@ func (h *SearchHandler) Search(c *gin.Context) {
 			t = t.Add(24*time.Hour - time.Nanosecond)
 			filters.EndDate = &t
 		} else {
-			h.logger.Warnw("Invalid end_date format", "end_date", endDateStr)
+			h.logger.Warn("Invalid end_date format", logger.String("end_date", endDateStr))
 		}
 	}
 
@@ -83,19 +90,34 @@ func (h *SearchHandler) Search(c *gin.Context) {
 		limit = 10
 	}
 
-	h.logger.Infow("Search request", "userID", userID, "query", query, "filters", filters, "limit", limit)
+	h.logger.Info("Search request",
+		logger.Any("userID", userID),
+		logger.String("query", query),
+		logger.Any("filters", filters),
+		logger.Int("limit", limit),
+	)
 
 	// Perform search
 	results, err := h.searchService.Search(c.Request.Context(), userID, query, filters, limit)
 	duration := time.Since(start)
 
 	if err != nil {
-		h.logger.Errorw("Search failed", "userID", userID, "query", query, "error", err, "duration", duration)
+		h.logger.Error("Search failed",
+			logger.Any("userID", userID),
+			logger.String("query", query),
+			logger.Error(err),
+			logger.Duration("duration", duration),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "search failed", "details": err.Error()})
 		return
 	}
 
-	h.logger.Infow("Search completed", "userID", userID, "query", query, "results", len(results), "duration", duration)
+	h.logger.Info("Search completed",
+		logger.Any("userID", userID),
+		logger.String("query", query),
+		logger.Int("results", len(results)),
+		logger.Duration("duration", duration),
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"query":   query,
