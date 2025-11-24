@@ -20,15 +20,16 @@ interface InputFieldProps {
   icon: React.ElementType;
   disabled?: boolean;
   showPasswordToggle?: boolean;
+  inModal?: boolean;
 }
 
-function InputField({ id, label, type, placeholder, value, onChange, error, icon: Icon, disabled, showPasswordToggle }: InputFieldProps) {
+function InputField({ id, label, type, placeholder, value, onChange, error, icon: Icon, disabled, showPasswordToggle, inModal }: InputFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
   const inputType = showPasswordToggle && showPassword ? 'text' : type;
 
   return (
     <div className="space-y-1">
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700">
+      <label htmlFor={id} className={cn("block text-sm font-medium", inModal ? "text-slate-200" : "text-slate-700")}>
         {label}
       </label>
       <div className="relative">
@@ -45,7 +46,10 @@ function InputField({ id, label, type, placeholder, value, onChange, error, icon
           className={cn(
             "w-full pl-10 pr-3 py-2 border rounded-lg text-sm transition-all duration-200",
             "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
-            error ? "border-red-500 ring-red-100" : "border-slate-200 bg-slate-50",
+            inModal
+              ? "text-slate-100 placeholder:text-slate-400 bg-slate-700 border-slate-600"
+              : "text-slate-900 border-slate-200 bg-slate-50",
+            error && "border-red-500 ring-red-100",
             disabled && "cursor-not-allowed bg-slate-100"
           )}
         />
@@ -63,7 +67,7 @@ function InputField({ id, label, type, placeholder, value, onChange, error, icon
   );
 }
 
-export function SmartMailboxForm() {
+export function SmartMailboxForm({ inModal = false }: { inModal?: boolean }) {
   const { t } = useLanguage();
   const { mailbox, setMailboxConfig, setStep } = useOnboardingStore();
   const updateUser = useAuthStore(state => state.updateUser);
@@ -144,10 +148,10 @@ export function SmartMailboxForm() {
         smtp_port: mailbox.smtpPort,
       });
       setConnectionStatus('success');
-      
+
       // Update user state to mark account as connected (preliminary update)
       updateUser({ has_account: true });
-      
+
       setStep(3); // Move to next step
     } catch (error: unknown) {
       console.error("Mailbox connection failed:", error);
@@ -165,15 +169,19 @@ export function SmartMailboxForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen-auth p-4">
-      <h1 className="text-4xl font-extrabold text-slate-900 mb-4 text-center">
-        {t('onboarding.step2.title')}
-      </h1>
-      <p className="text-lg text-slate-600 mb-10 text-center max-w-xl">
-        {t('onboarding.step2.subtitle')}
-      </p>
+    <div className={cn("flex flex-col items-center justify-center p-4", !inModal && "min-h-screen-auth")}>
+      {!inModal && (
+        <>
+          <h1 className="text-4xl font-extrabold text-slate-900 mb-4 text-center">
+            {t('onboarding.step2.title')}
+          </h1>
+          <p className="text-lg text-slate-600 mb-10 text-center max-w-xl">
+            {t('onboarding.step2.subtitle')}
+          </p>
+        </>
+      )}
 
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+      <form onSubmit={handleSubmit} className={cn("w-full space-y-6", !inModal && "max-w-md")}>
         {generalError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -190,10 +198,11 @@ export function SmartMailboxForm() {
           onChange={(e) => setMailboxConfig({ email: e.target.value })}
           error={errors.email}
           icon={Mail}
+          inModal={inModal}
         />
 
         {detectedProvider?.requiresAppPassword && (
-          <p className="text-sm text-slate-500 mt-2 flex items-center gap-2">
+          <p className={cn("text-sm mt-2 flex items-center gap-2", inModal ? "text-slate-300" : "text-slate-500")}>
             <Key className="w-4 h-4" />
             {t('onboarding.step2.passwordHint').replace('{provider}', detectedProvider.name)}
             {detectedProvider.helpLink && (
@@ -214,19 +223,25 @@ export function SmartMailboxForm() {
           error={errors.password}
           icon={Lock}
           showPasswordToggle
+          inModal={inModal}
         />
 
         <div className="space-y-4">
           <button
             type="button"
             onClick={() => setShowAdvanced(prev => !prev)}
-            className="text-blue-600 hover:underline text-sm flex items-center gap-2"
+            className={cn("hover:underline text-sm flex items-center gap-2", inModal ? "text-blue-400" : "text-blue-600")}
           >
             <Server className="w-4 h-4" /> {t('onboarding.step2.advancedSettings')}
           </button>
 
           {(showAdvanced || !detectedProvider) && (
-            <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className={cn(
+              "space-y-4 p-4 rounded-lg border",
+              inModal
+                ? "bg-slate-800 border-slate-700"
+                : "bg-slate-50 border-slate-100"
+            )}>
               <InputField
                 id="imapHost"
                 label={t('onboarding.step2.imapHost')}
@@ -236,6 +251,7 @@ export function SmartMailboxForm() {
                 onChange={(e) => setMailboxConfig({ imapServer: e.target.value })}
                 error={errors.imapServer}
                 icon={Wifi}
+                inModal={inModal}
               />
               <InputField
                 id="imapPort"
@@ -246,6 +262,7 @@ export function SmartMailboxForm() {
                 onChange={(e) => setMailboxConfig({ imapPort: parseInt(e.target.value) || 0 })}
                 error={errors.imapPort}
                 icon={Globe}
+                inModal={inModal}
               />
               <InputField
                 id="smtpHost"
@@ -256,6 +273,7 @@ export function SmartMailboxForm() {
                 onChange={(e) => setMailboxConfig({ smtpServer: e.target.value })}
                 error={errors.smtpServer}
                 icon={Wifi}
+                inModal={inModal}
               />
               <InputField
                 id="smtpPort"
@@ -266,6 +284,7 @@ export function SmartMailboxForm() {
                 onChange={(e) => setMailboxConfig({ smtpPort: parseInt(e.target.value) || 0 })}
                 error={errors.smtpPort}
                 icon={Globe}
+                inModal={inModal}
               />
             </div>
           )}

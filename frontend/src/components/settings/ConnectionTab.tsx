@@ -166,7 +166,7 @@ export function ConnectionTab() {
               {t('settings.connection.mailboxConfigDesc')}
             </DialogDescription>
           </DialogHeader>
-          <SmartMailboxForm /> {/* Re-use the smart form from onboarding */}
+          <SmartMailboxForm inModal={true} /> {/* Re-use the smart form from onboarding */}
         </DialogContent>
       </Dialog>
     </div>
