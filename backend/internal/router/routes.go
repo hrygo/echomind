@@ -35,7 +35,7 @@ func SetupRoutes(router *gin.Engine, h *Handlers, authMiddleware gin.HandlerFunc
 		protected := api.Group("/").Use(authMiddleware)
 		{
 			// Users
-			protected.PATCH("/users/me", h.Auth.UpdateUserRole)
+			protected.PATCH("/users/me", h.Auth.UpdateUserProfile)
 
 			// Organization
 			protected.POST("/orgs", h.Org.CreateOrganization)
@@ -46,6 +46,7 @@ func SetupRoutes(router *gin.Engine, h *Handlers, authMiddleware gin.HandlerFunc
 			// Account & Sync
 			protected.POST("/settings/account", h.Account.ConnectAndSaveAccount)
 			protected.GET("/settings/account", h.Account.GetAccountStatus)
+			protected.DELETE("/settings/account", h.Account.DisconnectAccount)
 			protected.POST("/sync", h.Sync.SyncEmails)
 
 			// Emails & Insights

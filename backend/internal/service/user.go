@@ -109,9 +109,21 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (st
 	return token, &user, hasAccount, nil
 }
 
-// UpdateUserRole updates the role of a user.
-func (s *UserService) UpdateUserRole(ctx context.Context, userID uuid.UUID, role string) error {
-	return s.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", userID).Update("role", role).Error
+// UpdateUserProfile updates the profile (role, name) of a user.
+func (s *UserService) UpdateUserProfile(ctx context.Context, userID uuid.UUID, role, name string) error {
+	updates := make(map[string]interface{})
+	if role != "" {
+		updates["role"] = role
+	}
+	if name != "" {
+		updates["name"] = name
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	return s.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", userID).Updates(updates).Error
 }
 
 // GetUserByID retrieves a user by their ID.

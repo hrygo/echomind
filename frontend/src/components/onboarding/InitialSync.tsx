@@ -23,7 +23,7 @@ export function InitialSync() {
       try {
         // 1. Update user role (from Step 1)
         if (role) {
-          await api.patch('/users/me', { role }); // TODO: Need to implement backend PATCH /users/me
+          await api.patch('/users/me', { role });
         }
 
         // 2. Save mailbox config (from Step 2) if not already done via SmartMailboxForm's handleSubmit

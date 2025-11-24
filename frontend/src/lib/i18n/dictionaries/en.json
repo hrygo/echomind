@@ -195,7 +195,9 @@
         "profile": {
             "title": "Profile Settings",
             "uploadAvatar": "Upload new picture",
-            "saveChanges": "Save Changes"
+            "saveChanges": "Save Changes",
+            "success": "Profile updated successfully",
+            "error": "Failed to update profile"
         },
         "connection": {
             "title": "Mailbox Connection",
@@ -208,7 +210,10 @@
             "notConfigured": "No mailbox configured. Please set up your email account.",
             "syncFailed": "Sync failed. Please try again.",
             "configureMailboxDesc": "Configure IMAP/SMTP server information for email synchronization",
-            "configureMailbox": "Configure Mailbox"
+            "configureMailbox": "Configure Mailbox",
+            "disconnect": "Disconnect Account",
+            "disconnectConfirm": "Are you sure you want to disconnect your email account? This will stop synchronization.",
+            "disconnectFailed": "Failed to disconnect account"
         }
     },
     "emailDetail": {
@@ -240,6 +245,10 @@
         "feature1": "AI-powered Smart Summaries",
         "feature2": "Context-aware AI Chat Copilot",
         "feature3": "Automated Action Item Extraction",
+        "emailLabel": "Email",
+        "passwordLabel": "Password",
+        "nameLabel": "Full Name",
+        "confirmPasswordLabel": "Confirm Password",
         "errors": {
             "emailRequired": "Email is required",
             "emailInvalid": "Please enter a valid email",

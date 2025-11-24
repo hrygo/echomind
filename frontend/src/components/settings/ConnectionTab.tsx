@@ -113,6 +113,22 @@ export function ConnectionTab() {
             >
               {t('settings.connection.reconfigure')}
             </button>
+            <button
+              onClick={async () => {
+                if (confirm(t('settings.connection.disconnectConfirm'))) { // Need to add key
+                  try {
+                    await api.delete('/settings/account');
+                    fetchAccountStatus();
+                  } catch (error) {
+                    console.error("Failed to disconnect:", error);
+                    alert(t('settings.connection.disconnectFailed')); // Need to add key
+                  }
+                }
+              }}
+              className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+            >
+              {t('settings.connection.disconnect')}
+            </button>
           </div>
         </div>
       ) : (

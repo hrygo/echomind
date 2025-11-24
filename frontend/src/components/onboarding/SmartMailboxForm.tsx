@@ -50,7 +50,7 @@ function InputField({ id, label, type, placeholder, value, onChange, error, icon
           )}
         />
         {showPasswordToggle && (
-          <span 
+          <span
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer hover:text-slate-600"
             onClick={() => setShowPassword(prev => !prev)}
           >
@@ -88,14 +88,14 @@ export function SmartMailboxForm() {
         providerConfig: detectedProvider,
       });
     } else if (!detectedProvider && !showAdvanced) {
-        // Clear auto-filled if email changes to unknown domain and not in advanced mode
-        setMailboxConfig({
-            imapServer: '',
-            imapPort: 0,
-            smtpServer: '',
-            smtpPort: 0,
-            providerConfig: null,
-        });
+      // Clear auto-filled if email changes to unknown domain and not in advanced mode
+      setMailboxConfig({
+        imapServer: '',
+        imapPort: 0,
+        smtpServer: '',
+        smtpPort: 0,
+        providerConfig: null,
+      });
     }
   }, [detectedProvider, setMailboxConfig, showAdvanced]);
 
@@ -112,7 +112,7 @@ export function SmartMailboxForm() {
       if (!mailbox.imapServer) newErrors.imapServer = t('onboarding.step2.errors.imapHostRequired');
       if (!mailbox.imapPort) newErrors.imapPort = t('onboarding.step2.errors.imapPortRequired');
       else if (isNaN(mailbox.imapPort) || mailbox.imapPort <= 0 || mailbox.imapPort > 65535) newErrors.imapPort = t('onboarding.step2.errors.invalidPort');
-      
+
       if (!mailbox.smtpServer) newErrors.smtpServer = t('onboarding.step2.errors.smtpHostRequired');
       if (!mailbox.smtpPort) newErrors.smtpPort = t('onboarding.step2.errors.smtpPortRequired');
       else if (isNaN(mailbox.smtpPort) || mailbox.smtpPort <= 0 || mailbox.smtpPort > 65535) newErrors.smtpPort = t('onboarding.step2.errors.invalidPort');
@@ -139,9 +139,8 @@ export function SmartMailboxForm() {
         password: mailbox.password,
         server_address: mailbox.imapServer,
         server_port: mailbox.imapPort,
-        // The backend `EmailAccountInput` only has one server/port. This needs clarification.
-        // For now, we'll send IMAP details, assuming backend handles SMTP separately or doesn't need it at this stage.
-        // TODO: Backend `EmailAccountInput` needs IMAP and SMTP fields separately.
+        smtp_server: mailbox.smtpServer,
+        smtp_port: mailbox.smtpPort,
       });
       setConnectionStatus('success');
       setStep(3); // Move to next step

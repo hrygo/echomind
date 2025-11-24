@@ -195,7 +195,9 @@
         "profile": {
             "title": "个人资料设置",
             "uploadAvatar": "上传新头像",
-            "saveChanges": "保存更改"
+            "saveChanges": "保存更改",
+            "success": "个人资料更新成功",
+            "error": "更新个人资料失败"
         },
         "connection": {
             "title": "邮箱连接管理",
@@ -208,7 +210,10 @@
             "notConfigured": "未配置邮箱。请设置您的邮箱账户。",
             "syncFailed": "同步失败。请重试。",
             "configureMailboxDesc": "配置用于同步邮件的 IMAP/SMTP 服务器信息",
-            "configureMailbox": "配置邮箱"
+            "configureMailbox": "配置邮箱",
+            "disconnect": "断开连接",
+            "disconnectConfirm": "您确定要断开邮箱连接吗？这将停止邮件同步。",
+            "disconnectFailed": "断开连接失败"
         }
     },
     "emailDetail": {
@@ -240,6 +245,10 @@
         "feature1": "AI 智能邮件摘要",
         "feature2": "上下文感知 AI 对话",
         "feature3": "自动提取待办事项",
+        "emailLabel": "邮箱地址",
+        "passwordLabel": "密码",
+        "nameLabel": "姓名",
+        "confirmPasswordLabel": "确认密码",
         "errors": {
             "emailRequired": "邮箱地址不能为空",
             "emailInvalid": "请输入有效的邮箱地址",

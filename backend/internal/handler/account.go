@@ -66,14 +66,34 @@ func (h *AccountHandler) GetAccountStatus(c *gin.Context) {
 
 	// Return a simplified view of the account status (NO PASSWORD)
 	response := gin.H{
-		"has_account": true,
-		"email":         account.Email,
+		"has_account":    true,
+		"email":          account.Email,
 		"server_address": account.ServerAddress,
 		"server_port":    account.ServerPort,
-		"username":        account.Username,
-		"is_connected":    account.IsConnected,
-		"last_sync_at":    account.LastSyncAt,
-		"error_message":   account.ErrorMessage,
+		"username":       account.Username,
+		"is_connected":   account.IsConnected,
+		"last_sync_at":   account.LastSyncAt,
+		"error_message":  account.ErrorMessage,
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// DisconnectAccount handles the DELETE request to remove a user's email account.
+func (h *AccountHandler) DisconnectAccount(c *gin.Context) {
+	userID, ok := middleware.GetUserIDFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	if err := h.accountService.DisconnectAccount(c.Request.Context(), userID); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No email account found to disconnect"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to disconnect account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Account disconnected successfully"})
 }

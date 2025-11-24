@@ -4,6 +4,7 @@ import React from 'react';
 import { Camera } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useAuthStore } from '@/store/auth';
+import { api } from '@/lib/api';
 
 export function ProfileTab() {
   const { t } = useLanguage();
@@ -13,9 +14,19 @@ export function ProfileTab() {
   const [firstName, setFirstName] = React.useState(user?.name?.split(' ')[0] || '');
   const [lastName, setLastName] = React.useState(user?.name?.split(' ')[1] || '');
 
-  const handleSaveChanges = () => {
-    // TODO: Implement API call to update user profile
-    alert('Saving changes...'); // Placeholder
+  const handleSaveChanges = async () => {
+    try {
+      const fullName = `${firstName} ${lastName}`.trim();
+      await api.patch('/users/me', { name: fullName });
+      // Update local store
+      useAuthStore.setState(state => ({
+        user: state.user ? { ...state.user, name: fullName } : null
+      }));
+      alert(t('settings.profile.success')); // Need to add key
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      alert(t('settings.profile.error')); // Need to add key
+    }
   };
 
   return (
@@ -33,8 +44,8 @@ export function ProfileTab() {
             <Camera className="w-6 h-6 text-white" />
           </div>
         </div>
-        <button 
-          onClick={handleSaveChanges} // Placeholder for avatar upload
+        <button
+          onClick={() => alert("Avatar upload not implemented yet")} // Placeholder for avatar upload
           className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
         >
           {t('settings.profile.uploadAvatar')}
@@ -44,8 +55,8 @@ export function ProfileTab() {
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">{t('settings.firstName')}</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
@@ -53,8 +64,8 @@ export function ProfileTab() {
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">{t('settings.lastName')}</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
@@ -62,11 +73,11 @@ export function ProfileTab() {
         </div>
         <div className="col-span-2 space-y-2">
           <label className="text-sm font-medium text-slate-700">{t('settings.loginEmail')}</label>
-          <input 
-            type="email" 
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed" 
+          <input
+            type="email"
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
             value={user?.email || ''}
-            disabled 
+            disabled
           />
           <p className="text-sm text-slate-700">{t('settings.loginEmailDesc')}</p>
         </div>

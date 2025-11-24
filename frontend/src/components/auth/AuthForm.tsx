@@ -47,7 +47,7 @@ function AuthInput({ id, label, type, placeholder, value, onChange, error, icon:
           )}
         />
         {showPasswordToggle && (
-          <span 
+          <span
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer hover:text-slate-600"
             onClick={() => setShowPassword(prev => !prev)}
           >
@@ -161,7 +161,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
       {mode === 'register' && (
         <AuthInput
           id="fullName"
-          label={t('auth.namePlaceholder')}
+          label={t('auth.nameLabel')}
           type="text"
           placeholder={t('auth.namePlaceholder')}
           value={fullName}
@@ -173,7 +173,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
 
       <AuthInput
         id="email"
-        label={t('auth.emailPlaceholder')}
+        label={t('auth.emailLabel')}
         type="email"
         placeholder={t('auth.emailPlaceholder')}
         value={email}
@@ -184,7 +184,7 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
 
       <AuthInput
         id="password"
-        label={t('auth.passwordPlaceholder')}
+        label={t('auth.passwordLabel')}
         type="password"
         placeholder={t('auth.passwordPlaceholder')}
         value={password}
@@ -197,9 +197,9 @@ export function AuthForm({ mode, onModeChange }: AuthFormProps) {
       {mode === 'register' && (
         <AuthInput
           id="confirmPassword"
-          label={t('auth.confirmPassword')}
+          label={t('auth.confirmPasswordLabel')}
           type="password"
-          placeholder={t('auth.confirmPassword')}
+          placeholder={t('auth.confirmPasswordLabel')}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           error={errors.confirmPassword}

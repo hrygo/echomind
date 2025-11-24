@@ -48,7 +48,7 @@ func (s *ChatService) StreamChat(ctx context.Context, userID uuid.UUID, messages
 	// We use a simple heuristic: search using the last user message
 	// In a more advanced version, we might summarize the conversation history first.
 	var contextBuilder strings.Builder
-	
+
 	// Strategy A: Explicit Context (High Priority)
 	if len(contextRefIDs) > 0 && s.emailService != nil {
 		emails, err := s.emailService.GetEmailsByIDs(ctx, userID, contextRefIDs)
@@ -85,6 +85,17 @@ func (s *ChatService) StreamChat(ctx context.Context, userID uuid.UUID, messages
 	} else {
 		contextBuilder.WriteString("You are EchoMind Copilot, a helpful AI assistant for managing emails and work.\n")
 	}
+
+	// Add Widget Instructions
+	contextBuilder.WriteString(`
+You can generate interactive widgets for the user.
+Supported widgets:
+1. Task List: <widget type="task_list">[{"title": "Task 1", "due": "2023-10-27"}, ...]</widget>
+2. Email Draft: <widget type="email_draft">{"to": "...", "subject": "...", "body": "..."}</widget>
+3. Calendar Event: <widget type="calendar_event">{"title": "...", "start": "...", "end": "..."}</widget>
+
+When the user asks to create tasks, draft emails, or schedule meetings, output the corresponding widget XML block.
+`)
 
 	// 4. Prepare messages for AI Provider
 	// We prepend the system prompt.

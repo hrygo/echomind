@@ -9,23 +9,26 @@ import (
 
 // EmailAccount represents a user's configured email account for IMAP synchronization.
 type EmailAccount struct {
-	ID                uuid.UUID `gorm:"type:uuid;primary_key"`
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	DeletedAt         gorm.DeletedAt `gorm:"index"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	UserID            *uuid.UUID `gorm:"type:uuid;index"` // Nullable if owned by team or org
-	TeamID            *uuid.UUID `gorm:"type:uuid;index"` // New field
-	OrganizationID    *uuid.UUID `gorm:"type:uuid;index"` // New field (for org-wide accounts)
-	
-	Email             string    `gorm:"not null"`          // The email address (display/login if different from username)
-	ServerAddress     string    `gorm:"not null"`          // e.g., imap.gmail.com
-	ServerPort        int       `gorm:"not null;default:993"`
-	Username          string    `gorm:"not null"`          // IMAP Login Username
-	
-	EncryptedPassword string    `gorm:"type:text;not null"` // Base64 encoded ciphertext
-	
-	IsConnected       bool      `gorm:"default:false"`     // Status flag: true if last connection attempt was successful
-	LastSyncAt        *time.Time                           // Timestamp of last successful sync
-	ErrorMessage      string    `gorm:"type:text"`         // Stores the error message from the last failed connection/sync attempt
+	UserID         *uuid.UUID `gorm:"type:uuid;index"` // Nullable if owned by team or org
+	TeamID         *uuid.UUID `gorm:"type:uuid;index"` // New field
+	OrganizationID *uuid.UUID `gorm:"type:uuid;index"` // New field (for org-wide accounts)
+
+	Email         string `gorm:"not null"` // The email address (display/login if different from username)
+	ServerAddress string `gorm:"not null"` // e.g., imap.gmail.com
+	ServerPort    int    `gorm:"not null;default:993"`
+	Username      string `gorm:"not null"` // IMAP Login Username
+
+	SMTPServer string `gorm:"not null"` // e.g., smtp.gmail.com
+	SMTPPort   int    `gorm:"not null;default:587"`
+
+	EncryptedPassword string `gorm:"type:text;not null"` // Base64 encoded ciphertext
+
+	IsConnected  bool       `gorm:"default:false"` // Status flag: true if last connection attempt was successful
+	LastSyncAt   *time.Time // Timestamp of last successful sync
+	ErrorMessage string     `gorm:"type:text"` // Stores the error message from the last failed connection/sync attempt
 }

@@ -3,6 +3,9 @@ import { Header } from "@/components/layout/Header";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
 import AuthGuard from '@/components/auth/AuthGuard';
 
+// Force dynamic rendering for all dashboard pages
+export const dynamic = 'force-dynamic';
+
 
 export default function DashboardLayout({
   children,

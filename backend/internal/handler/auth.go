@@ -51,13 +51,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message":     "User registered successfully",
-		"token":       token,
+		"message": "User registered successfully",
+		"token":   token,
 		"user": gin.H{
-			"id": user.ID,
-			"email": user.Email,
-			"name": user.Name,
-			"role": user.Role,
+			"id":          user.ID,
+			"email":       user.Email,
+			"name":        user.Name,
+			"role":        user.Role,
 			"has_account": hasAccount,
 		},
 	})
@@ -87,39 +87,40 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token":   token,
+		"token": token,
 		"user": gin.H{
-			"id": user.ID,
-			"email": user.Email,
-			"name": user.Name,
-			"role": user.Role,
+			"id":          user.ID,
+			"email":       user.Email,
+			"name":        user.Name,
+			"role":        user.Role,
 			"has_account": hasAccount,
 		},
 	})
 }
 
-type UpdateUserRoleRequest struct {
-	Role string `json:"role" binding:"required,oneof=executive manager dealmaker"`
+type UpdateUserProfileRequest struct {
+	Role string `json:"role" binding:"omitempty,oneof=executive manager dealmaker"`
+	Name string `json:"name" binding:"omitempty,max=100"`
 }
 
-// UpdateUserRole handles updating the authenticated user's role.
-func (h *AuthHandler) UpdateUserRole(c *gin.Context) {
+// UpdateUserProfile handles updating the authenticated user's profile (Role, Name).
+func (h *AuthHandler) UpdateUserProfile(c *gin.Context) {
 	userID, ok := middleware.GetUserIDFromContext(c)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in context"})
 		return
 	}
 
-	var req UpdateUserRoleRequest
+	var req UpdateUserProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.userService.UpdateUserRole(c.Request.Context(), userID, req.Role); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
+	if err := h.userService.UpdateUserProfile(c.Request.Context(), userID, req.Role, req.Name); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User role updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "User profile updated successfully"})
 }
