@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Bell, Settings, LogOut, Globe, Sparkles, Menu } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useUIStore } from "@/store/ui";
 import { CopilotWidget } from "@/components/copilot/CopilotWidget";
 import { useCopilotStore } from "@/store/useCopilotStore";
+import { useAuthStore } from "@/store/auth";
+import { useRouter } from "next/navigation";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 export function Header() {
     const { language, setLanguage, t } = useLanguage();
@@ -14,6 +17,12 @@ export function Header() {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     
     const { setMode, setIsOpen } = useCopilotStore();
+    const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
+    const router = useRouter();
+
+    const dropdownRef = useRef(null);
+    useOnClickOutside(dropdownRef, () => setIsUserMenuOpen(false));
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
@@ -22,6 +31,12 @@ export function Header() {
     const handleOpenChat = () => {
         setMode('chat');
         setIsOpen(true);
+    };
+
+    const handleLogout = () => {
+      logout();
+      setIsUserMenuOpen(false); // Close the dropdown
+      router.push('/auth');    // Redirect to the auth page
     };
 
     return (
@@ -45,12 +60,29 @@ export function Header() {
                     >
                         <Sparkles className="w-5 h-5" />
                     </button>
-                    <button
-                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                         className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
-                    >
-                        U
-                    </button>
+                    <div ref={dropdownRef} className="relative">
+                        <button
+                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                             className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
+                        >
+                            {user?.name?.[0].toUpperCase() || 'U'}
+                        </button>
+                        {isUserMenuOpen && (
+                           // Dropdown menu content remains the same, just for mobile
+                           // This is a simplified version for brevity in this example
+                            <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-50">
+                                <div className="p-1">
+                                    <button
+                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg text-left transition-colors"
+                                        onClick={handleLogout}
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        {t('common.logout')}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -87,16 +119,16 @@ export function Header() {
                     <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
                     {/* User Profile Dropdown */}
-                    <div className="relative">
+                    <div ref={dropdownRef} className="relative">
                          <button
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-slate-100 transition-all duration-200 focus:outline-none"
                         >
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-200">
-                                U
+                                {user?.name?.[0].toUpperCase() || 'U'}
                             </div>
                             <div className="hidden lg:block text-left">
-                                <p className="text-sm font-semibold text-slate-700 leading-none">{t('sidebar.user')}</p>
+                                <p className="text-sm font-semibold text-slate-700 leading-none">{user?.name || t('sidebar.user')}</p>
                                 <p className="text-[10px] text-slate-400 font-medium mt-1">{t('sidebar.freePlan')}</p>
                             </div>
                         </button>
@@ -106,8 +138,8 @@ export function Header() {
                             <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">
                                 <div className="p-2 border-b border-slate-50">
                                     <div className="px-3 py-2">
-                                        <p className="text-sm font-semibold text-slate-800">User Name</p>
-                                        <p className="text-xs text-slate-500">user@example.com</p>
+                                        <p className="text-sm font-semibold text-slate-800">{user?.name || 'User Name'}</p>
+                                        <p className="text-xs text-slate-500">{user?.email || 'user@example.com'}</p>
                                     </div>
                                 </div>
                                 <div className="p-1">
@@ -121,7 +153,7 @@ export function Header() {
                                     </Link>
                                     <button
                                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg text-left transition-colors"
-                                        onClick={() => alert("Logout clicked")}
+                                        onClick={handleLogout}
                                     >
                                         <LogOut className="w-4 h-4" />
                                         {t('common.logout')}
