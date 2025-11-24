@@ -15,9 +15,9 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/github/actions/workflow/status/your-username/echomind/ci-cd.yml?branch=main&style=for-the-badge" alt="CI/CD 状态">
-    <img src="https://img.shields.io/github/v/release/your-username/echomind?style=for-the-badge" alt="版本">
-    <img src="https://img.shields.io/github/license/your-username/echomind?style=for-the-badge" alt="许可证">
+    <img src="https://img.shields.io/github/actions/workflow/status/hrygo/echomind/ci-cd.yml?branch=main&style=for-the-badge" alt="CI/CD 状态">
+    <img src="https://img.shields.io/github/v/release/hrygo/echomind?style=for-the-badge" alt="版本">
+    <img src="https://img.shields.io/github/license/hrygo/echomind?style=for-the-badge" alt="许可证">
 </p>
 </div>
 

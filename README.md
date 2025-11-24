@@ -10,9 +10,9 @@
     <a href="README.zh.md">简体中文</a>
   </p>
   <p align="center">
-    <img src="https://img.shields.io/github/actions/workflow/status/your-username/echomind/ci-cd.yml?branch=main&style=for-the-badge" alt="CI/CD Status">
-    <img src="https://img.shields.io/github/v/release/your-username/echomind?style=for-the-badge" alt="Version">
-    <img src="https://img.shields.io/github/license/your-username/echomind?style=for-the-badge" alt="License">
+    <img src="https://img.shields.io/github/actions/workflow/status/hrygo/echomind/ci-cd.yml?branch=main&style=for-the-badge" alt="CI/CD Status">
+    <img src="https://img.shields.io/github/v/release/hrygo/echomind?style=for-the-badge" alt="Version">
+    <img src="https://img.shields.io/github/license/hrygo/echomind?style=for-the-badge" alt="License">
   </p>
 </div>
 
