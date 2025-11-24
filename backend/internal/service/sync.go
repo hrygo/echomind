@@ -140,10 +140,10 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 
 	password, err := utils.Decrypt(account.EncryptedPassword, keyBytes)
 	if err != nil {
-		s.logger.Errorw("Error decrypting password for account %s: %v", account.ID, err)
+		s.logger.Errorw("Error decrypting password", "account_id", account.ID, "error", err)
 		// Update account status to indicate decryption failure
 		if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, false, "Failed to decrypt password", nil); statusErr != nil {
-			s.logger.Errorw("Failed to update account status after decryption failure: %v", statusErr)
+			s.logger.Errorw("Failed to update account status after decryption failure", "error", statusErr)
 		}
 		return fmt.Errorf("failed to decrypt password: %w", err)
 	}
@@ -157,7 +157,7 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 			"error", err)
 		// Update account status to indicate connection failure
 		if err := s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP connection/login failed: %v", err), nil); err != nil {
-			s.logger.Errorw("Failed to update account status after IMAP connection failure: %v", err)
+			s.logger.Errorw("Failed to update account status after IMAP connection failure", "error", err)
 		}
 		return fmt.Errorf("failed to dial/login to IMAP server: %w", err)
 	}
@@ -166,7 +166,7 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 	// Connection successful, update account status
 	now := time.Now()
 	if err := s.accountService.UpdateAccountStatus(ctx, account.ID, true, "", &now); err != nil {
-		s.logger.Errorw("Failed to update account status after successful sync: %v", err)
+		s.logger.Errorw("Failed to update account status after successful sync", "error", err)
 	}
 	// 4. Fetch emails using the dynamically created client
 	emails, err := s.fetcher.FetchEmails(imapClient, "INBOX", 30)
@@ -176,7 +176,7 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 			"error", err)
 		// Optionally update account status with fetch error, keep connected true as login was successful
 		if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, true, fmt.Sprintf("Failed to fetch emails: %v", err), nil); statusErr != nil {
-			s.logger.Errorw("Failed to update account status after email fetch failure: %v", statusErr)
+			s.logger.Errorw("Failed to update account status after email fetch failure", "error", statusErr)
 		}
 		return fmt.Errorf("failed to fetch emails: %w", err)
 	}
