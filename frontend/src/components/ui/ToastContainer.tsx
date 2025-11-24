@@ -9,6 +9,7 @@ export function ToastContainer() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -30,7 +31,7 @@ export function ToastContainer() {
           <div className="mt-0.5">
             {getToastIcon(toast.type)}
           </div>
-          
+
           <div className="flex-1 min-w-0">
             {toast.title && (
               <div className="font-semibold mb-1 text-sm">

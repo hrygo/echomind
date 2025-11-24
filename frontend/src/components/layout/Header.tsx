@@ -15,34 +15,34 @@ export function Header() {
     const { language, setLanguage, t } = useLanguage();
     const { openMobileSidebar } = useUIStore();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    
+
     const { setMode, setIsOpen } = useCopilotStore();
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
     const router = useRouter();
 
-    const dropdownRef = useRef(null);
-    useOnClickOutside(dropdownRef, () => setIsUserMenuOpen(false));
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    useOnClickOutside<HTMLDivElement>(dropdownRef, () => setIsUserMenuOpen(false));
 
     const toggleLanguage = () => {
         setLanguage(language === 'zh' ? 'en' : 'zh');
     };
-    
+
     const handleOpenChat = () => {
         setMode('chat');
         setIsOpen(true);
     };
 
     const handleLogout = () => {
-      logout();
-      setIsUserMenuOpen(false); // Close the dropdown
-      router.push('/auth');    // Redirect to the auth page
+        logout();
+        setIsUserMenuOpen(false); // Close the dropdown
+        router.push('/auth');    // Redirect to the auth page
     };
 
     return (
         <header className="h-16 md:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 transition-all duration-200">
             {/* Mobile Header (Simplified for now) */}
-             <div className="flex md:hidden items-center w-full justify-between">
+            <div className="flex md:hidden items-center w-full justify-between">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={openMobileSidebar}
@@ -53,7 +53,7 @@ export function Header() {
                     <span className="font-bold text-lg text-slate-800">EchoMind</span>
                 </div>
                 <div className="flex items-center gap-2">
-                     {/* Mobile Search/Chat Trigger */}
+                    {/* Mobile Search/Chat Trigger */}
                     <button
                         onClick={handleOpenChat}
                         className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full"
@@ -62,14 +62,14 @@ export function Header() {
                     </button>
                     <div ref={dropdownRef} className="relative">
                         <button
-                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                             className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
+                            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                            className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
                         >
                             {user?.name?.[0].toUpperCase() || 'U'}
                         </button>
                         {isUserMenuOpen && (
-                           // Dropdown menu content remains the same, just for mobile
-                           // This is a simplified version for brevity in this example
+                            // Dropdown menu content remains the same, just for mobile
+                            // This is a simplified version for brevity in this example
                             <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-50">
                                 <div className="p-1">
                                     <button
@@ -120,7 +120,7 @@ export function Header() {
 
                     {/* User Profile Dropdown */}
                     <div ref={dropdownRef} className="relative">
-                         <button
+                        <button
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-slate-100 transition-all duration-200 focus:outline-none"
                         >
@@ -132,7 +132,7 @@ export function Header() {
                                 <p className="text-[10px] text-slate-400 font-medium mt-1">{t('sidebar.freePlan')}</p>
                             </div>
                         </button>
-                        
+
                         {/* Dropdown Menu */}
                         {isUserMenuOpen && (
                             <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200 z-50">

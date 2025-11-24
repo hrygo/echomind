@@ -16,11 +16,18 @@ export function ProfileTab() {
   useEffect(() => {
     if (user?.name) {
       const nameParts = user.name.split(' ');
-      setFirstName(nameParts[0] || '');
-      // Handle names with more than two parts correctly
-      setLastName(nameParts.slice(1).join(' ') || '');
+      const newFirstName = nameParts[0] || '';
+      const newLastName = nameParts.slice(1).join(' ') || '';
+
+      if (firstName !== newFirstName) {
+        setFirstName(newFirstName);
+      }
+      if (lastName !== newLastName) {
+        setLastName(newLastName);
+      }
     }
-  }, [user]); // This effect runs when the user object is loaded or changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.name]); // Depend on user.name string to avoid object reference issues
 
   const handleSaveChanges = async () => {
     try {
