@@ -70,6 +70,7 @@
 
 ## 📝 版本历史
 
+- **v0.9.5** (2025-11-24): ✅ Bugfixes (Logger, Frontend Lint), CI/CD Prep
 - **v0.9.4** (2025-11-23): ✅ Generative Widgets (Chat UI)
 - **v0.9.3** (2025-11-23): ✅ Omni-Bar (Smart Routing & Mixed Mode)
 - **v0.9.2** (2025-11-23): ✅ Context Bridge (Search -> Chat Integration)

@@ -5,7 +5,7 @@
 
 EchoMind is a Personal Neural Interface designed for executives, managers, and dealmakers. It acts as an AI cognitive layer on top of your existing communication streams (Email, Calendar), transforming unstructured noise into structured insights, actionable tasks, and strategic intelligence.
 
-> **Current Status**: v0.9.4 (Beta) - Phase 6.3: The Neural Nexus
+> **Current Status**: v0.9.5 (Beta) - Phase 6.3: The Neural Nexus
 >
 > ## 🚀 Core Capabilities
 >
@@ -124,7 +124,11 @@ EchoMind is a Personal Neural Interface designed for executives, managers, and d
 > └── scripts/           # Dev utilities
 > ```
 >
-> ## 🔄 Recent Updates (v0.9.4)
+> ## 🔄 Recent Updates (v0.9.5)
+>
+> **Bug Fixes & Stability:**
+> - ✅ **Critical Fix**: Resolved structured logging format errors in SyncService to prevent data loss in logs.
+> - ✅ **CI/CD**: Fixed frontend type errors and lint warnings for smoother pipeline execution.
 >
 > **The Neural Nexus (Generative Widgets):**
 > - ✅ **Generative Widgets**: Dynamic UI components (TaskList, SearchResult) rendered directly in chat stream.

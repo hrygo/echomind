@@ -1,7 +1,7 @@
 .PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status
 
 # Version
-VERSION := 0.9.4
+VERSION := 0.9.5
 
 # Variables
 REPO_OWNER ?= your-username
