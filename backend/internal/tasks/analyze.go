@@ -61,9 +61,11 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	// 在上下文中添加用户ID和任务信息
+	// Add user ID and task info to the context
 	ctx = logger.WithUserID(ctx, p.UserID.String())
-	ctx = logger.WithRequestID(ctx, t.ResultWriter().TaskID())
+	if rw := t.ResultWriter(); rw != nil {
+		ctx = logger.WithRequestID(ctx, rw.TaskID())
+	}
 
 	log.InfoContext(ctx, "[Task Started] Email Analysis",
 		logger.String("email_id", p.EmailID.String()),

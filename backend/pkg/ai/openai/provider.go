@@ -200,11 +200,11 @@ func cleanMarkdown(text string) string {
 	return strings.TrimSpace(cleaned)
 }
 
-// Embed generates a vector for a single text using text-embedding-3-small.
+// Embed generates a vector for a single text using the configured embedding model.
 func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
 	req := openai.EmbeddingRequest{
 		Input: []string{text},
-		Model: openai.SmallEmbedding3,
+		Model: openai.EmbeddingModel(p.embeddingModel),
 	}
 
 	resp, err := p.client.CreateEmbeddings(ctx, req)
@@ -223,7 +223,7 @@ func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
 func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
 	req := openai.EmbeddingRequest{
 		Input: texts,
-		Model: openai.SmallEmbedding3,
+		Model: openai.EmbeddingModel(p.embeddingModel),
 	}
 
 	resp, err := p.client.CreateEmbeddings(ctx, req)
