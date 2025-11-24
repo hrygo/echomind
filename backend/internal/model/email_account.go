@@ -23,7 +23,7 @@ type EmailAccount struct {
 	ServerPort    int    `gorm:"not null;default:993"`
 	Username      string `gorm:"not null"` // IMAP Login Username
 
-	SMTPServer string `gorm:"not null"` // e.g., smtp.gmail.com
+	SMTPServer string `gorm:"not null;default:''"` // e.g., smtp.gmail.com
 	SMTPPort   int    `gorm:"not null;default:587"`
 
 	EncryptedPassword string `gorm:"type:text;not null"` // Base64 encoded ciphertext

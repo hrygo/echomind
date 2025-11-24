@@ -18,6 +18,7 @@ type Container struct {
 	ContextService *service.ContextService
 	Summarizer     *service.SummaryService
 	ActionService  *service.ActionService
+	SyncService    *service.SyncService // Add SyncService
 }
 
 // NewContainer creates a new dependency injection container
@@ -49,6 +50,19 @@ func NewContainer(configPath string, isProduction bool) (*Container, error) {
 	summarizer := service.NewSummaryService(aiProvider)
 	actionService := service.NewActionService(app.DB)
 
+	// Create SyncService with dependencies
+	defaultFetcher := &service.DefaultFetcher{}
+	syncService := service.NewSyncService(
+		app.DB,
+		&service.DefaultIMAPClient{},
+		defaultFetcher,
+		app.AsynqClient,
+		nil, // contactService will be set later
+		nil, // accountService will be set later
+		app.Config,
+		app.Logger,
+	)
+
 	return &Container{
 		App:            app,
 		AIProvider:     aiProvider,
@@ -57,6 +71,7 @@ func NewContainer(configPath string, isProduction bool) (*Container, error) {
 		ContextService: contextService,
 		Summarizer:     summarizer,
 		ActionService:  actionService,
+		SyncService:    syncService, // Add SyncService
 	}, nil
 }
 

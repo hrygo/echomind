@@ -6,6 +6,7 @@ import (
 
 	"github.com/hrygo/echomind/internal/app"
 	"github.com/hrygo/echomind/internal/model"
+	"github.com/hrygo/echomind/pkg/logger"
 )
 
 func main() {
@@ -22,24 +23,31 @@ func main() {
 	// Fetch all emails
 	var emails []model.Email
 	if err := container.DB.Select("id, subject, snippet, body_text").Find(&emails).Error; err != nil {
-		container.Sugar.Fatalf("Failed to fetch emails: %v", err)
+		container.Logger.Fatal("Failed to fetch emails", logger.Error(err))
 	}
 
-	container.Sugar.Infof("Found %d emails to reindex", len(emails))
+	container.Logger.Info("Starting reindex process",
+		logger.Int("email_count", len(emails)))
 
 	ctx := context.Background()
 	success := 0
 	failed := 0
 
 	for _, email := range emails {
-		container.Sugar.Infof("Reindexing email %s: %s", email.ID, email.Subject)
+		container.Logger.Info("Reindexing email",
+			logger.String("email_id", email.ID.String()),
+			logger.String("subject", email.Subject))
 		if err := container.SearchService.GenerateAndSaveEmbedding(ctx, &email, container.ChunkSize()); err != nil {
-			container.Sugar.Warnf("Failed to reindex email %s: %v", email.ID, err)
+			container.Logger.Warn("Failed to reindex email",
+				logger.String("email_id", email.ID.String()),
+				logger.Error(err))
 			failed++
 		} else {
 			success++
 		}
 	}
 
-	container.Sugar.Infof("Reindex complete. Success: %d, Failed: %d", success, failed)
+	container.Logger.Info("Reindex complete",
+		logger.Int("success", success),
+		logger.Int("failed", failed))
 }

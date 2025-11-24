@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hrygo/echomind/internal/app"
+	"github.com/hrygo/echomind/pkg/logger"
 )
 
 func main() {
@@ -17,12 +18,12 @@ func main() {
 	}
 	defer container.Close()
 
-	container.Sugar.Info("Starting database initialization...")
+	container.Logger.Info("Starting database initialization...")
 
 	// Setup Database (Migrations & Extensions)
 	if err := container.SetupDB(); err != nil {
-		container.Sugar.Fatalf("Database setup failed: %v", err)
+		container.Logger.Fatal("Database setup failed", logger.Error(err))
 	}
 
-	container.Sugar.Info("Database initialization completed successfully.")
+	container.Logger.Info("Database initialization completed successfully.")
 }

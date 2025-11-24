@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hrygo/echomind/internal/app"
 	"github.com/hrygo/echomind/internal/model"
+	"github.com/hrygo/echomind/pkg/logger"
 )
 
 func main() {
@@ -22,10 +23,11 @@ func main() {
 	// Fetch all emails
 	var emails []model.Email
 	if err := container.DB.Find(&emails).Error; err != nil {
-		container.Sugar.Fatalf("Failed to fetch emails: %v", err)
+		container.Logger.Fatal("Failed to fetch emails", logger.Error(err))
 	}
 
-	container.Sugar.Infof("Found %d emails to scan for contexts", len(emails))
+	container.Logger.Info("Starting context backfill process",
+		logger.Int("email_count", len(emails)))
 
 	success := 0
 	matched := 0
@@ -34,7 +36,9 @@ func main() {
 	for _, email := range emails {
 		matches, err := container.ContextService.MatchContexts(&email)
 		if err != nil {
-			container.Sugar.Warnf("Failed to match context for email %s: %v", email.ID, err)
+			container.Logger.Warn("Failed to match context for email",
+				logger.String("email_id", email.ID.String()),
+				logger.Error(err))
 			failed++
 			continue
 		}
@@ -48,15 +52,22 @@ func main() {
 			}
 
 			if err := container.ContextService.AssignContextsToEmail(email.ID, contextIDs); err != nil {
-				container.Sugar.Warnf("Failed to assign contexts to email %s: %v", email.ID, err)
+				container.Logger.Warn("Failed to assign contexts to email",
+					logger.String("email_id", email.ID.String()),
+					logger.Error(err))
 				failed++
 			} else {
-				container.Sugar.Infof("Matched email %s to contexts: %v", email.ID, names)
+				container.Logger.Info("Matched email to contexts",
+					logger.String("email_id", email.ID.String()),
+					logger.Strings("context_names", names))
 				matched++
 			}
 		}
 		success++
 	}
 
-	container.Sugar.Infof("Backfill complete. Scanned: %d, Matched: %d, Failed: %d", success, matched, failed)
+	container.Logger.Info("Context backfill complete",
+		logger.Int("scanned", success),
+		logger.Int("matched", matched),
+		logger.Int("failed", failed))
 }

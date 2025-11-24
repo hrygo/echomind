@@ -117,7 +117,6 @@ export function CopilotChat() {
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            let assistantMessage = "";
             let isFirstChunk = true;
             let fullBuffer = ""; // Buffer to hold full response for parsing
 

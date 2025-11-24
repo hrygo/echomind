@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { useOnboardingStore } from '@/store';
+import { useOnboardingStore, useAuthStore } from '@/store';
 import { api } from '@/lib/api';
 import { isAxiosError } from 'axios';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -12,6 +12,7 @@ export function InitialSync() {
   const { t } = useLanguage();
   const router = useRouter();
   const { mailbox, role, setStep } = useOnboardingStore();
+  const updateUser = useAuthStore(state => state.updateUser);
   const [syncStatus, setSyncStatus] = useState('pending'); // pending, success, failed
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -36,6 +37,9 @@ export function InitialSync() {
         // 3. Trigger initial email sync
         await api.post<{ message: string }>("/sync");
 
+        // 4. Update user state to mark account as connected
+        updateUser({ has_account: true });
+
         setSyncStatus('success');
         setTimeout(() => {
           router.push('/dashboard');
@@ -56,7 +60,7 @@ export function InitialSync() {
     };
 
     initiateSyncAndSaveProfile();
-  }, [router, mailbox, role, setStep, t]);
+  }, [router, mailbox, role, setStep, t, updateUser]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen-auth p-4 text-center">

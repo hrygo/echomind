@@ -17,9 +17,9 @@ import (
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/pkg/imap"
+	"github.com/hrygo/echomind/pkg/logger"
 	"github.com/hrygo/echomind/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -77,7 +77,11 @@ func setupSyncTest(t *testing.T) (*handler.SyncHandler, *gorm.DB, *configs.Confi
 		CloseFunc: func(c *clientimap.Client) {},
 	}
 
-	syncService := service.NewSyncService(db, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
+	// 初始化一个简单的 logger 用于测试
+	if err := logger.Init(logger.DevelopmentConfig()); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
+	}
+	syncService := service.NewSyncService(db, mockIMAPClient, mockFetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, logger.GetDefaultLogger())
 	return handler.NewSyncHandler(syncService), db, mockConfig
 }
 

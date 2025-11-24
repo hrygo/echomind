@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/Button"; // Assuming a global Button com
 import { isAxiosError } from 'axios';
 
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useToast } from "@/lib/hooks/useToast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 interface Email {
   ID: string;
@@ -29,6 +31,8 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { t } = useLanguage();
+  const toast = useToast();
+  const confirm = useConfirm();
   const categoryFilter = searchParams.get('category');
   const folderFilter = searchParams.get('folder');
   const smartFilter = searchParams.get('filter'); // 'smart' for Smart Inbox
@@ -85,18 +89,26 @@ export default function DashboardPage() {
     setSyncLoading(true);
     try {
       await api.post<{ message: string }>("/sync");
-      alert("同步任务已启动");
+      toast.success(t('inbox.syncStarted'));
       fetchEmails();
     } catch (error: unknown) {
       console.error("Sync error:", error);
       if (isAxiosError(error) && error.response?.status === 400) {
-        if (confirm("您尚未配置邮箱账户。是否立即前往设置页面进行配置？")) {
-          router.push('/dashboard/settings');
-        }
+        confirm(
+          t('inbox.noAccountConfigured'),
+          () => {
+            router.push('/dashboard/settings');
+          },
+          {
+            title: t('inbox.configureAccount'),
+            confirmText: t('common.goToSettings'),
+            cancelText: t('common.cancel')
+          }
+        );
       } else if (error instanceof Error) {
-        alert(`同步失败：${error.message}`);
+        toast.error(`${t('inbox.syncFailed')}: ${error.message}`);
       } else {
-        alert("同步失败：发生未知错误。");
+        toast.error(t('inbox.syncFailedUnknown'));
       }
     } finally {
       setSyncLoading(false);

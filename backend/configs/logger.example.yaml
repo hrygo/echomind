@@ -1,0 +1,101 @@
+# EchoMind Logger Configuration Example
+# 企业级日志配置示例
+
+# 基础配置
+level: INFO        # DEBUG, INFO, WARN, ERROR, FATAL
+production: false  # 生产模式
+
+# 输出配置
+output:
+  # 文件输出
+  file:
+    enabled: true
+    path: "logs/echomind.log"
+    max_size: 100      # MB
+    max_age: 7         # days
+    max_backups: 3     # 备份文件数
+    compress: true     # 压缩备份
+
+  # 控制台输出
+  console:
+    enabled: true
+    format: "console"  # "json" | "console"
+    color: true        # 彩色输出
+
+# 上下文配置
+context:
+  # 自动提取的上下文字段
+  auto_fields:
+    - "trace_id"
+    - "user_id"
+    - "org_id"
+    - "session_id"
+    - "request_id"
+
+  # 全局固定字段
+  global_fields:
+    service: "echomind"
+    version: "0.9.4"
+    environment: "development"
+
+# 采样配置（生产环境建议启用）
+sampling:
+  enabled: false     # 启用采样
+  rate: 100         # 每秒最大日志数
+  burst: 10         # 突发缓冲
+  levels:           # 需要采样的级别
+    - DEBUG
+    - INFO
+
+# 企业级日志提供者配置
+providers:
+  # Elasticsearch 示例
+  - name: "elasticsearch"
+    type: "elasticsearch"
+    enabled: false
+    settings:
+      url: "http://localhost:9200"
+      index: "echomind-logs"
+      batch_size: 100
+      # username: "elastic"
+      # password: "changeme"
+
+  # Grafana Loki 示例
+  - name: "loki"
+    type: "loki"
+    enabled: false
+    settings:
+      url: "http://localhost:3100"
+      batch_size: 100
+      labels:
+        service: "echomind"
+        environment: "production"
+
+  # Splunk 示例
+  - name: "splunk"
+    type: "splunk"
+    enabled: false
+    settings:
+      url: "https://splunk.example.com:8088"
+      token: "your-hec-token"
+      index: "echomind"
+      source: "backend"
+      batch_size: 100
+
+# 生产环境配置建议
+# level: INFO
+# production: true
+# output:
+#   file:
+#     enabled: true
+#     max_size: 500
+#   console:
+#     format: "json"
+#     color: false
+# sampling:
+#   enabled: true
+#   rate: 1000
+# providers:
+#   - name: "elasticsearch"
+#     type: "elasticsearch"
+#     enabled: true

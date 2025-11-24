@@ -10,6 +10,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -83,7 +84,12 @@ func TestUpdateContactStats_NewContact(t *testing.T) {
 	emailSentiment := "Positive"
 	interactedAt := time.Now()
 
-	err := updateContactStats(ctx, db, userID, emailAddress, emailSentiment, interactedAt)
+	// 初始化一个简单的 logger 用于测试
+	if err := logger.Init(logger.DevelopmentConfig()); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
+	}
+	log := logger.GetDefaultLogger()
+	err := updateContactStats(ctx, db, userID, emailAddress, emailSentiment, interactedAt, log)
 	assert.NoError(t, err)
 
 	var contact model.Contact
@@ -118,7 +124,8 @@ func TestUpdateContactStats_ExistingContact(t *testing.T) {
 	// Update with new interaction
 	newInteractedAt := time.Now()
 	newSentiment := "Negative"
-	err := updateContactStats(ctx, db, userID, emailAddress, newSentiment, newInteractedAt)
+	log := logger.GetDefaultLogger()
+	err := updateContactStats(ctx, db, userID, emailAddress, newSentiment, newInteractedAt, log)
 	assert.NoError(t, err)
 
 	var updatedContact model.Contact
@@ -171,7 +178,8 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, mockContextMatcher, 1000)
+	log := logger.GetDefaultLogger()
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, mockContextMatcher, 1000, log)
 	assert.NoError(t, err)
 
 	// Verify email was updated
@@ -192,7 +200,7 @@ func TestHandleEmailAnalyzeTask(t *testing.T) {
 
 	// Verify embedder was called
 	assert.Equal(t, 1, mockEmbedder.CallCount)
-	
+
 	// Verify context matching was called
 	assert.Equal(t, 1, mockContextMatcher.MatchCount)
 	assert.Equal(t, 1, mockContextMatcher.AssignCount)
@@ -229,7 +237,8 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 	task := asynq.NewTask(TypeEmailAnalyze, payload)
 
 	// Handle the task
-	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, mockContextMatcher, 1000)
+	log := logger.GetDefaultLogger()
+	err := HandleEmailAnalyzeTask(ctx, task, db, mockSummarizer, mockEmbedder, mockContextMatcher, 1000, log)
 	assert.NoError(t, err)
 
 	// Verify email was updated as spam
@@ -242,10 +251,10 @@ func TestHandleEmailAnalyzeTask_Spam(t *testing.T) {
 
 	// Verify Summarizer was NOT called
 	assert.Equal(t, 0, mockSummarizer.CallCount)
-	
+
 	// Verify Embedder was NOT called (spam check comes first)
 	assert.Equal(t, 0, mockEmbedder.CallCount)
-	
+
 	// Verify Context Matcher was NOT called
 	assert.Equal(t, 0, mockContextMatcher.MatchCount)
 }

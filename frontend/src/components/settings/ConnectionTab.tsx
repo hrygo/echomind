@@ -8,6 +8,8 @@ import { api } from '@/lib/api';
 import { isAxiosError } from 'axios';
 import { SmartMailboxForm } from '../onboarding/SmartMailboxForm'; // Re-use from onboarding
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog'; // Assuming Radix UI Dialog
+import { useToast } from '@/lib/hooks/useToast';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 interface AccountStatusResponse {
   has_account: boolean;
@@ -22,6 +24,8 @@ interface AccountStatusResponse {
 
 export function ConnectionTab() {
   const { t } = useLanguage();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [accountStatus, setAccountStatus] = useState<AccountStatusResponse | null>(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -48,14 +52,14 @@ export function ConnectionTab() {
     setIsSyncing(true);
     try {
       await api.post<{ message: string }>("/sync");
-      alert(t('settings.connection.syncStarted')); // Need to add this key
+      toast.success(t('settings.connection.syncStarted'));
       fetchAccountStatus(); // Refresh status after sync
     } catch (error: unknown) {
       console.error("Sync failed:", error);
       if (isAxiosError(error) && error.response?.status === 400) {
-        alert(error.response.data?.error || t('settings.connection.notConfigured')); // Need to add this key
+        toast.error(error.response.data?.error || t('settings.connection.notConfigured'));
       } else {
-        alert(t('settings.connection.syncFailed')); // Need to add this key
+        toast.error(t('settings.connection.syncFailed'));
       }
     } finally {
       setIsSyncing(false);
@@ -114,16 +118,25 @@ export function ConnectionTab() {
               {t('settings.connection.reconfigure')}
             </button>
             <button
-              onClick={async () => {
-                if (confirm(t('settings.connection.disconnectConfirm'))) { // Need to add key
-                  try {
-                    await api.delete('/settings/account');
-                    fetchAccountStatus();
-                  } catch (error) {
-                    console.error("Failed to disconnect:", error);
-                    alert(t('settings.connection.disconnectFailed')); // Need to add key
+              onClick={() => {
+                confirm(
+                  t('settings.connection.disconnectConfirm'),
+                  async () => {
+                    try {
+                      await api.delete('/settings/account');
+                      toast.success(t('settings.connection.disconnectSuccess'));
+                      fetchAccountStatus();
+                    } catch (error) {
+                      console.error("Failed to disconnect:", error);
+                      toast.error(t('settings.connection.disconnectFailed'));
+                    }
+                  },
+                  {
+                    title: t('settings.connection.disconnectTitle'),
+                    confirmText: t('common.confirm'),
+                    cancelText: t('common.cancel')
                   }
-                }
+                );
               }}
               className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
             >

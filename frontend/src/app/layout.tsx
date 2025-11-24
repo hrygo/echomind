@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { ToastContainer } from "@/components/ui/ToastContainer";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export const metadata: Metadata = {
   title: "EchoMind",
@@ -17,6 +19,8 @@ export default function RootLayout({
       <body className="bg-gray-100 text-gray-900 antialiased">
         <LanguageProvider>
           {children}
+          <ToastContainer />
+          <ConfirmDialog />
         </LanguageProvider>
       </body>
     </html>

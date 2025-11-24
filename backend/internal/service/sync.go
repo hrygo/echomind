@@ -5,19 +5,18 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	clientimap "github.com/emersion/go-imap/client"
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/tasks"
 	"github.com/hrygo/echomind/pkg/imap"
-	clientimap "github.com/emersion/go-imap/client"
-	"github.com/hibiken/asynq"
+	echologger "github.com/hrygo/echomind/pkg/logger"
 	"github.com/hrygo/echomind/pkg/utils"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -68,28 +67,39 @@ type AsynqClientInterface interface {
 }
 
 // SyncService handles the business logic for synchronizing emails.
-type SyncService struct {
-	db          *gorm.DB
-	imapClient  IMAPClient // Use the new IMAPClient interface
-	fetcher     EmailFetcher
-	asynqClient AsynqClientInterface // Use the new AsynqClientInterface
-	contactService *ContactService
-	accountService *AccountService // New dependency for account management
-	config *configs.Config // Need full config to access security.EncryptionKey
-	logger *zap.SugaredLogger // Add logger
+// CompatibleLogger 兼容的日志接口
+type CompatibleLogger interface {
+	Errorw(msg string, keysAndValues ...interface{})
+	Errorf(template string, args ...interface{})
+	Debugw(msg string, keysAndValues ...interface{})
+	Warnw(msg string, keysAndValues ...interface{})
 }
 
+type SyncService struct {
+	db             *gorm.DB
+	imapClient     IMAPClient // Use the new IMAPClient interface
+	fetcher        EmailFetcher
+	asynqClient    AsynqClientInterface // Use the new AsynqClientInterface
+	contactService *ContactService
+	accountService *AccountService  // New dependency for account management
+	config         *configs.Config  // Need full config to access security.EncryptionKey
+	logger         CompatibleLogger // Add logger (兼容层)
+}
+
+// Ensure SyncService implements the EmailSyncer interface
+var _ tasks.EmailSyncer = (*SyncService)(nil)
+
 // NewSyncService creates a new SyncService.
-func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, asynqClient AsynqClientInterface, contactService *ContactService, accountService *AccountService, config *configs.Config, logger *zap.SugaredLogger) *SyncService {
+func NewSyncService(db *gorm.DB, imapClient IMAPClient, fetcher EmailFetcher, asynqClient AsynqClientInterface, contactService *ContactService, accountService *AccountService, config *configs.Config, log echologger.Logger) *SyncService {
 	return &SyncService{
-		db:          db,
-		imapClient:  imapClient,
-		fetcher:     fetcher,
-		asynqClient: asynqClient,
+		db:             db,
+		imapClient:     imapClient,
+		fetcher:        fetcher,
+		asynqClient:    asynqClient,
 		contactService: contactService,
 		accountService: accountService,
-		config: config,
-		logger: logger,
+		config:         config,
+		logger:         echologger.AsZapSugaredLogger(log),
 	}
 }
 
@@ -114,7 +124,11 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(err.Error(), "record not found") {
 			return ErrAccountNotConfigured
 		}
-		log.Printf("Error fetching email account for user %s, team %v, org %v: %v", userID, teamID, organizationID, err)
+		s.logger.Errorw("Failed to fetch email account",
+			"user_id", userID,
+			"team_id", teamID,
+			"org_id", organizationID,
+			"error", err)
 		return fmt.Errorf("failed to retrieve email account: %w", err)
 	}
 
@@ -125,22 +139,25 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 	}
 
 	password, err := utils.Decrypt(account.EncryptedPassword, keyBytes)
-        if err != nil {
-                s.logger.Errorf("Error decrypting password for account %s: %v", account.ID, err)
-                // Update account status to indicate decryption failure
-                if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, false, "Failed to decrypt password", nil); statusErr != nil {
-                        s.logger.Errorf("Failed to update account status after decryption failure: %v", statusErr)
-                }
-                return fmt.Errorf("failed to decrypt password: %w", err)
-        }
+	if err != nil {
+		s.logger.Errorw("Error decrypting password for account %s: %v", account.ID, err)
+		// Update account status to indicate decryption failure
+		if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, false, "Failed to decrypt password", nil); statusErr != nil {
+			s.logger.Errorw("Failed to update account status after decryption failure: %v", statusErr)
+		}
+		return fmt.Errorf("failed to decrypt password: %w", err)
+	}
 	// 3. Establish IMAP connection (dynamic, per-sync)
 	addr := fmt.Sprintf("%s:%d", account.ServerAddress, account.ServerPort)
 	imapClient, err := s.imapClient.DialAndLogin(addr, account.Username, password)
 	if err != nil {
-		log.Printf("Error dialing/logging into IMAP server %s for account %s: %v", addr, account.ID, err)
+		s.logger.Errorw("IMAP connection failed",
+			"address", addr,
+			"account_id", account.ID,
+			"error", err)
 		// Update account status to indicate connection failure
 		if err := s.accountService.UpdateAccountStatus(ctx, account.ID, false, fmt.Sprintf("IMAP connection/login failed: %v", err), nil); err != nil {
-			s.logger.Errorf("Failed to update account status after IMAP connection failure: %v", err)
+			s.logger.Errorw("Failed to update account status after IMAP connection failure: %v", err)
 		}
 		return fmt.Errorf("failed to dial/login to IMAP server: %w", err)
 	}
@@ -148,16 +165,18 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 
 	// Connection successful, update account status
 	now := time.Now()
-	        if err := s.accountService.UpdateAccountStatus(ctx, account.ID, true, "", &now); err != nil {
-	                s.logger.Errorf("Failed to update account status after successful sync: %v", err)
-	        }
+	if err := s.accountService.UpdateAccountStatus(ctx, account.ID, true, "", &now); err != nil {
+		s.logger.Errorw("Failed to update account status after successful sync: %v", err)
+	}
 	// 4. Fetch emails using the dynamically created client
 	emails, err := s.fetcher.FetchEmails(imapClient, "INBOX", 30)
 	if err != nil {
-		log.Printf("Error fetching emails for account %s: %v", account.ID, err)
+		s.logger.Errorw("Failed to fetch emails",
+			"account_id", account.ID,
+			"error", err)
 		// Optionally update account status with fetch error, keep connected true as login was successful
 		if statusErr := s.accountService.UpdateAccountStatus(ctx, account.ID, true, fmt.Sprintf("Failed to fetch emails: %v", err), nil); statusErr != nil {
-			s.logger.Errorf("Failed to update account status after email fetch failure: %v", statusErr)
+			s.logger.Errorw("Failed to update account status after email fetch failure: %v", statusErr)
 		}
 		return fmt.Errorf("failed to fetch emails: %w", err)
 	}
@@ -189,11 +208,16 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 			// Create new
 			email.ID = uuid.New() // Generate new UUID
 			if err := s.db.WithContext(ctx).Create(&email).Error; err != nil {
-				log.Printf("Failed to create email for user %s: %v", userID, err)
+				s.logger.Errorw("Failed to create email",
+					"user_id", userID,
+					"message_id", email.MessageID,
+					"error", err)
 				continue
 			}
 		} else {
-			log.Printf("DB error for user %s: %v", userID, result.Error)
+			s.logger.Errorw("Database error",
+				"user_id", userID,
+				"error", result.Error)
 			continue
 		}
 
@@ -201,13 +225,21 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 		if s.asynqClient != nil {
 			task, err := tasks.NewEmailAnalyzeTask(email.ID, userID) // Pass UserID to task
 			if err != nil {
-				log.Printf("Failed to create task for email %s (user %s): %v", email.ID, userID, err)
+				s.logger.Errorw("Failed to create analysis task",
+					"email_id", email.ID,
+					"user_id", userID,
+					"error", err)
 				continue
 			}
 			if _, err := s.asynqClient.Enqueue(task); err != nil {
-				log.Printf("Failed to enqueue task for email %s (user %s): %v", email.ID, userID, err)
+				s.logger.Errorw("Failed to enqueue analysis task",
+					"email_id", email.ID,
+					"user_id", userID,
+					"error", err)
 			} else {
-				log.Printf("Enqueued analysis task for email %s (user %s)", email.ID, userID)
+				s.logger.Debugw("Enqueued analysis task",
+					"email_id", email.ID,
+					"user_id", userID)
 			}
 		}
 
@@ -217,13 +249,22 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 			senderEmail, senderName := parseSender(email.Sender) // Assuming parseSender exists or create a simple one
 			if senderEmail != "" {
 				if err := s.contactService.UpdateContactFromEmail(ctx, userID, senderEmail, senderName, email.Date); err != nil {
-					log.Printf("Failed to update contact for user %s, email %s: %v", userID, senderEmail, err)
+					s.logger.Warnw("Failed to update contact",
+						"user_id", userID,
+						"email", senderEmail,
+						"error", err)
 				}
 			}
 		}
 	}
 
 	return nil
+}
+
+// SyncEmailsForTask implements the EmailSyncer interface for use in background tasks
+// It calls the main SyncEmails method with nil teamID and organizationID
+func (s *SyncService) SyncEmailsForTask(ctx context.Context, userID uuid.UUID) error {
+	return s.SyncEmails(ctx, userID, nil, nil)
 }
 
 // Helper to parse sender string, e.g., "Name <email@example.com>" or "email@example.com"

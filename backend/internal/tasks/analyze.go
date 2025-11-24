@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,6 +12,7 @@ import (
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/spam"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/logger"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -53,7 +53,7 @@ type ContextMatcher interface {
 }
 
 // HandleEmailAnalyzeTask handles the email analysis task for a specific user.
-func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder EmbeddingGenerator, contextMatcher ContextMatcher, chunkSize int) error {
+func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, summarizer Summarizer, embedder EmbeddingGenerator, contextMatcher ContextMatcher, chunkSize int, log logger.Logger) error {
 	startTime := time.Now()
 
 	var p EmailAnalyzePayload
@@ -61,14 +61,22 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	log.Printf("[Task Started] Email Analysis - EmailID: %s, UserID: %s, TaskType: %s",
-		p.EmailID, p.UserID, t.Type())
+	// 在上下文中添加用户ID和任务信息
+	ctx = logger.WithUserID(ctx, p.UserID.String())
+	ctx = logger.WithRequestID(ctx, t.ResultWriter().TaskID())
+
+	log.InfoContext(ctx, "[Task Started] Email Analysis",
+		logger.String("email_id", p.EmailID.String()),
+		logger.String("task_type", t.Type()),
+		logger.String("component", "email_analyzer"))
 
 	// Defer logging task completion and duration
 	defer func() {
 		duration := time.Since(startTime)
-		log.Printf("[Task Completed] Email Analysis - EmailID: %s, UserID: %s, Duration: %.2fs",
-			p.EmailID, p.UserID, duration.Seconds())
+		log.InfoContext(ctx, "[Task Completed] Email Analysis",
+			logger.String("email_id", p.EmailID.String()),
+			logger.Duration("duration", duration),
+			logger.String("component", "email_analyzer"))
 	}()
 
 	// 1. Fetch Email from DB, ensure it belongs to the user
@@ -82,7 +90,11 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 	isSpam, spamReason := spamFilter.IsSpam(&email)
 
 	if isSpam {
-		log.Printf("Email %s identified as spam: %s", p.EmailID, spamReason)
+		log.InfoContext(ctx, "Email identified as spam",
+			logger.String("email_id", p.EmailID.String()),
+			logger.String("reason", spamReason),
+			logger.String("component", "spam_detector"))
+
 		email.Category = "Spam"
 		email.Sentiment = "Neutral"
 		email.Summary = "Auto-detected as spam: " + spamReason
@@ -120,12 +132,19 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 		return fmt.Errorf("failed to save analysis for email %s (user %s): %v", p.EmailID, p.UserID, err)
 	}
 
-	log.Printf("[Email Analyzed] EmailID: %s, UserID: %s, Category: %s, Sentiment: %s, Urgency: %s",
-		p.EmailID, p.UserID, email.Category, email.Sentiment, email.Urgency)
+	log.InfoContext(ctx, "[Email Analyzed]",
+		logger.String("email_id", p.EmailID.String()),
+		logger.String("category", email.Category),
+		logger.String("sentiment", email.Sentiment),
+		logger.String("urgency", email.Urgency),
+		logger.String("component", "email_analyzer"))
 
 	// 6. Update Contact Statistics for the sender
-	if err := updateContactStats(ctx, db, p.UserID, email.Sender, email.Sentiment, email.Date); err != nil {
-		log.Printf("Warning: Failed to update contact stats for sender %s: %v", email.Sender, err)
+	if err := updateContactStats(ctx, db, p.UserID, email.Sender, email.Sentiment, email.Date, log); err != nil {
+		log.WarnContext(ctx, "Failed to update contact stats",
+			logger.String("sender", email.Sender),
+			logger.Error(err),
+			logger.String("component", "contact_updater"))
 		// Do not return error, as email analysis is complete, contact update can be retried or ignored
 	}
 
@@ -137,15 +156,24 @@ func HandleEmailAnalyzeTask(ctx context.Context, t *asynq.Task, db *gorm.DB, sum
 			contextIDs = append(contextIDs, m.ID)
 		}
 		if err := contextMatcher.AssignContextsToEmail(email.ID, contextIDs); err != nil {
-			log.Printf("Warning: Failed to assign contexts to email %s: %v", email.ID, err)
+			log.WarnContext(ctx, "Failed to assign contexts to email",
+				logger.String("email_id", email.ID.String()),
+				logger.Error(err),
+				logger.String("component", "context_matcher"))
 		}
 	} else if err != nil {
-		log.Printf("Warning: Failed to match contexts for email %s: %v", email.ID, err)
+		log.WarnContext(ctx, "Failed to match contexts for email",
+			logger.String("email_id", email.ID.String()),
+			logger.Error(err),
+			logger.String("component", "context_matcher"))
 	}
 
 	// 8. Generate and Save Embeddings
 	if err := embedder.GenerateAndSaveEmbedding(ctx, &email, chunkSize); err != nil {
-		log.Printf("Warning: Failed to process embedding for email %s: %v", p.EmailID, err)
+		log.WarnContext(ctx, "Failed to process embedding for email",
+			logger.String("email_id", p.EmailID.String()),
+			logger.Error(err),
+			logger.String("component", "embedding_generator"))
 		// We treat embedding failure as non-fatal for the analysis task, but log it.
 		// Ideally, this could be a separate task or retried.
 	}
@@ -159,7 +187,7 @@ func jsonRaw(v interface{}) []byte {
 }
 
 // updateContactStats updates or creates a contact and aggregates its statistics.
-func updateContactStats(ctx context.Context, db *gorm.DB, userID uuid.UUID, emailAddress string, emailSentiment string, interactedAt time.Time) error {
+func updateContactStats(ctx context.Context, db *gorm.DB, userID uuid.UUID, emailAddress string, emailSentiment string, interactedAt time.Time, log logger.Logger) error {
 	var contact model.Contact
 	err := db.WithContext(ctx).Where("user_id = ? AND email = ?", userID, emailAddress).First(&contact).Error
 
@@ -178,9 +206,19 @@ func updateContactStats(ctx context.Context, db *gorm.DB, userID uuid.UUID, emai
 				AvgSentiment:     sentimentValue,
 			}
 			if createErr := db.WithContext(ctx).Create(&contact).Error; createErr != nil {
+				log.ErrorContext(ctx, "Failed to create contact",
+					logger.String("email", emailAddress),
+					logger.String("user_id", userID.String()),
+					logger.Error(createErr),
+					logger.String("component", "contact_manager"))
 				return fmt.Errorf("failed to create contact %s for user %s: %v", emailAddress, userID, createErr)
 			}
 		} else {
+			log.ErrorContext(ctx, "Failed to query contact",
+				logger.String("email", emailAddress),
+				logger.String("user_id", userID.String()),
+				logger.Error(err),
+				logger.String("component", "contact_manager"))
 			return fmt.Errorf("failed to query contact %s for user %s: %v", emailAddress, userID, err)
 		}
 	} else {
@@ -193,6 +231,11 @@ func updateContactStats(ctx context.Context, db *gorm.DB, userID uuid.UUID, emai
 		contact.AvgSentiment = ((contact.AvgSentiment * float64(contact.InteractionCount-1)) + sentimentValue) / float64(contact.InteractionCount)
 
 		if updateErr := db.WithContext(ctx).Save(&contact).Error; updateErr != nil {
+			log.ErrorContext(ctx, "Failed to update contact",
+				logger.String("email", emailAddress),
+				logger.String("user_id", userID.String()),
+				logger.Error(updateErr),
+				logger.String("component", "contact_manager"))
 			return fmt.Errorf("failed to update contact %s for user %s: %v", emailAddress, userID, updateErr)
 		}
 	}

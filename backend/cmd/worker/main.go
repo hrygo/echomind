@@ -10,32 +10,32 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/internal/app"
 	"github.com/hrygo/echomind/internal/tasks"
-	"go.uber.org/zap"
+	"github.com/hrygo/echomind/pkg/logger"
 )
 
-// ZapLoggerAdapter adapts zap.Logger to asynq.Logger interface
-type ZapLoggerAdapter struct {
-	logger *zap.Logger
+// LoggerAdapter adapts our logger to asynq.Logger interface
+type LoggerAdapter struct {
+	logger logger.Logger
 }
 
-func (l *ZapLoggerAdapter) Debug(args ...interface{}) {
-	l.logger.Sugar().Debug(args...)
+func (l *LoggerAdapter) Debug(args ...interface{}) {
+	l.logger.Debug("Asynq Debug", logger.Any("args", args))
 }
 
-func (l *ZapLoggerAdapter) Info(args ...interface{}) {
-	l.logger.Sugar().Info(args...)
+func (l *LoggerAdapter) Info(args ...interface{}) {
+	l.logger.Info("Asynq Info", logger.Any("args", args))
 }
 
-func (l *ZapLoggerAdapter) Warn(args ...interface{}) {
-	l.logger.Sugar().Warn(args...)
+func (l *LoggerAdapter) Warn(args ...interface{}) {
+	l.logger.Warn("Asynq Warn", logger.Any("args", args))
 }
 
-func (l *ZapLoggerAdapter) Error(args ...interface{}) {
-	l.logger.Sugar().Error(args...)
+func (l *LoggerAdapter) Error(args ...interface{}) {
+	l.logger.Error("Asynq Error", logger.Any("args", args))
 }
 
-func (l *ZapLoggerAdapter) Fatal(args ...interface{}) {
-	l.logger.Sugar().Fatal(args...)
+func (l *LoggerAdapter) Fatal(args ...interface{}) {
+	l.logger.Fatal("Asynq Fatal", logger.Any("args", args))
 }
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 		},
 		asynq.Config{
 			Concurrency: container.WorkerConcurrency(),
-			Logger:      &ZapLoggerAdapter{logger: container.Logger},
+			Logger:      &LoggerAdapter{logger: container.Logger},
 		},
 	)
 
@@ -72,6 +72,14 @@ func main() {
 			container.SearchService,
 			container.ContextService,
 			container.ChunkSize(),
+			container.Logger, // Use new logger
+		)
+	})
+	mux.HandleFunc(tasks.TypeEmailSync, func(ctx context.Context, t *asynq.Task) error {
+		return tasks.HandleEmailSyncTask(
+			ctx, t,
+			container.SyncService,
+			container.Logger, // Use new logger
 		)
 	})
 
@@ -94,7 +102,7 @@ func main() {
 		container.Logger.Info("Worker stopped gracefully")
 	case err := <-done:
 		if err != nil {
-			container.Logger.Fatal("Worker failed", zap.Error(err))
+			container.Logger.Fatal("Worker failed", logger.Error(err))
 		}
 	}
 }

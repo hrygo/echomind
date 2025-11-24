@@ -18,7 +18,7 @@ describe('TaskListWidget', () => {
     });
 
     it('renders error message for invalid data', () => {
-        // @ts-ignore
+        // @ts-expect-error - Testing error handling with invalid data
         render(<TaskListWidget data={null} />);
         expect(screen.getByText('Invalid task data')).toBeInTheDocument();
     });

@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 > **Vision**: Personal Neural Interface for Executive Work. (个人智能神经中枢)  
-> **Stage**: v0.9.3 (Beta) | **Active Sprint**: Phase 6.3 - Stage 3: Generative Widgets
+> **Stage**: v0.9.4 (Beta) | **Active Sprint**: Phase 7 - WeChat Integration
 
 ---
 
@@ -14,22 +14,24 @@
 
 ## 2. Roadmap Status
 
-### ✅ Recent Completion (v0.9.2 → v0.9.3)
-**Phase 6.3 - Stage 2: Smart Copilot (Omni-Bar)**
-- ✅ Implemented and integrated the Smart Copilot, unifying search and chat with RAG capabilities and real-time streaming.
+### ✅ Recent Completion (v0.9.2 → v0.9.4)
+**Phase 6.3 - The Neural Nexus (Smart Copilot & Generative Widgets)**
+- ✅ **Context Bridge** (v0.9.2): Seamless Search → Chat integration with context passing.
+- ✅ **Omni-Bar** (v0.9.3): Unified search/chat interface with smart routing and RAG.
+- ✅ **Generative Widgets** (v0.9.4): Dynamic UI rendering in chat stream (TaskList, EmailDraft, CalendarEvent, SearchResult widgets).
+- ✅ **Widget Framework**: Complete widget system with 5 widget types and E2E tests.
+- ✅ **Stream Integration**: Real-time widget parsing from SSE chat stream.
 
-### 🚧 Current Sprint (v0.9.4 Target)
-**Phase 6.4 - UX Redesign v2.0: Zero-Friction Onboarding**
-- **Unified Auth**: Redesign login/register pages with split-screen layout and smooth transitions.
-- **Onboarding Wizard**: Implement a 3-step setup process (Role Selection -> Smart Mailbox Connect -> Initial Sync).
-- **Smart Connect**: Auto-detect email providers (Gmail/Outlook) and pre-fill server settings.
-- **Settings Overhaul**: Refactor the Settings Center for better profile and connection management.
+### 🚧 Current Sprint (v0.9.5+ Target)
+**Phase 7 - WeChat Integration (Conversational OS)**
+- **Voice Commander**: WeChat voice → Whisper transcription → Intent execution.
+- **One-Touch Decision**: Push approval/decision cards to WeChat for instant action.
+- **Calendar Gatekeeper**: Auto-detect conflicts and generate smart replies.
+- **Morning Briefing**: Daily digest push (tasks + key emails).
 
 ### 🔮 Future (6-Month Plan)
-- **Phase 6.5 - Generative Widgets** (v0.9.5): Chat stream dynamically renders UI components.
-- **Phase 7** (2026.03-04): WeChat Integration (Official Account)
-- **Phase 8** (2026.05+): Commercialization (Stripe, SSO)
-- **Phase 9** (TBD): Team Collaboration (重新评估优先级)
+- **Phase 8** (2026.03+): Commercialization (Stripe, SSO, Multi-tier Plans)
+- **Phase 9** (TBD): Team Collaboration (基础设施已就绪，功能开发暂停)
 
 ---
 

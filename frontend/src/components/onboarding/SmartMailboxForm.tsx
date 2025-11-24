@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Mail, Lock, Server, Globe, Key, Wifi, AlertCircle, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { useOnboardingStore } from '@/store';
+import { useOnboardingStore, useAuthStore } from '@/store';
 import { cn } from '@/lib/utils';
 import { detectProvider } from '@/lib/constants/mail_providers';
 import { api } from '@/lib/api';
@@ -66,6 +66,7 @@ function InputField({ id, label, type, placeholder, value, onChange, error, icon
 export function SmartMailboxForm() {
   const { t } = useLanguage();
   const { mailbox, setMailboxConfig, setStep } = useOnboardingStore();
+  const updateUser = useAuthStore(state => state.updateUser);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -143,6 +144,10 @@ export function SmartMailboxForm() {
         smtp_port: mailbox.smtpPort,
       });
       setConnectionStatus('success');
+      
+      // Update user state to mark account as connected (preliminary update)
+      updateUser({ has_account: true });
+      
       setStep(3); // Move to next step
     } catch (error: unknown) {
       console.error("Mailbox connection failed:", error);

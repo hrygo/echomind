@@ -13,8 +13,8 @@ import (
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/pkg/imap"
+	"github.com/hrygo/echomind/pkg/logger"
 	"github.com/hrygo/echomind/pkg/utils"
-	"go.uber.org/zap"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -103,7 +103,11 @@ func TestSyncEmails(t *testing.T) {
 		},
 		CloseFunc: func(c *client.Client) { /* do nothing */ },
 	}
-	syncService := service.NewSyncService(db, mockIMAPClient, fetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, zap.NewNop().Sugar())
+	// 初始化一个简单的 logger 用于测试
+	if err := logger.Init(logger.DevelopmentConfig()); err != nil {
+		t.Fatalf("Failed to initialize logger: %v", err)
+	}
+	syncService := service.NewSyncService(db, mockIMAPClient, fetcher, mockAsynqClient, mockContactService, mockAccountService, mockConfig, logger.GetDefaultLogger())
 
 	// 5. Create a mock EmailAccount for the user
 	userID := uuid.New() // Generate a new UserID for the test

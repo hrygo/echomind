@@ -8,6 +8,7 @@ import (
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/internal/bootstrap"
 	"github.com/hrygo/echomind/internal/middleware"
+	echologger "github.com/hrygo/echomind/pkg/logger"
 )
 
 // SetupMiddleware configures all global middleware for the Gin engine
@@ -19,7 +20,7 @@ func SetupMiddleware(r *gin.Engine, app *bootstrap.App, isProduction bool) {
 
 	// Configure trusted proxies (security best practice)
 	if err := r.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
-		app.Sugar.Warnf("Failed to set trusted proxies: %v", err)
+		app.Logger.Warn("Failed to set trusted proxies", echologger.Error(err))
 	}
 
 	// Middleware: Request ID (for tracing)

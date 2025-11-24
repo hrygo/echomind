@@ -9,16 +9,14 @@ import (
 	"github.com/hrygo/echomind/pkg/config"
 	"github.com/hrygo/echomind/pkg/database"
 	"github.com/hrygo/echomind/pkg/logger"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type App struct {
 	Config      *configs.Config
 	DB          *gorm.DB
-	Logger      *zap.Logger
+	Logger      logger.Logger
 	AsynqClient *asynq.Client
-	Sugar       *zap.SugaredLogger
 }
 
 func Init(configPath string, production bool) (*App, error) {
@@ -28,12 +26,22 @@ func Init(configPath string, production bool) (*App, error) {
 		return nil, err
 	}
 
-	// 2. Logger
-	log, err := logger.New(production)
-	if err != nil {
+	// 2. Logger - 使用新的日志框架
+	var logConfig *logger.Config
+	if production {
+		logConfig = logger.ProductionConfig()
+		// 从环境变量加载配置
+		logConfig = logger.LoadConfigFromEnv()
+		logConfig.Production = true
+	} else {
+		logConfig = logger.DevelopmentConfig()
+		logConfig = logger.LoadConfigFromEnv()
+	}
+
+	if err := logger.Init(logConfig); err != nil {
 		return nil, fmt.Errorf("logger init failed: %w", err)
 	}
-	sugar := log.Sugar()
+	log := logger.GetDefaultLogger()
 
 	// 3. Database
 	if cfg.Database.DSN == "" {
@@ -58,7 +66,6 @@ func Init(configPath string, production bool) (*App, error) {
 		Config:      cfg,
 		DB:          db,
 		Logger:      log,
-		Sugar:       sugar,
 		AsynqClient: asynqClient,
 	}
 
@@ -94,7 +101,7 @@ func (app *App) SetupDB() error {
 
 	// Indices
 	if err := app.DB.Exec("CREATE INDEX IF NOT EXISTS email_embeddings_vector_idx ON email_embeddings USING hnsw (vector vector_cosine_ops)").Error; err != nil {
-		app.Sugar.Warnf("Failed to create HNSW index: %v", err)
+		app.Logger.Warn("Failed to create HNSW index", logger.Error(err))
 	}
 
 	return nil
@@ -104,7 +111,6 @@ func (app *App) Close() {
 	if app.AsynqClient != nil {
 		app.AsynqClient.Close()
 	}
-	if app.Logger != nil {
-		_ = app.Logger.Sync()
-	}
+	// 新日志框架会自动清理
+	_ = logger.Close()
 }

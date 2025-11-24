@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.9.4] - 2025-11-23
+
+### Added
+- **Generative Widgets (Phase 6.3 - Stage 3)**: Dynamic UI component rendering in AI chat stream.
+  - **Widget Framework**: Implemented 5 widget components (TaskList, Task, EmailDraft, CalendarEvent, SearchResult).
+  - **Stream Parser**: Real-time widget parsing from SSE chat responses using regex-based `<widget type="...">` extraction.
+  - **Backend Support**: ChatService now includes widget generation instructions in system prompts.
+  - **Type Definitions**: Added `WidgetData` and `DeltaContent` structures in AI provider interface.
+- **E2E Testing**: Complete test coverage for widget rendering in chat interface.
+
+### Changed
+- **CopilotChat Component**: Enhanced to dynamically render widgets based on message metadata.
+- **AI Provider Interface**: Extended `ChatCompletionChunk` to support widget data alongside text content.
+
+## [v0.9.2] - 2025-11-23
+
+### Added
+- **Context Bridge (Phase 6.3 - Stage 1)**: Seamless Search → Chat integration.
+  - **Context Passing**: Search results can now be attached as context to chat queries.
+  - **Ask Copilot Button**: Added "Ask Copilot" action in search results for instant AI analysis.
+  - **Copilot Store**: Enhanced `useCopilotStore` to manage `searchResults` and `activeContext` state.
+- **RAG Foundation**: Backend chat service now accepts `context_ref_ids` to ground AI responses in search results.
+
+### Changed
+- **Search UX**: Search results now include contextual AI actions.
+- **Chat Service**: Refactored to retrieve and inject email content as context for AI providers.
+
 ## [v0.9.3] - 2025-11-23
 
 ### Added

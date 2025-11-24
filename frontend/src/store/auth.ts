@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { api } from '@/lib/api'; // Import api client
-import { isAxiosError } from 'axios'; // Import for error handling
 
 interface User {
     id: string;
@@ -21,6 +20,7 @@ interface AuthState {
     setHydrated: () => void;
     login: (email: string, password: string) => Promise<void>; // Add login method
     register: (name: string, email: string, password: string) => Promise<void>; // Add register method
+    updateUser: (updates: Partial<User>) => void; // Add updateUser method
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -33,6 +33,9 @@ export const useAuthStore = create<AuthState>()(
             setAuth: (token, user) => set({ token, user, isAuthenticated: true }),
             logout: () => set({ token: null, user: null, isAuthenticated: false }),
             setHydrated: () => set({ isHydrated: true }),
+            updateUser: (updates) => set((state) => ({
+                user: state.user ? { ...state.user, ...updates } : null
+            })),
             login: async (email, password) => {
                 try {
                     const response = await api.post('/auth/login', { email, password });
