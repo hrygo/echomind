@@ -1,118 +1,126 @@
 <div align="center">
-  <h1 align="center">EchoMind</h1>
-  <p align="center">
-    <strong>🧠 Your Personal Neural Interface to Navigate the Information Maze 🧠</strong>
-  </p>
-  <p align="center">
-    EchoMind is a smart, context-aware assistant that integrates with your digital life, starting with your emails, to create a searchable and intelligent knowledge base. It helps you stay organized, find information instantly, and gain insights from your communications.
-  </p>
-  <p align="center">
-    <img src="https://img.shields.io/github/actions/workflow/status/your-username/echomind/ci-cd.yml?branch=main&style=for-the-badge" alt="CI/CD Status">
-    <img src="https://img.shields.io/github/v/release/your-username/echomind?style=for-the-badge" alt="Version">
-    <img src="https://img.shields.io/github/license/your-username/echomind?style=for-the-badge" alt="License">
-  </p>
+
+<h1 align="center">EchoMind</h1>
+
+<p align="center">
+  <strong>🧠 您的个人智能神经中枢，轻松驾驭信息迷宫 🧠</strong>
+</p>
+
+<p align="center">
+  EchoMind 是一款智能的、具备情境感知能力的个人助理。它能深度融入您的数字生活（从电子邮件开始），为您创建一个可搜索的、智能化的知识库。它能帮助您保持条理，即时找到所需信息，并从日常沟通中获得洞见。
+</p>
+
+<p align="center">
+    <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
+    <img src="https://img.shields.io/github/actions/workflow/status/your-username/echomind/ci-cd.yml?branch=main&style=for-the-badge" alt="CI/CD 状态">
+    <img src="https://img.shields.io/github/v/release/your-username/echomind?style=for-the-badge" alt="版本">
+    <img src="https://img.shields.io/github/license/your-username/echomind?style=for-the-badge" alt="许可证">
+</p>
 </div>
 
 ---
 
-## 📚 Table of Contents
-- [✨ Key Features](#-key-features)
-- [🔧 Tech Stack](#-tech-stack)
-- [🚀 Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation & Setup](#installation--setup)
-- [🧪 Running Tests](#-running-tests)
-- [🚢 Deployment](#-deployment)
-- [🗺️ Roadmap](#️-roadmap)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+## 📚 目录
+- [✨ 主要功能](#-主要功能)
+- [🔧 技术栈](#-技术栈)
+- [🚀 快速开始](#-快速开始)
+  - [环境准备](#环境准备)
+  - [安装与设置](#安装与设置)
+- [🧪 运行测试](#-运行测试)
+- [🚢 应用部署](#-应用部署)
+- [🗺️ 路线图](#️-路线图)
+- [🤝 如何贡献](#-如何贡献)
+- [📄 开源许可](#-开源许可)
 
 ---
 
-## ✨ Key Features
+## ✨ 主要功能
 
-- **📧 Intelligent Email Sync**: Automatically syncs and processes emails from your IMAP accounts.
-- **🧠 Contextual Understanding**: Builds a rich context graph from your communications to surface relevant information.
-- **🔍 Advanced Search**: Perform semantic searches across all your synced data. Find not just keywords, but concepts and conversations.
-- **🤖 AI-Powered Drafts**: Generate email replies and other text with the help of AI, based on the current context.
-- **📈 Insight Generation**: (Coming Soon) Proactively provides summaries and insights from your data.
-
----
-
-## 🔧 Tech Stack
-
-| Category      | Technology                               |
-|---------------|------------------------------------------|
-| **Backend**   | Go, Gin, GORM, Asynq                     |
-| **Frontend**  | Next.js, TypeScript, Tailwind CSS, Zustand |
-| **Database**  | PostgreSQL (with pgvector), Redis        |
-| **Container** | Docker                                   |
-| **AI**        | OpenAI, Gemini                           |
+- **📧 智能邮件同步**: 自动同步并处理来自您 IMAP 账户的邮件。
+- **🧠 情境理解**: 从您的通信内容中构建丰富的上下文关系图，以呈现相关信息。
+- **🔍 高级搜索**: 在您所有同步数据中执行语义搜索。不仅能找到关键词，还能发现概念和对话。
+- **🤖 AI 驱动的草稿**: 基于当前上下文，借助 AI 生成邮件回复和其他文本。
+- **📈 洞察生成**: (即将推出) 主动从您的数据中提供摘要和洞察。
 
 ---
 
-## 🚀 Getting Started
+## 🔧 技术栈
 
-Follow these instructions to get EchoMind up and running on your local machine for development and testing purposes.
+| 类别       | 技术栈                                   |
+|------------|------------------------------------------|
+| **后端**   | Go, Gin, GORM, Asynq                     |
+| **前端**   | Next.js, TypeScript, Tailwind CSS, Zustand |
+| **数据库** | PostgreSQL (with pgvector), Redis        |
+| **容器化** | Docker                                   |
+| **AI**     | OpenAI, Gemini                           |
 
-### Prerequisites
+---
 
-Make sure you have the following tools installed:
-- [Go](https://golang.org/doc/install) (version 1.22+)
-- [Node.js](https://nodejs.org/en/download/) (version 18+) with [pnpm](https://pnpm.io/installation)
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+## 🚀 快速开始
+
+请遵循以下说明在您的本地计算机上启动并运行 EchoMind，以便进行开发和测试。
+
+### 环境准备
+
+请确保您已安装以下工具：
+- [Go](https://golang.org/doc/install) (版本 1.22+)
+- [Node.js](https://nodejs.org/en/download/) (版本 18+) 及 [pnpm](https://pnpm.io/installation)
+- [Docker](https://docs.docker.com/get-docker/) 和 [Docker Compose](https://docs.docker.com/compose/install/)
 - [make](https://www.gnu.org/software/make/)
 
-### Installation & Setup
+### 安装与设置
 
-1.  **Clone the Repository**
+1.  **克隆代码仓库**
     ```bash
     git clone https://github.com/your-username/echomind.git
     cd echomind
     ```
-    *(Note: Remember to replace `your-username` with the actual repository owner's username.)*
+    *(注意: 请记得将 `your-username` 替换为实际的代码仓库所有者用户名。)*
 
-2.  **Configure Environment Variables**
-    Copy the example configuration files and update them with your credentials (e.g., OpenAI API key, database passwords).
+2.  **配置环境变量**
+    复制示例配置文件，并用您的凭据（例如 OpenAI API 密钥、数据库密码）更新它们。
     ```bash
     cp backend/configs/config.example.yaml backend/configs/config.local.yaml
     cp backend/configs/logger.example.yaml backend/configs/logger.local.yaml
     ```
-    - Edit `backend/configs/config.local.yaml` to fill in the required secrets.
+    - 编辑 `backend/configs/config.local.yaml` 文件，填入所需的安全密钥和配置。
 
-3.  **Start Backend Services**
-    This command starts the required databases (Postgres, Redis) in Docker containers.
+3.  **启动后端服务**
+    此命令会在 Docker 容器中启动所需的数据库 (Postgres, Redis)。
     ```bash
     make dev-db
     ```
-    Then, run the database migrations:
+    然后，运行数据库迁移：
     ```bash
     make db-init
     ```
-    Finally, start the backend server:
+    最后，启动后端服务器：
     ```bash
     make run-be
     ```
-    The backend API will be available at `http://localhost:8080`.
+    后端 API 将在 `http://localhost:8080` 上可用。
 
-4.  **Start Frontend Application**
-    In a new terminal, navigate to the `frontend` directory, install dependencies, and start the development server.
+4.  **启动前端应用**
+    在新的终端窗口中，进入 `frontend` 目录，安装依赖并启动开发服务器。
     ```bash
     cd frontend
     pnpm install
     pnpm dev
     ```
-    The frontend application will be accessible at `http://localhost:3000`.
+    前端应用将可以在 `http://localhost:3000` 访问。
 
 ---
 
-## 🧪 Running Tests
+## 🧪 运行测试
 
-- **Backend Tests**:
+- **后端测试**:
   ```bash
   make test
   ```
-- **Frontend Tests**:
+- **前端测试**:
   ```bash
   cd frontend
   pnpm test
@@ -120,33 +128,33 @@ Make sure you have the following tools installed:
 
 ---
 
-## 🚢 Deployment
+## 🚢 应用部署
 
-A production-ready setup can be deployed using Docker Compose:
+可以使用 Docker Compose 部署一个生产就绪的环境：
 ```bash
 docker-compose -f deploy/docker-compose.prod.yml up -d
 ```
-This will build and run the frontend and backend containers, along with the required database services.
+这将构建并运行前端和后端容器，以及所需的数据库服务。
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ 路线图
 
-- **Phase 1**: Core email sync and contextual processing.
-- **Phase 2**: Advanced search and AI-powered drafting.
-- **Phase 3**: Integration with other data sources (e.g., calendars, notes).
-- **Phase 4**: Proactive insights and automated task management.
+- **第一阶段**: 核心邮件同步与上下文处理。
+- **第二阶段**: 高级搜索与 AI 草稿功能。
+- **第三阶段**: 集成其他数据源（如日历、笔记）。
+- **第四阶段**: 主动洞察与自动化任务管理。
 
-See the [product roadmap](docs/product-roadmap.md) for more details.
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes.
+更多详情请参阅[产品路线图](docs/product-roadmap.md)。
 
 ---
 
-## 📄 License
+## 🤝 如何贡献
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+我们欢迎任何形式的贡献！请阅读我们的 [CONTRIBUTING.md](CONTRIBUTING.md) 文件，以了解我们的开发流程、如何提出错误修复和改进建议，以及如何构建和测试您的更改。
+
+---
+
+## 📄 开源许可
+
+本项目基于 MIT 许可证授权 - 详情请参阅 [LICENSE](LICENSE) 文件。
