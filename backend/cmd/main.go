@@ -38,20 +38,21 @@ func main() {
 	_ = container.Config.AI.Providers[container.Config.AI.ActiveServices.Chat]
 
 	// Initialize business services
-	defaultFetcher := &service.DefaultFetcher{}
 	organizationService := service.NewOrganizationService(container.DB)
 	userService := service.NewUserService(container.DB, container.Config.Server.JWT, organizationService)
 	emailService := service.NewEmailService(container.DB)
-	contactService := service.NewContactService(container.DB)
 	accountService := service.NewAccountService(container.DB, &container.Config.Security)
 	insightService := service.NewInsightService(container.DB)
 	aiDraftService := service.NewAIDraftService(container.AIProvider)
+	defaultIMAPClient := &service.DefaultIMAPClient{}
+	connector := service.NewIMAPConnector(defaultIMAPClient, container.Config)
+	ingestor := service.NewEmailIngestor(container.EmailRepo, container.Logger)
+
 	syncService := service.NewSyncService(
-		container.DB,
-		&service.DefaultIMAPClient{},
-		defaultFetcher,
-		container.AsynqClient,
-		contactService,
+		container.AccountRepo,
+		connector,
+		ingestor,
+		container.EventBus,
 		accountService,
 		container.Config,
 		container.Logger,

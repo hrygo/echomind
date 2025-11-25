@@ -4,8 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hrygo/echomind/internal/bootstrap"
+	"github.com/hrygo/echomind/internal/event"
+	"github.com/hrygo/echomind/internal/listener"
+	"github.com/hrygo/echomind/internal/repository"
 	"github.com/hrygo/echomind/internal/service"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/event/bus"
 )
 
 // Container holds all application dependencies
@@ -19,6 +23,9 @@ type Container struct {
 	Summarizer     *service.SummaryService
 	ActionService  *service.ActionService
 	SyncService    *service.SyncService // Add SyncService
+	EmailRepo      repository.EmailRepository
+	AccountRepo    repository.AccountRepository
+	EventBus       *bus.Bus
 }
 
 // NewContainer creates a new dependency injection container
@@ -50,14 +57,28 @@ func NewContainer(configPath string, isProduction bool) (*Container, error) {
 	summarizer := service.NewSummaryService(aiProvider)
 	actionService := service.NewActionService(app.DB)
 
+	// 5. Initialize Event Bus and Listeners
+	eventBus := bus.New()
+	contactService := service.NewContactService(app.DB) // Need this for listener
+	analysisListener := listener.NewAnalysisListener(app.AsynqClient, app.Logger)
+	contactListener := listener.NewContactListener(contactService, app.Logger)
+
+	eventBus.Subscribe(event.EmailSyncedEventName, analysisListener)
+	eventBus.Subscribe(event.EmailSyncedEventName, contactListener)
+
 	// Create SyncService with dependencies
-	defaultFetcher := &service.DefaultFetcher{}
+	emailRepo := repository.NewEmailRepository(app.DB)
+	accountRepo := repository.NewAccountRepository(app.DB)
+	imapClient := &service.DefaultIMAPClient{}
+
+	connector := service.NewIMAPConnector(imapClient, app.Config)
+	ingestor := service.NewEmailIngestor(emailRepo, app.Logger)
+
 	syncService := service.NewSyncService(
-		app.DB,
-		&service.DefaultIMAPClient{},
-		defaultFetcher,
-		app.AsynqClient,
-		nil, // contactService will be set later
+		accountRepo,
+		connector,
+		ingestor,
+		eventBus,
 		nil, // accountService will be set later
 		app.Config,
 		app.Logger,
@@ -72,6 +93,9 @@ func NewContainer(configPath string, isProduction bool) (*Container, error) {
 		Summarizer:     summarizer,
 		ActionService:  actionService,
 		SyncService:    syncService, // Add SyncService
+		EmailRepo:      emailRepo,
+		AccountRepo:    accountRepo,
+		EventBus:       eventBus,
 	}, nil
 }
 

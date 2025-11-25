@@ -7,9 +7,15 @@ import (
 	"io"
 	"strings"
 
+	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/ai/registry"
 	openai "github.com/sashabaranov/go-openai"
 )
+
+func init() {
+	registry.Register("openai", NewProvider)
+}
 
 type Provider struct {
 	client         *openai.Client
@@ -18,7 +24,7 @@ type Provider struct {
 	prompts        map[string]string
 }
 
-func NewProvider(settings map[string]interface{}, prompts map[string]string) *Provider {
+func NewProvider(ctx context.Context, settings configs.ProviderSettings, prompts map[string]string) (ai.AIProvider, error) {
 	apiKey, _ := settings["api_key"].(string)
 	model, _ := settings["model"].(string)
 	baseURL, _ := settings["base_url"].(string)
@@ -38,7 +44,7 @@ func NewProvider(settings map[string]interface{}, prompts map[string]string) *Pr
 		model:          model,
 		embeddingModel: embeddingModel,
 		prompts:        prompts,
-	}
+	}, nil
 }
 
 func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResult, error) {

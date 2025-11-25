@@ -9,10 +9,16 @@ import (
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
+	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/ai/registry"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
+
+func init() {
+	registry.Register("gemini", NewProvider)
+}
 
 type Provider struct {
 	client         *genai.Client
@@ -21,7 +27,7 @@ type Provider struct {
 	prompts        map[string]string
 }
 
-func NewProvider(ctx context.Context, settings map[string]interface{}, prompts map[string]string) (*Provider, error) {
+func NewProvider(ctx context.Context, settings configs.ProviderSettings, prompts map[string]string) (ai.AIProvider, error) {
 	apiKey, _ := settings["api_key"].(string)
 	modelName, _ := settings["model"].(string)
 	embeddingModelName, _ := settings["embedding_model"].(string)

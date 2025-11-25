@@ -6,9 +6,12 @@ import (
 
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/pkg/ai"
-	"github.com/hrygo/echomind/pkg/ai/gemini"
 	"github.com/hrygo/echomind/pkg/ai/mock"
-	"github.com/hrygo/echomind/pkg/ai/openai"
+	"github.com/hrygo/echomind/pkg/ai/registry"
+
+	// Import providers to trigger registration
+	_ "github.com/hrygo/echomind/pkg/ai/gemini"
+	_ "github.com/hrygo/echomind/pkg/ai/openai"
 )
 
 // CompositeProvider combines an AIProvider (for text) and an EmbeddingProvider.
@@ -36,14 +39,12 @@ func NewAIProvider(cfg *configs.AIConfig) (ai.AIProvider, error) {
 			return nil, fmt.Errorf("provider configuration not found: %s", name)
 		}
 
-		switch pConfig.Protocol {
-		case "openai":
-			return openai.NewProvider(pConfig.Settings, prompts), nil
-		case "gemini":
-			return gemini.NewProvider(context.Background(), pConfig.Settings, prompts)
-		default:
-			return nil, fmt.Errorf("unsupported protocol: %s", pConfig.Protocol)
+		factory, err := registry.Get(pConfig.Protocol)
+		if err != nil {
+			return nil, err
 		}
+
+		return factory(context.Background(), pConfig.Settings, prompts)
 	}
 
 	// 1. Initialize Chat Provider

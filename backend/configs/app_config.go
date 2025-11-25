@@ -51,9 +51,11 @@ type ServiceRoute struct {
 }
 
 type ProviderConfig struct {
-	Protocol string                 `mapstructure:"protocol"` // "openai" | "gemini"
-	Settings map[string]interface{} `mapstructure:"settings"`
+	Protocol string           `mapstructure:"protocol"` // "openai" | "gemini"
+	Settings ProviderSettings `mapstructure:"settings"`
 }
+
+type ProviderSettings map[string]interface{}
 
 type PromptConfig struct {
 	Summary    string `mapstructure:"summary"`
