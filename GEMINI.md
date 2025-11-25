@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 - **Vision**: Personal Neural Interface (个人智能神经中枢)
-- **Status**: `v0.9.7` | **Current Sprint**: Dashboard API Integration Phase 1
+- **Status**: `v0.9.8` | **Current Sprint**: Dashboard API Integration Phase 2
 - **Stack**:
     - **Backend**: Go 1.22+ (Gin, GORM, Asynq) | Postgres+pgvector | Redis
     - **Frontend**: Next.js 16 (TypeScript, Tailwind, Zustand)
