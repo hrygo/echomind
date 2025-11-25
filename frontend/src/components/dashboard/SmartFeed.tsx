@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, MoreVertical, BellOff, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertTriangle, ArrowRight, CheckCircle2, MoreVertical, BellOff, Trash2, Sparkles, Copy, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -8,6 +8,7 @@ import { Email } from '@/lib/api/emails';
 import { formatDistanceToNow } from 'date-fns';
 import { useActionStore } from '@/lib/store/actions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
+import { useAIReply } from '@/hooks/useAIReply';
 
 interface SmartFeedProps {
   contextId?: string | null;
@@ -64,10 +65,44 @@ export function SmartFeed({ contextId }: SmartFeedProps) {
 function SmartFeedCard({ item }: { item: Email }) {
   const { t } = useLanguage();
   const { approveEmail, snoozeEmail, dismissEmail } = useActionStore();
+  const { mutate: generateReply, isPending: isGeneratingReply } = useAIReply();
+  const [aiReply, setAiReply] = useState<{ reply: string; confidence: number } | null>(null);
+  const [showReplyDialog, setShowReplyDialog] = useState(false);
+
   const isHighRisk = item.Urgency === 'High';
-  
+
   // Parse Date
   const timeAgo = item.Date ? formatDistanceToNow(new Date(item.Date), { addSuffix: true }) : '';
+
+  // Handle AI reply generation
+  const handleReplyWithAI = () => {
+    generateReply(
+      {
+        emailId: item.ID,
+        tone: 'professional',
+        context: 'brief'
+      },
+      {
+        onSuccess: (data) => {
+          setAiReply(data);
+          setShowReplyDialog(true);
+        },
+        onError: (error) => {
+          console.error('AI Reply generation failed:', error);
+        }
+      }
+    );
+  };
+
+  // Copy reply to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
 
   return (
     <div className={`group relative bg-white rounded-xl border p-5 transition-all duration-200 hover:shadow-md
@@ -141,12 +176,79 @@ function SmartFeedCard({ item }: { item: Email }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                 <Button className="h-8 text-slate-600 border border-slate-200 hover:bg-slate-50 bg-transparent px-3">
+                 <Button
+                    onClick={handleReplyWithAI}
+                    disabled={isGeneratingReply}
+                    className="h-8 text-blue-600 border border-blue-200 hover:bg-blue-50 bg-transparent px-3 gap-1.5"
+                 >
+                    {isGeneratingReply ? (
+                       <div className="w-3.5 h-3.5 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                       <Sparkles className="w-3.5 h-3.5" />
+                    )}
                     {t('dashboard.replyWithAI')}
                  </Button>
             </div>
         </div>
       </div>
+
+      {/* AI Reply Dialog */}
+      {showReplyDialog && aiReply && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            {/* Header */}
+            <div className="border-b border-slate-200 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <h3 className="font-semibold text-slate-800">AI Generated Reply</h3>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  {Math.round(aiReply.confidence * 100)}% confidence
+                </span>
+              </div>
+              <button
+                onClick={() => setShowReplyDialog(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Reply Content */}
+            <div className="p-4">
+              <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-700 whitespace-pre-wrap max-h-96 overflow-y-auto border border-slate-200">
+                {aiReply.reply}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="border-t border-slate-200 p-4 flex justify-end gap-2">
+              <Button
+                onClick={() => copyToClipboard(aiReply.reply)}
+                variant="outline"
+                className="h-8 text-slate-600 border border-slate-200 hover:bg-slate-50 bg-transparent px-3 gap-1.5"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                Copy
+              </Button>
+              <Button
+                onClick={() => {
+                  // Here you could open email client with the reply
+                  window.location.href = `mailto:?body=${encodeURIComponent(aiReply.reply)}`;
+                }}
+                className="h-8 bg-blue-600 hover:bg-blue-700 text-white px-3"
+              >
+                Open in Email
+              </Button>
+              <Button
+                onClick={() => setShowReplyDialog(false)}
+                className="h-8 bg-slate-600 hover:bg-slate-700 text-white px-3"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

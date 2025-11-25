@@ -116,10 +116,18 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 func (p *Provider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
 	systemPrompt := p.prompts["draft_reply"]
 	if systemPrompt == "" {
-		return "", errors.New("draft_reply prompt not configured")
+		systemPrompt = "You are an email assistant. Generate a professional email reply based on the provided email content and user instructions."
 	}
 
-	fullPrompt := fmt.Sprintf("%s\n\nOriginal Email:\n%s\n\nUser Prompt:\n%s", systemPrompt, emailContent, userPrompt)
+	// Ensure we have valid content
+	if emailContent == "" {
+		emailContent = "No email content provided."
+	}
+	if userPrompt == "" {
+		userPrompt = "Generate a brief, professional email reply."
+	}
+
+	fullPrompt := fmt.Sprintf("%s\n\nOriginal Email:\n%s\n\nUser Instructions:\n%s", systemPrompt, emailContent, userPrompt)
 	return p.generateContent(ctx, fullPrompt, "")
 }
 

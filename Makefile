@@ -1,7 +1,7 @@
-.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test lint deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status
+.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test test-fe lint lint-fe deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status build-fe
 
 # Version
-VERSION := 0.9.6
+VERSION := 0.9.7
 
 # Variables
 REPO_OWNER ?= your-username
@@ -25,12 +25,20 @@ help:
 	@echo "    make stop-apps     - Stop only Apps"
 	@echo "    make clean         - Clean build artifacts and logs"
 	@echo ""
+	@echo "  Quality Assurance:"
+	@echo "    make test          - Run backend tests"
+	@echo "    make test-fe        - Run frontend tests"
+	@echo "    make lint          - Lint backend code"
+	@echo "    make lint-fe       - Lint frontend code"
+	@echo "    make build         - Build backend binaries"
+	@echo "    make build-fe      - Build frontend"
+	@echo "    make build-check   - Build both backend and frontend"
+	@echo ""
 	@echo "  Individual Services:"
 	@echo "    make docker-up     - Start Local Docker services"
 	@echo "    make run-backend   - Build and Start Backend API"
 	@echo "    make run-worker    - Build and Start Worker"
 	@echo "    make run-frontend  - Start Frontend"
-	@echo "    make build         - Build backend binaries"
 	@echo "    make reindex       - Reindex all emails (generate embeddings)"
 	@echo ""
 	@echo "  Observability:"
@@ -41,13 +49,14 @@ help:
 	@echo ""
 	@echo "  Advanced:"
 	@echo "    make run-backend-prod   - Run backend in production mode"
-	@echo "    make build              - Build backend binaries"
-	@echo "    make reindex            - Reindex all emails"
+	@echo "    make db-init            - Initialize database"
 	@echo ""
 	@echo "  CLI Parameters (for manual runs):"
 	@echo "    ./bin/server -h              - Show backend CLI help"
 	@echo "    ./bin/server -production     - Run in production mode"
 	@echo "    ./bin/server -config=path    - Custom config file"
+	@echo ""
+	@echo "Note: Always run commands from ~/aicoding/echomind directory"
 
 ensure-log-dir:
 	@mkdir -p $(LOG_DIR)
@@ -186,9 +195,19 @@ test-coverage:
 	cd backend && go test -coverprofile=coverage.out ./...
 	cd backend && go tool cover -func=coverage.out
 
+test:
+	@echo "Running backend tests..."
+	cd backend && go test -v ./...
+
+test-fe:
+	@echo "Running frontend tests..."
+	cd frontend && pnpm test
+
 lint:
 	@echo "Linting backend..."
 	cd backend && golangci-lint run ./... || echo "golangci-lint not installed or found issues"
+
+lint-fe:
 	@echo "Linting frontend..."
 	cd frontend && pnpm lint
 
@@ -196,6 +215,15 @@ build:
 	@echo "Building backend..."
 	cd backend && go build -o ../bin/server ./cmd/main.go
 	cd backend && go build -o ../bin/worker ./cmd/worker/main.go
+
+build-fe:
+	@echo "Building frontend..."
+	cd frontend && pnpm build
+
+build-check:
+	@echo "Building and checking both backend and frontend..."
+	$(MAKE) build
+	$(MAKE) build-fe
 
 clean:
 	@echo "Cleaning..."

@@ -1,25 +1,35 @@
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
-import { ArrowRight, DollarSign, Users, Briefcase, Zap } from 'lucide-react';
+import { ArrowRight, DollarSign, Users, Briefcase, Zap, Loader2 } from 'lucide-react';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useOpportunities } from '@/hooks/useOpportunities';
+import { useDealmakerRadar } from '@/hooks/useDealmakerRadar';
 
 export function DealmakerView() {
     const { t } = useLanguage();
 
-    const radarData = [
-      { subject: t('dashboard.radarBuyingIntent'), A: 120, fullMark: 150 },
-      { subject: t('dashboard.radarPartnership'), A: 98, fullMark: 150 },
-      { subject: t('dashboard.radarHiring'), A: 86, fullMark: 150 },
-      { subject: t('dashboard.radarMeeting'), A: 99, fullMark: 150 },
-      { subject: t('dashboard.radarReferral'), A: 85, fullMark: 150 },
-      { subject: t('dashboard.radarFollowUp'), A: 65, fullMark: 150 },
-    ];
+    // Fetch opportunities data
+    const { data: opportunities = [], isLoading: opportunitiesLoading } = useOpportunities({ limit: 10 });
 
-    const opportunities = [
-        { id: 1, title: "Enterprise License Inquiry", company: "TechCorp", value: "$50k", confidence: 92, type: "buying" },
-        { id: 2, title: "Strategic Partnership Q1", company: "Innovate Inc", value: "Strategic", confidence: 85, type: "partnership" },
-        { id: 3, title: "Team Expansion Discussion", company: "GlobalSoft", value: "10 Seats", confidence: 78, type: "buying" },
-    ];
+    // Fetch radar data
+    const { data: radarData = [], isLoading: radarLoading } = useDealmakerRadar();
+
+    // Transform opportunities for UI display
+    const displayOpportunities = opportunities.map(opp => ({
+      id: parseInt(opp.id, 10),
+      title: opp.title,
+      company: opp.company,
+      value: opp.value,
+      confidence: opp.confidence,
+      type: opp.type
+    }));
+
+    // Transform radar data for Recharts format
+    const displayRadarData = radarData.map(item => ({
+      subject: item.category,
+      A: item.value,
+      fullMark: item.fullMark
+    }));
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -32,21 +42,31 @@ export function DealmakerView() {
                 <p className="text-sm text-slate-500 mb-4">{t('dashboard.radarDescription')}</p>
                 
                 <div className="flex-1 min-h-[300px] -ml-6">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                            <PolarGrid stroke="#e2e8f0" />
-                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
-                            <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                            <Radar
-                                name="Intent"
-                                dataKey="A"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                fill="#3b82f6"
-                                fillOpacity={0.2}
-                            />
-                        </RadarChart>
-                    </ResponsiveContainer>
+                    {radarLoading ? (
+                        <div className="flex items-center justify-center h-full">
+                            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                        </div>
+                    ) : displayRadarData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={displayRadarData}>
+                                <PolarGrid stroke="#e2e8f0" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
+                                <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                                <Radar
+                                    name="Intent"
+                                    dataKey="A"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    fill="#3b82f6"
+                                    fillOpacity={0.2}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-slate-500">
+                            <p className="text-sm">No radar data available</p>
+                        </div>
+                    )}
                 </div>
                 <div className="mt-4 text-center">
                     <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
@@ -63,9 +83,13 @@ export function DealmakerView() {
                         <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">{t('dashboard.viewAll')}</button>
                     </div>
                     <div className="divide-y divide-slate-50">
-                        {opportunities.map((opp) => (
+                        {opportunitiesLoading ? (
+                            <div className="p-8 flex items-center justify-center">
+                                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                            </div>
+                        ) : displayOpportunities.length > 0 ? displayOpportunities.map((opp) => (
                             <div key={opp.id} className="p-5 hover:bg-slate-50 transition-colors cursor-pointer group flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center 
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center
                                     ${opp.type === 'buying' ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600'}
                                 `}>
                                     {opp.type === 'buying' ? <DollarSign className="w-5 h-5" /> : <Briefcase className="w-5 h-5" />}
@@ -80,7 +104,11 @@ export function DealmakerView() {
                                 </div>
                                 <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500" />
                             </div>
-                        ))}
+                        )) : (
+                            <div className="p-8 text-center text-slate-500">
+                                <p className="text-sm">No opportunities found</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

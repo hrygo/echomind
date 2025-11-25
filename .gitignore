@@ -56,3 +56,4 @@ backend/configs/config.yaml
 # Frontend Specific
 *.pem
 .vercel
+backend/echomind-server

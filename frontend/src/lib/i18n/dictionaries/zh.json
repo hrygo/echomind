@@ -63,6 +63,7 @@
         "highPriority": "高优先级",
         "noPendingTasks": "暂无待办任务！干得好。",
         "completed": "已完成",
+        "completedToday": "今日完成",
         "thisWeek": "本周",
         "overdue": "已逾期",
         "actionNeeded": "需采取行动",

@@ -63,6 +63,7 @@
         "highPriority": "High Priority",
         "noPendingTasks": "No pending tasks! Great job.",
         "completed": "Completed",
+        "completedToday": "Completed Today",
         "thisWeek": "This week",
         "overdue": "Overdue",
         "actionNeeded": "Action needed",

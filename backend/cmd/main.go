@@ -17,7 +17,7 @@ import (
 	"github.com/hrygo/echomind/internal/service"
 )
 
-const Version = "0.9.6"
+const Version = "0.9.7"
 
 func main() {
 	// Parse CLI configuration
@@ -64,14 +64,15 @@ func main() {
 
 	chatService := service.NewChatService(container.AIProvider, container.SearchService, emailService)
 	taskService := service.NewTaskService(container.DB)
+	opportunityService := service.NewOpportunityService(container.DB)
 
 	// Initialize handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	syncHandler := handler.NewSyncHandler(syncService)
 	emailHandler := handler.NewEmailHandler(emailService)
 	authHandler := handler.NewAuthHandler(userService)
-	insightHandler := handler.NewInsightHandler(insightService)
-	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService)
+	insightHandler := handler.NewInsightHandlerWithServices(insightService, taskService, emailService)
+	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService, emailService)
 	searchHandler := handler.NewSearchHandler(container.SearchService, container.Logger)
 	healthHandler := handler.NewHealthHandler(container.DB)
 	orgHandler := handler.NewOrganizationHandler(organizationService)
@@ -79,6 +80,7 @@ func main() {
 	taskHandler := handler.NewTaskHandler(taskService)
 	contextHandler := handler.NewContextHandler(container.ContextService)
 	actionHandler := handler.NewActionHandler(container.ActionService)
+	opportunityHandler := handler.NewOpportunityHandler(opportunityService)
 
 	// Setup Router and Middleware
 	r := gin.Default()
@@ -86,19 +88,20 @@ func main() {
 
 	// Register routes
 	handlers := &router.Handlers{
-		Health:  healthHandler,
-		Auth:    authHandler,
-		Org:     orgHandler,
-		Account: accountHandler,
-		Sync:    syncHandler,
-		Email:   emailHandler,
-		Insight: insightHandler,
-		AIDraft: aiDraftHandler,
-		Search:  searchHandler,
-		Chat:    chatHandler,
-		Task:    taskHandler,
-		Context: contextHandler,
-		Action:  actionHandler,
+		Health:      healthHandler,
+		Auth:        authHandler,
+		Org:         orgHandler,
+		Account:     accountHandler,
+		Sync:        syncHandler,
+		Email:       emailHandler,
+		Insight:     insightHandler,
+		AIDraft:     aiDraftHandler,
+		Search:      searchHandler,
+		Chat:        chatHandler,
+		Task:        taskHandler,
+		Context:     contextHandler,
+		Action:      actionHandler,
+		Opportunity: opportunityHandler,
 	}
 
 	authMiddleware := router.SetupAuthMiddleware(container.Config.Server.JWT)

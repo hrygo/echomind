@@ -7,19 +7,20 @@ import (
 
 // Handlers holds all HTTP handlers
 type Handlers struct {
-	Health  *handler.HealthHandler
-	Auth    *handler.AuthHandler
-	Org     *handler.OrganizationHandler
-	Account *handler.AccountHandler
-	Sync    *handler.SyncHandler
-	Email   *handler.EmailHandler
-	Insight *handler.InsightHandler
-	AIDraft *handler.AIDraftHandler
-	Search  *handler.SearchHandler
-	Chat    *handler.ChatHandler
-	Task    *handler.TaskHandler
-	Context *handler.ContextHandler
-	Action  *handler.ActionHandler
+	Health      *handler.HealthHandler
+	Auth        *handler.AuthHandler
+	Org         *handler.OrganizationHandler
+	Account     *handler.AccountHandler
+	Sync        *handler.SyncHandler
+	Email       *handler.EmailHandler
+	Insight     *handler.InsightHandler
+	AIDraft     *handler.AIDraftHandler
+	Search      *handler.SearchHandler
+	Chat        *handler.ChatHandler
+	Task        *handler.TaskHandler
+	Context     *handler.ContextHandler
+	Action      *handler.ActionHandler
+	Opportunity *handler.OpportunityHandler
 }
 
 // SetupRoutes registers all API routes
@@ -55,8 +56,16 @@ func SetupRoutes(router *gin.Engine, h *Handlers, authMiddleware gin.HandlerFunc
 			protected.DELETE("/emails/all", h.Email.DeleteAllEmails)
 			protected.GET("/insights/network", h.Insight.GetNetworkGraph)
 
+			// Dashboard Insights
+			protected.GET("/insights/manager/stats", h.Insight.GetManagerStats)
+			protected.GET("/insights/executive/overview", h.Insight.GetExecutiveOverview)
+			protected.GET("/insights/risks", h.Insight.GetRisks)
+			protected.GET("/insights/trends", h.Insight.GetTrends)
+			protected.GET("/insights/dealmaker/radar", h.Insight.GetDealmakerRadar)
+
 			// AI & Search
 			protected.POST("/ai/draft", h.AIDraft.GenerateDraft)
+			protected.POST("/ai/reply", h.AIDraft.GenerateReply)
 			protected.GET("/search", h.Search.Search)
 			protected.POST("/chat/completions", h.Chat.StreamChat)
 
@@ -77,6 +86,13 @@ func SetupRoutes(router *gin.Engine, h *Handlers, authMiddleware gin.HandlerFunc
 			protected.POST("/actions/approve", h.Action.ApproveEmail)
 			protected.POST("/actions/snooze", h.Action.SnoozeEmail)
 			protected.POST("/actions/dismiss", h.Action.DismissEmail)
+
+			// Opportunities
+			protected.POST("/opportunities", h.Opportunity.CreateOpportunity)
+			protected.GET("/opportunities", h.Opportunity.ListOpportunities)
+			protected.GET("/opportunities/:id", h.Opportunity.GetOpportunity)
+			protected.PATCH("/opportunities/:id", h.Opportunity.UpdateOpportunity)
+			protected.DELETE("/opportunities/:id", h.Opportunity.DeleteOpportunity)
 		}
 	}
 }

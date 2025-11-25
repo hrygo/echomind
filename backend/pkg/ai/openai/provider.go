@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 
@@ -108,11 +109,19 @@ func (p *Provider) AnalyzeSentiment(ctx context.Context, text string) (ai.Sentim
 func (p *Provider) GenerateDraftReply(ctx context.Context, emailContent, userPrompt string) (string, error) {
 	systemPrompt := p.prompts["draft_reply"]
 	if systemPrompt == "" {
-		return "", errors.New("draft_reply prompt not configured")
+		systemPrompt = "You are an email assistant. Generate a professional email reply based on the provided email content and user instructions."
 	}
 
-	fullPrompt := systemPrompt + "\n\nOriginal Email:\n" + emailContent + "\n\nUser Prompt:\n" + userPrompt
-	return p.chatCompletion(ctx, fullPrompt, "", false)
+	// Ensure we have valid content
+	if emailContent == "" {
+		emailContent = "No email content provided."
+	}
+	if userPrompt == "" {
+		userPrompt = "Generate a brief, professional email reply."
+	}
+
+	fullUserPrompt := fmt.Sprintf("Original Email:\n%s\n\nUser Instructions:\n%s", emailContent, userPrompt)
+	return p.chatCompletion(ctx, systemPrompt, fullUserPrompt, false)
 }
 
 func (p *Provider) chatCompletion(ctx context.Context, systemPrompt, userContent string, jsonMode bool) (string, error) {

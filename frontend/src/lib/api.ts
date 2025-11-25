@@ -41,6 +41,7 @@ apiClient.interceptors.response.use(
 
 // API Functions (Remaining existing functions, but export apiClient as `api` for consistency)
 export const api = apiClient;
+export default apiClient;
 
 // Types
 export interface SearchResult {

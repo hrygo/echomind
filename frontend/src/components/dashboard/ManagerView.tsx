@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Clock, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { TaskWidget } from "./TaskWidget"; // Import TaskWidget
+import { useManagerStats } from '@/hooks/useManagerStats';
 import Link from 'next/link';
 
 export function ManagerView() {
   const { t } = useLanguage();
   const [filter, setFilter] = useState<'all' | 'high'>('all');
 
-  // TODO: Replace with actual counts from useTaskStore or an API call for dashboard stats
-  const activeTasksCount = 5; // Placeholder
-  const overdueTasksCount = 1; // Placeholder
+  // Get manager statistics from API
+  const { data: managerStats, isLoading: statsLoading, error: statsError } = useManagerStats();
+
+  const activeTasksCount = managerStats?.activeTasksCount || 0;
+  const overdueTasksCount = managerStats?.overdueTasksCount || 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -57,16 +60,40 @@ export function ManagerView() {
       <div className="space-y-6">
         {/* Stats Widget */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-            <p className="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">{t('dashboard.completed')}</p>
-            <p className="text-2xl font-bold text-slate-800">14</p>
-            <p className="text-[10px] text-slate-400">{t('dashboard.thisWeek')}</p>
-          </div>
-          <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
-            <p className="text-xs font-medium text-orange-600 uppercase tracking-wider mb-1">{t('dashboard.overdue')}</p>
-            <p className="text-2xl font-bold text-slate-800">{overdueTasksCount}</p>
-            <p className="text-[10px] text-slate-400">{t('dashboard.actionNeeded')}</p>
-          </div>
+          {statsLoading ? (
+            <>
+              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex items-center justify-center">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+              </div>
+              <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 flex items-center justify-center">
+                <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+              </div>
+            </>
+          ) : statsError ? (
+            <>
+              <div className="bg-red-50/50 p-4 rounded-xl border border-red-100">
+                <p className="text-xs font-medium text-red-600">{t('dashboard.error')}</p>
+                <p className="text-lg font-bold text-slate-800">--</p>
+              </div>
+              <div className="bg-red-50/50 p-4 rounded-xl border border-red-100">
+                <p className="text-xs font-medium text-red-600">{t('dashboard.error')}</p>
+                <p className="text-lg font-bold text-slate-800">--</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                <p className="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">{t('dashboard.completedToday')}</p>
+                <p className="text-2xl font-bold text-slate-800">{managerStats?.completedTodayCount || 0}</p>
+                <p className="text-[10px] text-slate-400">{t('dashboard.today')}</p>
+              </div>
+              <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                <p className="text-xs font-medium text-orange-600 uppercase tracking-wider mb-1">{t('dashboard.overdue')}</p>
+                <p className="text-2xl font-bold text-slate-800">{overdueTasksCount}</p>
+                <p className="text-[10px] text-slate-400">{t('dashboard.actionNeeded')}</p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Smart Follow-up */}

@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Context
 
 - **Vision**: Personal Neural Interface (个人智能神经中枢)
-- **Status**: `v0.9.4` | **Current Sprint**: Phase 7 - WeChat Integration
+- **Status**: `v0.9.7` | **Current Sprint**: Dashboard API Integration Phase 1
 - **Stack**:
     - **Backend**: Go 1.22+ (Gin, GORM, Asynq) | Postgres+pgvector | Redis
     - **Frontend**: Next.js 16 (TypeScript, Tailwind, Zustand)
@@ -16,8 +16,9 @@
 ## The Golden Rules (Non-Negotiable)
 
 - 🛡️ **Quality (TDD)**
-    - **CI**: `make test` (BE) & `pnpm build && pnpm type-check` (FE) must pass before commit.
+    - **CI**: `make test` (BE) & `make test-fe` (FE) must pass before commit.
     - **Tests**: Mock external dependencies (AI, DB) for speed & stability.
+    - **Build**: Use `make build` (BE) & `make build-fe` (FE) for compilation verification.
 
 - 🚀 **Delivery (Frequent & Versioned)**
     - **Commits**: Atomic, frequent, use conventional prefixes (`feat:`, `fix:`).
@@ -32,5 +33,12 @@
     - All UI text must be bilingual (en/zh) via `t('key')`. No hardcoded strings.
 
 - 🔧 **Tooling (AI Agent SOP)**
+    - **Working Directory**: Always ensure `~/aicoding/echomind` as the base directory before executing any commands.
+    - **Preferred Commands**: Prioritize `make` commands over direct tool calls:
+      - Use `make test` instead of `go test ./...`
+      - Use `make build` instead of `go build ./cmd/main.go`
+      - Use `make test-fe` instead of `pnpm build && pnpm type-check`
+      - Use `make build-fe` instead of `pnpm build`
     - **`replace`**: Use minimal, unique context for `old_string`.
     - **`verify`**: On tool failure, use `read_file` to check state before retrying.
+    - **Directory Awareness**: Before any command execution, verify working directory with `pwd` and navigate to project root if needed.
