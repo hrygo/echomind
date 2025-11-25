@@ -228,8 +228,9 @@ func cleanMarkdown(text string) string {
 // Embed generates a vector for a single text using the configured embedding model.
 func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
 	req := openai.EmbeddingRequest{
-		Input: []string{text},
-		Model: openai.EmbeddingModel(p.embeddingModel),
+		Input:      []string{text},
+		Model:      openai.EmbeddingModel(p.embeddingModel),
+		Dimensions: p.dimensions, // Use configured dimensions
 	}
 
 	resp, err := p.client.CreateEmbeddings(ctx, req)
@@ -247,8 +248,9 @@ func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
 // EmbedBatch generates vectors for multiple texts.
 func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
 	req := openai.EmbeddingRequest{
-		Input: texts,
-		Model: openai.EmbeddingModel(p.embeddingModel),
+		Input:      texts,
+		Model:      openai.EmbeddingModel(p.embeddingModel),
+		Dimensions: p.dimensions, // Use configured dimensions
 	}
 
 	resp, err := p.client.CreateEmbeddings(ctx, req)
