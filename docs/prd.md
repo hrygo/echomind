@@ -80,7 +80,7 @@ EchoMind 服务于那些 **"Time-Poor, Influence-High" (时间匮乏，影响力
 *   **Network Graph**: 当意图为 `relationship` 时渲染，展示人脉网络。
 *   **Smart Action Buttons**: 在邮件详情中动态渲染行动按钮。
 
-#### D. 微信公众号 (WeChat Connect) - "随身第二大脑"
+#### D. 微信公众号 (WeChat OS) - "随身第二大脑"
 **定位**：EchoMind 的移动端对话式操作系统 (Conversational OS)，不仅仅是通知，更是核心交互界面。遵循 **"Lazy Intelligence" (懒人智能)** 哲学：零摩擦，高上下文。
 
 *   **🎙️ 语音指挥官 (Voice Commander)**：

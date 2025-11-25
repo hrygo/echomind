@@ -18,19 +18,7 @@
 
 ---
 
-## 📚 Table of Contents
-- [✨ Key Features](#-key-features)
-- [🔧 Tech Stack](#-tech-stack)
-- [🚀 Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation & Setup](#installation--setup)
-- [🧪 Running Tests](#-running-tests)
-- [🚢 Deployment](#-deployment)
-- [🗺️ Roadmap](#️-roadmap)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
 
----
 
 ## ✨ Key Features
 
@@ -133,14 +121,17 @@ This will build and run the frontend and backend containers, along with the requ
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap & Documentation
 
 Our development is organized into clear, feature-driven phases. Here are our most recently completed and ongoing phases:
 
 - ✅ **v0.9.2-4 (Neural Nexus)**: Context Bridge, Omni-Bar, Generative Widget Framework.
 - 🚧 **v0.9.5+ (WeChat OS)**: Voice Commander, One-Touch Decisions, Calendar Gatekeeper, Morning Briefing.
 
-For more details and future plans, see the full [product roadmap](docs/product-roadmap.md).
+For detailed architecture and product specifications, please refer to our key documents:
+
+- **[📚 Unified Product & Technical Architecture](docs/product-design.md)**
+- **[🗺️ Product Roadmap](docs/product-roadmap.md)**
 
 ---
 

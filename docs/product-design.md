@@ -1,8 +1,68 @@
-# 🛠️ 系统设计文档 - EchoMind
+# 📚 EchoMind: 统一产品与技术架构文档
 
-## 1. 系统架构概览 (Cloud-Native SaaS)
+> **版本**: 2.1 | **状态**: 规划中
+> **摘要**: 本文档是 EchoMind 系统的统一设计纲领，旨在整合产品理念、工程文化、系统架构、前后端设计、以及开发实施计划，为所有团队成员提供一个清晰、协同的单一事实来源 (Single Source of Truth)。
 
-EchoMind 采用微服务架构，部署于云端（AWS/GCP/阿里云），为用户提供 24/7 的邮件智能分析服务。
+---
+
+## 1. 产品理念与核心原则 (Vision & Principles)
+
+EchoMind 的核心是打造一个**个人智能神经中枢 (Personal Neural Interface)**，将用户从繁杂的数字信息（尤其是邮件）中解放出来。我们遵循以下设计原则：
+
+1.  **零摩擦体验 (Zero-Friction)**:
+    *   **引导式 (Guided)**: 通过向导 (Wizard) 模式帮助新用户无缝完成初始化设置。
+    *   **智能预设 (Smart Defaults)**: 自动推断邮箱配置，极大降低技术门槛。
+    *   **懒人智能 (Lazy Intelligence)**: 能够在不打字、少操作的情况下完成任务，如一键决策、语音指令。
+
+2.  **沉浸式与即时反馈 (Immersive & Real-time)**:
+    *   强化登录与引导页面的视觉体验，建立专业、科技的品牌感。
+    *   所有操作都应有即时反馈（如内联验证、Toast 通知），摒弃干扰性的原生弹窗。
+
+3.  **智能画布 (Intelligence Canvas)**:
+    *   从传统的“客户端 (Client)”演变为智能“画布 (Surface)”，将信息流重组成动态的、可交互的智能仪表盘。
+
+4.  **对话式操作系统 (Conversational OS)**:
+    *   通过微信、语音等媒介，实现用自然语言与系统进行多轮交互，完成复杂任务。
+
+---
+
+## 2. 工程文化与开发规范 (Engineering Culture & Standards)
+
+我们采用业界最佳实践来保证代码质量、协作效率和项目可维护性。
+
+### 2.1 Monorepo 工程结构
+采用 Monorepo 模式管理代码，确保前后端、文档和脚本的协同。
+
+```text
+/echomind
+├── .github/                 # [最佳实践] GitHub Actions CI/CD
+├── backend/                 # Go 后端服务
+├── docs/                    # [最佳实践] 项目文档中心
+├── frontend/                # Next.js 前端应用
+├── deploy/                  # 部署与基础设施脚本
+├── scripts/                 # 工具脚本
+├── Makefile                 # [最佳实践] 统一任务入口
+└── CONTRIBUTING.md          # [最佳实践] 贡献与开发规约
+```
+
+### 2.2 开发工作流
+*   **测试驱动开发 (TDD)**: 核心业务逻辑须遵循 TDD 流程。
+*   **版本控制**:
+    *   **提交 (Commits)**: 遵循 **Conventional Commits** 规范 (`feat:`, `fix:`, `docs:` 等)。
+    *   **发布 (Releases)**: 采用语义化版本号 (`vX.Y.Z`) 进行独立的功能发布。
+
+### 2.3 自动化 (CI/CD)
+通过 GitHub Actions 实现持续集成与部署。
+*   **CI (持续集成)**: 自动执行代码格式化、静态检查 (`Lint`)、单元测试 (`go test`, `jest`)。
+*   **CD (持续部署)**: 在 `main` 分支合并后，自动构建 Docker 镜像并推送到容器仓库 (GHCR)，随后触发生产环境的更新脚本。
+
+---
+
+## 3. 系统总体架构与可观测性
+
+EchoMind 采用云原生微服务架构，为用户提供 24/7 的高可用智能服务。
+
+### 3.1 高层架构图
 
 ```mermaid
 graph TD
@@ -29,202 +89,151 @@ graph TD
     subgraph 数据存储层 Data Layer
         Auth_Svc --> Redis_Session[Redis Session/Cache]
         Biz_Logic --> DB_Meta[PostgreSQL 元数据/索引/摘要]
-        Vector_Engine --> Vector_DB[Chroma/Milvus 向量库]
+        Vector_Engine --> Vector_DB[pgvector 向量库]
         Mail_Sync_Svc --> Object_Store[S3 临时附件存储 - 极短生命周期]
     end
 ```
 
----
+### 3.2 技术栈概览
 
-## 2. 核心模块详细设计
+*   **Backend**: Go (Gin)
+*   **Frontend**: React (Next.js) + Tailwind CSS
+*   **Database**: PostgreSQL + pgvector (向量), Redis (缓存/队列)
+*   **Infrastructure**: Docker + Kubernetes (k8s)
+*   **AI Model**: DeepSeek-V3 / GPT-4o-mini
 
-### 2.1 邮件同步引擎 (Mail Sync Engine)
-这是系统的“心脏”，负责与全球各种邮件服务器通信。
-
-*   **技术选型**：Go (Goroutines 高并发优势)。
-*   **连接管理**：
-    *   维护一个持久化的 IMAP 连接池（IDLE 模式），实现新邮件实时推送。
-    *   针对不支持 IDLE 的邮箱，采用自适应轮询策略（活跃时间高频，夜间低频）。
-*   **数据结构 (Database Schema)**：
-    *   `Emails`: 仅存储 `Message-ID`, `Subject`, `From`, `To`, `Date` 以及 `Summary` (AI 生成的摘要)。
-    *   **隐私策略**：**不存储 `Body` 原文**。查看详情时实时透传。
-    *   `Threads`: 维护邮件会话关系树。
-
-### 2.4 微信连接模块 (WeChat Connect - v0.8.0+)
-**定位**: EchoMind 的移动端对话式操作系统 (Conversational OS)，不仅仅是通知通道，更是核心交互终端。
-
-*   **消息接收与路由**: 
-    *   处理微信 XML 回调，验证签名。
-    *   基于 **Redis FSM (有限状态机)** 维护用户会话状态，支持多轮对话 (e.g., "帮我约会" -> "约什么时间?").
-*   **语音指挥官 (Voice Commander)**:
-    *   **高精度转录**: 接收语音媒体 (AMR/MP3)，转发至 **OpenAI Whisper** 模型进行识别，确保中英文混合和专业术语的准确率。
-    *   **意图识别**: 识别 `Draft` (起草), `Search` (查询), `Schedule` (日程) 等意图。
-*   **懒人智能推送 (Lazy Intelligence Push)**:
-    *   **一键决策**: 利用微信模板消息推送审批/决策卡片，用户点击按钮直接触发后端 API (`[批准]`/`[驳回]`)。
-    *   **晨报推送**: 每日定时生成个性化简报 (Briefing Image/Text)。
-*   **身份绑定**: 采用带参二维码机制，实现 Web 端与微信端的安全绑定。
-
-### 2.5 AI 分析管道 (The Pipeline)
-采用异步事件驱动架构，确保邮件同步不被耗时的 AI 推理阻塞。
-
-1.  **Ingestion (摄入)**：IMAP 服务拉取新邮件元数据 -> 推送 Event 到 MQ。
-2.  **Sanitization (脱敏)**：Worker 消费消息 -> 正则/NLP 识别 PII -> 内存中脱敏。
-3.  **Analysis (分析)**：
-    *   **Task A (摘要)**：调用 LLM 生成 TL;DR。
-    *   **Task B (意图)**：分类为 (Report, Request, FYI, Spam)。
-    *   **Task C (实体)**：提取 Deadline, Action Items。
-4.  **Persist (存储)**：将结构化结果写入 PostgreSQL，将语义向量写入 VectorDB。
-
-### 2.3 搜索引擎 (Semantic Search)
-*   不再是简单的关键词匹配。
-*   支持自然语言提问：“上个月张总关于预算说了什么？”
-*   实现：基于 Embedding 的向量搜索 + 关键词混合检索 (Hybrid Search)。
-
-### 2.6 用户界面：神经中枢 (Neural Interface - v0.7.0+)
-**核心理念**: 从 "Client" (客户端) 进化为 "Surface" (智能画布)。不再是简单的邮件列表，而是基于 **RAG** 的生成式交互界面。
-
-#### A. 布局架构 (Fluid Canvas Layout)
-采用 **Source-Canvas-Detail** 三栏流体布局：
-
-1.  **左侧栏: 上下文管理器 (Context Manager)**
-    *   **不再是文件夹**: 摒弃传统的 Inbox/Sent 结构。
-    *   **关注点 (Attention Scopes)**:
-        *   **Smart Clusters**: 自动聚合 "待回复", "高风险", "跟进中"。
-        *   **User Contexts**: 用户定义的项目/人脉上下文 (e.g., "A轮融资", "VIP 客户")。勾选不同 Context，主屏 AI 的回答范围随之改变。
-    *   **源数据 (Sources)**: 包含附件文档、提取的电子表格。
-
-2.  **主画布: 智能中枢 (Intelligence Canvas)**
-    这是用户停留时间最长的区域，分为两种核心模式：
-    *   **模式 1: 晨报模式 (The Briefing - Passive)**
-        *   **类比**: Notion Dashboard / 动态报纸。
-        *   **内容**: 根据用户角色（高管/销售/经理）自动渲染不同的 **"Briefing Templates"**。
-            *   *Executive*: 风险摘要 + 决策卡片。
-            *   *Dealmaker*: 机会雷达 + 沉睡客户唤醒。
-        *   **操作**: 每个卡片带有一键操作 (`[批准]`, `[草拟回复]`)。
-    *   **模式 2: 工作室模式 (The Studio - Active)**
-        *   **类比**: NotebookLM / Perplexity。
-        *   **交互**: 
-            *   **流式问答**: "上周关于预算的讨论结论是什么？" -> AI 实时生成回答。
-            *   **动态组件**: 提问涉及时间时渲染日历组件，涉及人脉时渲染关系图谱。
-            *   **精准引用**: 所有 AI 生成的观点均带有 `[1]` 脚注。
-
-3.  **右侧栏: 事实锚点 (Grounding Panel)**
-    *   **交互**: 点击主画布中的 `[1]` 引用，右侧滑出。
-    *   **内容**: 展示原始邮件线程或文档片段，并高亮 AI 引用的具体段落。
-    *   **价值**: 消除 AI 幻觉，提供 "Trust but Verify" 的能力。
-
-#### B. 生成式 UI 组件 (Generative Widgets)
-系统根据**意图识别 (Intent Classification)** 动态渲染组件，而非死板的表单。
-
-| 意图 (Intent) | 渲染组件 (Widget) | 交互描述 |
-| :--- | :--- | :--- |
-| `scheduling` | **Calendar Grid** | 可交互的时间槽选择器，点击生成会议邀请。 |
-| `relationship` | **Network Graph** | 力导向图，展示联系人之间的亲密度与互动历史。 |
-| `decision` | **Approval Card** | 大号的 `[批准]` / `[驳回]` 按钮，附带风险分析摘要。 |
-| `draft` | **Rich Editor** | 预填充好草稿的富文本编辑器，支持 AI 润色。 |
-
-### 2.7 移动端体验：随身第二大脑 (Mobile Experience - v0.8.0+)
-**核心理念**: **"Lazy Intelligence" (懒人智能)**。零摩擦，高上下文，能够不打字就不打字。
-
-#### A. 语音交互 (Voice Commander)
-*   **场景**: 开车、行走、灵感闪现。
-*   **交互**: 
-    *   用户发送语音: "帮我查一下上周五王总发的关于合同的邮件。"
-    *   EchoMind (Whisper + RAG): "王总在周五的邮件确认了合同金额为 50 万，但要求修改付款条款。" (支持语音回复 + 文字卡片)。
-*   **灵感捕手 (Thought Catcher)**: "提醒我下周一跟进设计图" -> 自动同步至 Web 端 Tasks 列表。
-
-#### B. 智能协同 (Intelligent Collaboration)
-*   **日程守门人 (Calendar Gatekeeper)**:
-    *   用户转发聊天记录: "明天下午三点有空吗？"
-    *   EchoMind: "❌ 冲突 (财务会)。✅ 建议: 明天上午 10:00 或下午 4:30。"
-    *   操作: 用户点击 `[复制建议]`。
-*   **一键决策 (One-Touch Decision)**:
-    *   推送卡片: [审批请求: 预算超支 10%]
-    *   交互: 直接点击 `[ 🟢 批准 ]` 或 `[ 🔴 驳回 (AI 拟稿) ]`，无需打开 App。
-
-#### D. 微信公众号 (WeChat Companion) - "随身助理"
-*   **主动推送 (Push Notification)**：
-    *   **目的**: 通过微信即时触达用户，传递关键信息，无需打开邮件客户端。
-    *   **设计**: 模板消息卡片，包含 "今日决策日报"、"风险预警" 等，点击直达详情。
-    *   **核心元素**: 标题、摘要、时间、查看详情链接、快捷操作按钮。
-*   **语音指令 (Voice AI)**：
-    *   **目的**: 驾车/移动场景下的免手操作。
-    *   **设计**: 用户发送语音，系统返回 "文字 + 语音" 回复。
-    *   **场景**: "查一下未读邮件" -> 播放摘要；"提醒我回电话" -> 创建任务。
-*   **指令交互 (Command & Control)**：
-    *   **目的**: 允许用户通过微信快速处理任务或获取信息。
-    *   **设计**: 任务卡片下方操作按钮（[批准]/[拒绝]/[稍后提醒]）。
-    *   **核心元素**: 任务卡片、操作按钮。
+### 3.3 可观测性 (Observability)
+*   **结构化日志 (Structured Logging)**: 使用 `Zap` 库，每条日志包含 `request_id`, `user_id`, `duration` 等关键字段。
+*   **健康检查 (Health Checks)**: `GET /api/v1/health` 接口用于检查数据库等下游服务的连通性。
+*   **核心指标 (Metrics)**: 通过日志记录关键操作延迟，如搜索、Embedding API 调用等。
 
 ---
 
-## 3. 安全架构设计
+## 4. 后端架构详解 (Detailed Backend Architecture)
 
-### 3.1 零信任数据保护
-*   **传输加密**：强制 TLS 1.2+。
-*   **静态加密 (At Rest)**：
-    *   数据库卷加密。
-    *   敏感字段（如 OAuth Token, 邮箱密码）使用应用级加密（AES-GCM），密钥由 KMS 管理。
-*   **内存即焚**：邮件正文在内存中 AI 分析完成后立即 GC，不落盘。
+### 4.1 Web 框架与核心库
+*   **Web Framework**: `Gin` - 高性能 Web 框架。
+*   **Configuration**: `Viper` - 支持 YAML 与环境变量，实现灵活配置。
+*   **ORM**: `GORM` - 与 PostgreSQL 交互。
 
-### 3.2 认证与鉴权
-*   **用户认证**：JWT (JSON Web Token)。
-*   **邮箱授权**：
-    *   **OAuth2** (推荐)：只保存 Access/Refresh Token，不保存密码。
-    *   **App Password**：对于仅支持密码的邮箱，强制要求使用应用专用密码，并加密存储。
+### 4.2 邮件同步引擎 (Mail Sync Engine)
+*   **技术**: Go (Goroutines 高并发优势)。
+*   **连接**: 维护 IMAP IDLE 连接池实现新邮件实时推送，对不支持的邮箱采用自适应轮询。
+*   **数据与隐私**: **不存储邮件正文**。仅存储元数据和 AI 生成的摘要。查看详情时实时从用户邮箱服务器拉取。
+*   **垃圾邮件过滤**: 内置基于规则的过滤器 (`internal/spam`)，在 AI 处理前预筛邮件。
 
----
+### 4.3 AI 分析管道 (AI Pipeline)
+*   **架构**: 采用**异步事件驱动**模式，确保邮件同步不被 AI 推理阻塞。
+*   **异步任务系统**: `Asynq` (基于 Redis)，用于处理所有耗时的 AI 分析任务。
+*   **AI 引擎设计**:
+    *   **设计模式**: 采用**适配器 (Adapter)** 和**工厂 (Factory)** 模式，轻松切换不同 AI 服务商。
+    *   **核心接口**: `pkg/ai/AIProvider` 定义了 `Summarize`, `Classify`, `StreamChat` 等标准方法。
+    *   **RAG 支持**: 使用 OpenAI `text-embedding-3-small` 模型生成向量，存储于 `pgvector`。
+    *   **流式响应 (Streaming)**: 基于 **SSE (Server-Sent Events)** 实现大语言模型回复的实时文本流。
 
-## 4. 技术栈推荐
-
-*   **Backend**: Go (Gin/Chi) - 高性能，适合 IO 密集型（IMAP）。
-*   **Frontend**: React (Next.js) + Tailwind CSS - 构建现代 SaaS 界面。
-*   **Database**: PostgreSQL (主库) + Redis (缓存/队列) + Chroma (向量)。
-*   **Infrastructure**: Docker + Kubernetes (k8s) - 方便扩缩容。
-*   **AI Model**: DeepSeek-V3 (高性价比) 或 GPT-4o-mini (快速推理)。
-
----
-
-## 5. 关键挑战与解决方案
-
-| 挑战 | 解决方案 |
-| :--- | :--- |
-| **IMAP 兼容性地狱** | 建立“邮箱适配层”，针对 Gmail, Outlook, QQ, 163 维护不同的解析规则和 Quirks 模式。 |
-| **大邮件/附件处理** | 仅下载正文 (Text/HTML)，跳过大附件；或按需流式下载附件进行 OCR 分析。 |
-| **AI 成本控制** | 采用“三级过滤漏斗” (规则 -> 小模型 -> 大模型)。 |
-| **实时性** | IMAP IDLE + WebHook 推送。 |
+### 4.4 安全架构 (Security)
+*   **零信任数据保护**:
+    *   **传输加密**: 强制 TLS 1.2+。
+    *   **静态加密**: 数据库卷加密，敏感字段（OAuth Token）应用级加密。
+    *   **内存即焚**: 邮件正文在内存中处理，不落盘。
+*   **认证与鉴权**:
+    *   **用户认证**: JWT。
+    *   **邮箱授权**: 优先 OAuth2，对仅支持密码的邮箱，强制使用应用专用密码并加密存储。
 
 ---
 
-## 6. 核心交互逻辑详述 (Detailed Specifications)
+## 5. 数据层架构 (Data Layer Architecture)
 
-### 6.1 任务与邮件双向联动机制
-*   **任务完成联动 (Smart Prompt)**:
-    *   当用户在 EchoMind 标记任务完成时，Web 端弹出 Toast 提示：“是否归档原邮件？”
-    *   支持用户设置“不再询问，默认归档”。
-*   **外部操作独立 (Data Independence)**:
-    *   用户在外部邮箱客户端（Outlook/Gmail）对邮件的删除、归档、移动操作，**不影响** EchoMind 中已生成的任务状态。任务数据独立维护。
-*   **用户反馈循环 (Feedback Loop)**:
-    *   当用户修改 AI 自动提取的任务字段（如截止时间、任务标题）时，系统保留 `(AI_Original, User_Modified)` 数据对。
-    *   界面显示“已人工校准”标记。数据用于后续模型微调。
+### 5.1 PostgreSQL 规范
+*   **命名约定**: 表和字段均采用 `snake_case`。
+*   **主键 (ID)**: 优先使用 `UUID`。
+*   **核心实体**:
+    *   `emails`: 存储邮件元数据、摘要、情感、紧急度等 AI洞察。
+    *   `contacts`: 存储联系人信息及互动频率等统计数据。
+    *   `users`, `organizations`, `teams`: 用于多租户体系。
+    *   **向量存储**: 使用 `pgvector` 扩展，将向量数据与元数据存储在同一数据库中，简化架构。
 
-### 6.2 微信集成与账号体系
-*   **绑定流程 (Web First)**:
-    *   Web 端生成绑定二维码 -> 用户微信扫码 -> 公众号推送确认卡片 -> 用户点击确认 -> 绑定成功。
-*   **多邮箱管理 (Primary Context)**:
-    *   Web 端设置“主邮箱”。微信端默认展示主邮箱的日报和任务。
-    *   支持指令（如 `switch work`）或菜单切换上下文。
-    *   **风险预警例外**：任何邮箱的高风险邮件均会实时推送，不受当前上下文限制。
+### 5.2 Redis 键空间规范
+*   `asynq:{queue}`: Asynq 任务队列。
+*   `echomind:cache:{key}`: 通用业务缓存。
+*   `echomind:fsm:{user_id}`: 微信多轮对话状态机。
 
-### 6.3 AI 触发与隐私架构
-*   **智能分析漏斗 (3-Stage Funnel)**:
-    1.  **规则层 (Go)**: 过滤黑名单、系统通知 (`no-reply`)、垃圾邮件。
-    2.  **分类层 (Small Model)**: 快速识别邮件意图（重要 vs 普通通知）。
-    3.  **深度层 (LLM)**: 仅对“重要”邮件进行深度推理（摘要、任务提取、情绪分析）。
-*   **零信任隐私存储 (Dataless Architecture)**:
-    *   **正文不落盘**: 数据库仅存储元数据 (`Subject`, `From`, `Date`) 和 AI 生成的结构化数据。
-    *   **实时透传**: 用户查看详情时，后端实时从邮件服务器拉取正文。
-*   **附件策略 (Metadata First)**:
-    *   默认仅记录附件元数据。
-    *   仅在 AI 分析判断需要（如“见附件合同”）时临时下载分析并立即删除。
-    *   用户点击附件时实时下载/转发。
+---
+
+## 6. 多租户架构 (Multi-Tenancy Architecture)
+
+系统支持多租户，允许用户创建和管理组织 (Organization) 与团队 (Team)。
+
+*   **数据模型**:
+    *   `Organization`: 最高层级单元，拥有资源和成员。
+    *   `OrganizationMember`: 关联用户与组织，定义角色（Owner, Admin, Member）。
+    *   `Team`: 组织内的子单元。
+*   **资源所有权**: 资源（如 `EmailAccount`）通过 `UserID`, `TeamID`, 或 `OrganizationID` 区分归属。
+*   **上下文切换**: 前端通过 HTTP Header `X-Organization-ID` 传递当前组织上下文，后端据此进行数据隔离。
+
+---
+
+## 7. 前端与客户端架构 (Frontend & Client Architecture)
+
+### 7.1 客户端策略
+采用 **"Web 优先, 移动端适配"** 策略。
+*   **Web (主要)**: 全功能 Next.js 应用，提供复杂数据可视化与任务管理。
+*   **移动端 (次要)**:
+    *   **响应式 Web**: 深度优化的移动端网页，提供核心功能。
+    *   **微信公众号**: 作为通知和轻量级语音交互入口，**暂不开发原生 App 或小程序**。
+
+### 7.2 认证与新手引导 (Authentication & Onboarding)
+*   **统一认证模块 (`/auth`)**: 左右分栏布局，`LoginForm` / `RegisterForm` 无刷新切换。
+*   **新手引导向导 (`/onboarding`)**: 多步骤向导，包含**角色选择**和**智能邮箱连接**。`detectProvider` 函数将根据邮箱后缀自动匹配 `mail_providers.ts` 中的预设，简化配置。
+
+### 7.3 主界面：智能中枢 (Main Interface: Intelligence Canvas)
+*   **布局架构**: 采用 **Source-Canvas-Detail** 三栏流体布局。
+*   **生成式 UI 组件**: 根据用户意图动态渲染，如 `Calendar Grid` (日程安排)、`Network Graph` (人脉关系) 等。
+
+### 7.4 设置中心 (Settings Center)
+*   **结构**: 使用 Radix UI `Tabs` 组件重构，分栏管理个人资料、邮箱连接、通知等。
+
+### 7.5 微信与移动端体验 (WeChat & Mobile Experience)
+*   **语音指挥官**: 通过微信语音完成查邮件、建任务等操作。
+*   **智能协同**: 提供“日程守门人”、“一键决策”等功能，在微信端完成轻量级工作流。
+
+---
+
+## 8. 开发与集成 (Development & Integration)
+
+### 8.1 API 接口
+*   **核心约定**: 详细 API 文档请参考: `docs/api.md`。
+*   **关键接口**:
+
+| Method | Endpoint | 用途 |
+|:---|:---|:---|
+| `POST` | `/api/v1/auth/login` | 用户登录 (返回 `user.has_account`) |
+| `POST` | `/api/v1/settings/account`| 保存/更新邮箱连接 |
+| `PATCH`| `/api/v1/users/me` | 更新用户信息 (如 `role`) |
+
+### 8.2 测试策略
+*   **单元测试 (Jest)**: 测试前端工具函数 (`detectProvider`) 和表单验证逻辑。
+*   **E2E 测试 (Playwright)**:
+    *   `auth-flow.spec.ts`: 验证登录/注册/重定向流程。
+    *   `onboarding-flow.spec.ts`: 模拟新用户从注册到进入主页的全过程。
+
+---
+
+## 9. (附录) 开发任务清单 (Appendix: Development Task List)
+
+### Phase 0: 准备工作
+1.  [ ] 创建 `frontend/src/lib/constants/mail_providers.ts`。
+2.  [ ] 在 `en.json` 和 `zh.json` 中添加 i18n Key。
+
+### Phase 1: 认证页面 (`/auth`)
+1.  [ ] 创建 `AuthLayout` 及 `LoginForm` / `RegisterForm` 组件。
+2.  [ ] 编写 `tests/e2e/auth-flow.spec.ts`。
+
+### Phase 2: 引导流程 (`/onboarding`)
+1.  [ ] 创建 `onboarding` store (Zustand)。
+2.  [ ] 开发 `RoleSelector` 及 `SmartMailboxForm` 组件。
+3.  [ ] 编写 `tests/e2e/onboarding-flow.spec.ts`。
+
+### Phase 3: 设置与路由守卫
+1.  [ ] 更新 `AuthGuard`，未配置用户强制跳转 `/onboarding`。
+2.  [ ] 使用 Tabs 布局重构设置页面。
