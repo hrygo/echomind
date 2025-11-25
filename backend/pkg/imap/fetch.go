@@ -47,10 +47,10 @@ func FetchEmails(c *client.Client, mailbox string, limit int) ([]EmailData, erro
 	// Fetch Envelope and Body
 	section := &imap.BodySectionName{} // Empty section name means the whole message body (RFC 822 style)
 	items := []imap.FetchItem{imap.FetchEnvelope, section.FetchItem()}
-	
+
 	messages := make(chan *imap.Message, limit)
 	done := make(chan error, 1)
-	
+
 	go func() {
 		done <- c.Fetch(seqset, items, messages)
 	}()
@@ -60,15 +60,15 @@ func FetchEmails(c *client.Client, mailbox string, limit int) ([]EmailData, erro
 		if msg.Envelope == nil {
 			continue
 		}
-        
-        sender := "Unknown"
-        if len(msg.Envelope.From) > 0 {
-            sender = msg.Envelope.From[0].Address()
-        }
+
+		sender := "Unknown"
+		if len(msg.Envelope.From) > 0 {
+			sender = msg.Envelope.From[0].Address()
+		}
 
 		// Extract Body
 		var bodyText, bodyHTML string
-		
+
 		// We requested only one body section, so we can just take the first one found.
 		// This avoids potential issues with BodySectionName pointer equality in tests/mocks.
 		var r imap.Literal
@@ -76,7 +76,7 @@ func FetchEmails(c *client.Client, mailbox string, limit int) ([]EmailData, erro
 			r = literal
 			break
 		}
-		
+
 		if r != nil {
 			bodyText, bodyHTML, _ = ExtractBody(r)
 		}

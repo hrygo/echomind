@@ -27,7 +27,7 @@ func NewBatchProcessor(provider Provider, bufferSize int, flushTimeout time.Dura
 		bufferSize:   bufferSize,
 		flushTimeout: flushTimeout,
 		flushCh:      make(chan struct{}, 1),
-		stopCh:      make(chan struct{}),
+		stopCh:       make(chan struct{}),
 	}
 
 	// 启动后台 goroutine 处理批量写入
@@ -158,7 +158,7 @@ type AsyncBatchProcessor struct {
 
 // BatchJob 批量作业
 type BatchJob struct {
-	Entries []*LogEntry
+	Entries  []*LogEntry
 	Callback func(error)
 }
 
@@ -321,12 +321,12 @@ func (b *Batches) GetStats() map[string]interface{} {
 type SmartBatchProcessor struct {
 	*Batches
 	currentWorkers int
-	minWorkers      int
-	maxWorkers      int
-	adjustInterval  time.Duration
-	lastAdjust      time.Time
-	totalProcessed  int64
-	mu              sync.Mutex
+	minWorkers     int
+	maxWorkers     int
+	adjustInterval time.Duration
+	lastAdjust     time.Time
+	totalProcessed int64
+	mu             sync.Mutex
 }
 
 // NewSmartBatchProcessor 创建智能批量处理器
@@ -336,7 +336,7 @@ func NewSmartBatchProcessor(provider Provider, minWorkers, maxWorkers int) *Smar
 		minWorkers:     minWorkers,
 		maxWorkers:     maxWorkers,
 		currentWorkers: minWorkers,
-		adjustInterval:  30 * time.Second,
+		adjustInterval: 30 * time.Second,
 		lastAdjust:     time.Now(),
 	}
 

@@ -173,7 +173,7 @@ func (h *InsightHandler) calculateManagerStats(ctx context.Context, userID strin
 // calculateExecutiveOverview calculates executive overview for a user
 func (h *InsightHandler) calculateExecutiveOverview(ctx context.Context, userID string) (*ExecutiveOverviewResponse, error) {
 	overview := &ExecutiveOverviewResponse{
-		TotalConnections:        1247,
+		TotalConnections:       1247,
 		ActiveProjects:         8,
 		TeamCollaborationScore: 92,
 		ProductivityTrend:      "upward",
@@ -321,7 +321,7 @@ type ManagerStatsResponse struct {
 }
 
 type ExecutiveOverviewResponse struct {
-	TotalConnections        int    `json:"totalConnections"`
+	TotalConnections       int    `json:"totalConnections"`
 	ActiveProjects         int    `json:"activeProjects"`
 	TeamCollaborationScore int    `json:"teamCollaborationScore"`
 	ProductivityTrend      string `json:"productivityTrend"`

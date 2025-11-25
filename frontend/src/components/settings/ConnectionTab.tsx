@@ -69,35 +69,35 @@ export function ConnectionTab() {
   return (
     <div className="space-y-8">
       {/* Mailbox Connection Section */}
-      <div>
-        <h3 className="text-xl font-bold text-slate-800">{t('settings.connection.title')}</h3>
-        <p className="text-slate-700 text-sm mt-1">{t('settings.connectedMailboxDesc')}</p>
+      <div className="border-b border-border pb-4">
+        <h3 className="text-2xl font-semibold text-foreground">{t('settings.connection.title')}</h3>
+        <p className="text-muted-foreground text-sm mt-2">{t('settings.connectedMailboxDesc')}</p>
       </div>
 
       {isLoadingStatus ? (
-        <div className="flex items-center gap-3 text-slate-500">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <Loader2 className="w-5 h-5 animate-spin" />
           {t('common.loading')}
         </div>
       ) : accountStatus?.has_account ? (
-        <div className="space-y-4 bg-slate-50 p-6 rounded-lg border border-slate-100">
+        <div className="space-y-4 bg-muted/50 p-6 rounded-lg border border-border">
           <div className="flex items-center gap-3">
             {accountStatus.is_connected ? (
               <CheckCircle2 className="w-6 h-6 text-green-600" />
             ) : (
-              <AlertCircle className="w-6 h-6 text-red-600" />
+              <AlertCircle className="w-6 h-6 text-destructive" />
             )}
             <div>
-              <p className="text-lg font-semibold text-slate-800">
+              <p className="text-lg font-semibold text-foreground">
                 {accountStatus.email} - {accountStatus.is_connected ? t('settings.connection.statusConnected') : t('settings.connection.statusDisconnected')}
               </p>
               {accountStatus.last_sync_at && (
-                <p className="text-sm text-slate-600 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {t('settings.connection.lastSynced').replace('{time}', new Date(accountStatus.last_sync_at).toLocaleString())}
                 </p>
               )}
               {accountStatus.error_message && (
-                <p className="text-sm text-red-500 mt-1">Error: {accountStatus.error_message}</p>
+                <p className="text-sm text-destructive mt-1">Error: {accountStatus.error_message}</p>
               )}
             </div>
           </div>
@@ -106,14 +106,14 @@ export function ConnectionTab() {
             <button
               onClick={handleSyncNow}
               disabled={isSyncing}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-sm font-medium shadow-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isSyncing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               {isSyncing ? t('settings.connection.syncing') : t('settings.connection.syncNow')}
             </button>
             <button
               onClick={() => setShowReconfigModal(true)}
-              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              className="px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
             >
               {t('settings.connection.reconfigure')}
             </button>
@@ -138,20 +138,20 @@ export function ConnectionTab() {
                   }
                 );
               }}
-              className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+              className="px-4 py-2 bg-card border border-destructive/50 text-destructive rounded-lg text-sm font-medium hover:bg-destructive/10 transition-colors"
             >
               {t('settings.connection.disconnect')}
             </button>
           </div>
         </div>
       ) : (
-        <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200 text-slate-500">
+        <div className="text-center py-8 bg-muted/50 rounded-lg border border-dashed border-border text-muted-foreground">
           <Mail className="w-12 h-12 mx-auto mb-4" />
-          <p className="text-lg font-semibold mb-2">{t('settings.connection.notConfigured')}</p>
+          <p className="text-lg font-semibold mb-2 text-foreground">{t('settings.connection.notConfigured')}</p>
           <p className="text-sm mb-4">{t('settings.connection.configureMailboxDesc')}</p>
           <button
             onClick={() => setShowReconfigModal(true)}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-base font-semibold shadow-md transition-colors"
+            className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-base font-semibold shadow-md transition-colors"
           >
             {t('settings.connection.configureMailbox')}
           </button>

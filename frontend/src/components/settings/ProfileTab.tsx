@@ -70,13 +70,13 @@ export function ProfileTab() {
   return (
     <div className="space-y-8">
       {/* Profile Section */}
-      <div>
-        <h3 className="text-xl font-bold text-slate-800">{t('settings.profile.title')}</h3>
-        <p className="text-slate-700 text-sm mt-1">{t('settings.accountDesc')}</p>
+      <div className="border-b border-border pb-4">
+        <h3 className="text-2xl font-semibold text-foreground">{t('settings.profile.title')}</h3>
+        <p className="text-muted-foreground text-sm mt-2">{t('settings.accountDesc')}</p>
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-2xl font-bold text-slate-700 relative group cursor-pointer overflow-hidden">
+        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-foreground relative group cursor-pointer overflow-hidden">
           {user?.name ? user.name[0].toUpperCase() : user?.email?.[0].toUpperCase()}
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <Camera className="w-6 h-6 text-white" />
@@ -84,7 +84,7 @@ export function ProfileTab() {
         </div>
         <button
           onClick={() => alert("Avatar upload not implemented yet")} // Placeholder for avatar upload
-          className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+          className="px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
         >
           {t('settings.profile.uploadAvatar')}
         </button>
@@ -92,32 +92,32 @@ export function ProfileTab() {
 
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">{t('settings.firstName')}</label>
+          <label className="text-sm font-medium text-foreground">{t('settings.firstName')}</label>
           <input
             type="text"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-background text-foreground"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">{t('settings.lastName')}</label>
+          <label className="text-sm font-medium text-foreground">{t('settings.lastName')}</label>
           <input
             type="text"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-background text-foreground"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
           />
         </div>
         <div className="col-span-2 space-y-2">
-          <label className="text-sm font-medium text-slate-700">{t('settings.loginEmail')}</label>
+          <label className="text-sm font-medium text-foreground">{t('settings.loginEmail')}</label>
           <input
             type="email"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
+            className="w-full px-3 py-2 border border-border rounded-lg bg-muted text-muted-foreground cursor-not-allowed"
             value={user?.email || ''}
             disabled
           />
-          <p className="text-sm text-slate-700">{t('settings.loginEmailDesc')}</p>
+          <p className="text-sm text-muted-foreground">{t('settings.loginEmailDesc')}</p>
         </div>
       </div>
 
@@ -139,8 +139,8 @@ export function ProfileTab() {
           disabled={isLoading}
           className={`px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-colors ${
             isLoading
-              ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : 'bg-primary hover:bg-primary/90 text-primary-foreground'
           }`}
         >
           {isLoading ? (

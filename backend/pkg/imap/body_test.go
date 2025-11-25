@@ -24,7 +24,7 @@ func TestExtractBody(t *testing.T) {
 
 	// 2. Parse it using go-message (simulating what we'd do with the IMAP literal)
 	r := strings.NewReader(rawEmail)
-	
+
 	// 3. Call ExtractBody (SUT)
 	textBody, htmlBody, err := ExtractBody(r)
 	if err != nil {
@@ -58,4 +58,3 @@ func TestExtractBody_Simple(t *testing.T) {
 		t.Errorf("Expected 'Simple body.', got '%s'", textBody)
 	}
 }
-

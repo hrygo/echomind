@@ -92,13 +92,13 @@ type LogEntry struct {
 
 // ContextInfo 上下文信息
 type ContextInfo struct {
-	TraceID    string            `json:"trace_id,omitempty"`
-	SpanID     string            `json:"span_id,omitempty"`
-	UserID     string            `json:"user_id,omitempty"`
-	RequestID  string            `json:"request_id,omitempty"`
-	SessionID  string            `json:"session_id,omitempty"`
-	OrgID      string            `json:"org_id,omitempty"`
-	Extra      map[string]string `json:"extra,omitempty"`
+	TraceID   string            `json:"trace_id,omitempty"`
+	SpanID    string            `json:"span_id,omitempty"`
+	UserID    string            `json:"user_id,omitempty"`
+	RequestID string            `json:"request_id,omitempty"`
+	SessionID string            `json:"session_id,omitempty"`
+	OrgID     string            `json:"org_id,omitempty"`
+	Extra     map[string]string `json:"extra,omitempty"`
 }
 
 // SourceInfo 源码信息
@@ -115,7 +115,7 @@ type Config struct {
 	Production bool  `yaml:"production"`
 
 	// 输出配置
-	Output    OutputConfig `yaml:"output"`
+	Output OutputConfig `yaml:"output"`
 
 	// 上下文配置
 	Context ContextConfig `yaml:"context"`
@@ -138,18 +138,18 @@ type OutputConfig struct {
 
 // FileOutputConfig 文件输出配置
 type FileOutputConfig struct {
-	Enabled   bool   `yaml:"enabled"`
-	Path      string `yaml:"path"`
-	MaxSize   int    `yaml:"max_size"`    // MB
-	MaxAge    int    `yaml:"max_age"`     // days
-	MaxBackups int   `yaml:"max_backups"`
-	Compress  bool   `yaml:"compress"`
+	Enabled    bool   `yaml:"enabled"`
+	Path       string `yaml:"path"`
+	MaxSize    int    `yaml:"max_size"` // MB
+	MaxAge     int    `yaml:"max_age"`  // days
+	MaxBackups int    `yaml:"max_backups"`
+	Compress   bool   `yaml:"compress"`
 }
 
 // ConsoleOutputConfig 控制台输出配置
 type ConsoleOutputConfig struct {
 	Enabled bool   `yaml:"enabled"`
-	Format  string `yaml:"format"`  // "json" | "console"
+	Format  string `yaml:"format"` // "json" | "console"
 	Color   bool   `yaml:"color"`
 }
 
@@ -164,16 +164,16 @@ type ContextConfig struct {
 
 // SamplingConfig 采样配置
 type SamplingConfig struct {
-	Enabled    bool  `yaml:"enabled"`
-	Rate       int   `yaml:"rate"`        // 采样率，每秒日志数
-	Burst      int   `yaml:"burst"`       // 突发采样数
-	Levels     []Level `yaml:"levels"`    // 需要采样的级别
+	Enabled bool    `yaml:"enabled"`
+	Rate    int     `yaml:"rate"`   // 采样率，每秒日志数
+	Burst   int     `yaml:"burst"`  // 突发采样数
+	Levels  []Level `yaml:"levels"` // 需要采样的级别
 }
 
 // ProviderConfig 日志提供者配置
 type ProviderConfig struct {
 	Name     string                 `yaml:"name"`
-	Type     string                 `yaml:"type"`     // "elasticsearch", "loki", "splunk", etc.
+	Type     string                 `yaml:"type"` // "elasticsearch", "loki", "splunk", etc.
 	Enabled  bool                   `yaml:"enabled"`
 	Settings map[string]interface{} `yaml:"settings"`
 }

@@ -54,8 +54,12 @@ func (s *TaskService) ListTasks(ctx context.Context, userID uuid.UUID, status, p
 		query = query.Where("priority = ?", priority)
 	}
 
-	if limit <= 0 { limit = 20 } // Default limit
-	if offset < 0 { offset = 0 } // Default offset
+	if limit <= 0 {
+		limit = 20
+	} // Default limit
+	if offset < 0 {
+		offset = 0
+	} // Default offset
 
 	// Order by DueDate (ascending) and CreatedAt (descending) for consistency
 	if err := query.Limit(limit).Offset(offset).Order("due_date ASC, created_at DESC").Find(&tasks).Error; err != nil {
@@ -104,8 +108,12 @@ func (s *TaskService) UpdateTask(ctx context.Context, userID, taskID uuid.UUID, 
 	}
 
 	// Apply updates dynamically
-	if title, ok := updateData["title"].(string); ok { task.Title = title }
-	if description, ok := updateData["description"].(string); ok { task.Description = description }
+	if title, ok := updateData["title"].(string); ok {
+		task.Title = title
+	}
+	if description, ok := updateData["description"].(string); ok {
+		task.Description = description
+	}
 	if priority, ok := updateData["priority"].(string); ok {
 		switch model.TaskPriority(priority) {
 		case model.TaskPriorityHigh, model.TaskPriorityMedium, model.TaskPriorityLow:
@@ -116,7 +124,9 @@ func (s *TaskService) UpdateTask(ctx context.Context, userID, taskID uuid.UUID, 
 	}
 	if dueDateStr, ok := updateData["due_date"].(string); ok && dueDateStr != "" {
 		dueDate, err := time.Parse(time.RFC3339, dueDateStr)
-		if err != nil { return fmt.Errorf("invalid due_date format: %w", err) }
+		if err != nil {
+			return fmt.Errorf("invalid due_date format: %w", err)
+		}
 		task.DueDate = &dueDate
 	} else if dueDateStr == "" { // Allow clearing due date
 		task.DueDate = nil

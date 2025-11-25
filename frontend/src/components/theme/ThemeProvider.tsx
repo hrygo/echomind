@@ -28,15 +28,16 @@ export function ThemeProvider({
   storageKey = 'vite-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  // Initialize theme from localStorage with lazy initial state
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return defaultTheme;
 
-  // Initialize theme from localStorage on mount
-  useEffect(() => {
     const stored = localStorage.getItem(storageKey) as Theme;
     if (stored && ['light', 'dark', 'system'].includes(stored)) {
-      setTheme(stored);
+      return stored;
     }
-  }, [storageKey]);
+    return defaultTheme;
+  });
 
   useEffect(() => {
     // Only run on client side

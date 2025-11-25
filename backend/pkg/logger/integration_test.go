@@ -26,12 +26,12 @@ func TestFileOutput(t *testing.T) {
 		Production: true,
 		Output: OutputConfig{
 			File: FileOutputConfig{
-				Enabled:   true,
-				Path:      logPath,
-				MaxSize:   1, // 1MB
-				MaxAge:    1, // 1 day
+				Enabled:    true,
+				Path:       logPath,
+				MaxSize:    1, // 1MB
+				MaxAge:     1, // 1 day
 				MaxBackups: 3,
-				Compress:  false,
+				Compress:   false,
 			},
 			Console: ConsoleOutputConfig{
 				Enabled: false,
@@ -366,12 +366,12 @@ func TestLogRotation(t *testing.T) {
 		Production: true,
 		Output: OutputConfig{
 			File: FileOutputConfig{
-				Enabled:   true,
-				Path:      logPath,
-				MaxSize:   1, // 1MB - 非常小以便测试轮转
-				MaxAge:    1,
+				Enabled:    true,
+				Path:       logPath,
+				MaxSize:    1, // 1MB - 非常小以便测试轮转
+				MaxAge:     1,
 				MaxBackups: 2,
-				Compress:  false,
+				Compress:   false,
 			},
 			Console: ConsoleOutputConfig{
 				Enabled: false,

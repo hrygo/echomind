@@ -2,14 +2,14 @@ server:
   port: 8080
   environment: development  # Options: development, production
   jwt:
-    secret: "your-jwt-secret-here-change-in-production"
+    secret: "your-jwt-secret-here"  # Replace with your actual JWT secret
     expiration_hours: 72
 
 database:
-  dsn: "host=localhost user=your_db_user password=your_db_password dbname=echomind_db port=5432 sslmode=disable"
+  dsn: "host=localhost user=user password=password dbname=echomind_db port=5432 sslmode=disable"
 
 security:
-  encryption_key: "your-64-char-hex-encryption-key-here-change-in-production-32bytes" # 64-char hex key (32 bytes)
+  encryption_key: "your-64-character-hex-encryption-key-here-replace-with-actual-key" # Replace with your actual 64-char hex key
 
 redis:
   addr: "localhost:6380"
@@ -30,7 +30,7 @@ ai:
   # 指定由哪个注册的 Provider 负责具体的任务。
   active_services:
     chat: "deepseek"         # Responsible for Summarize, Classify, Draft Reply
-    embedding: "gemini_flash"   # Responsible for Vector Embeddings (RAG)
+    embedding: "siliconflow"   # Responsible for Vector Embeddings (RAG)
 
   chunk_size: 1000  # Max tokens per chunk for RAG processing
 
@@ -39,35 +39,48 @@ ai:
   # ---------------------------------------------------------------------------
   # Register any OpenAI-compatible or Google Gemini provider here.
   # No code changes required to add new vendors.
+  # Embedding model dimensions must be configured accurately for database schema
   providers:
-    
+
     # [Use Case: Cost-Effective & Smart]
     # DeepSeek via OpenAI Protocol
     deepseek:
       protocol: "openai"
       settings:
         base_url: "https://api.deepseek.com/v1"
-        api_key: "sk-your-deepseek-api-key-here"
+        api_key: "your-deepseek-api-key-here"  # Replace with your DeepSeek API key
         model: "deepseek-chat"
+
+    # siliconflow
+    siliconflow:
+      protocol: "openai"
+      settings:
+        base_url: "https://api.siliconflow.cn/v1"
+        api_key: "your-siliconflow-api-key-here"  # Replace with your SiliconFlow API key
+        model: "Qwen/Qwen3-235B-A22B"
+        embedding_model: "Pro/BAAI/bge-m3"
+        embedding_dimensions: 1024  # BGE-M3 outputs 1024 dimensions
 
     # [Use Case: Industry Standard]
     # Official OpenAI
     openai_small:
       protocol: "openai"
       settings:
-        api_key: "sk-your-openai-api-key-here"
+        api_key: "your-openai-api-key-here"  # Replace with your OpenAI API key
         # This provider supports both Chat and Embedding
         model: "gpt-4o-mini"
         embedding_model: "text-embedding-3-small"
+        embedding_dimensions: 1536  # text-embedding-3-small outputs 1536 dimensions
 
     # [Use Case: Multimodal Native]
     # Google Gemini
     gemini_flash:
       protocol: "gemini"
       settings:
-        api_key: "your-google-ai-studio-api-key-here"
-        model: "gemini-2.0-flash-exp"
+        api_key: "your-gemini-api-key-here"  # Replace with your Google Gemini API key
+        model: "gemini-2.5-flash"
         embedding_model: "text-embedding-004"
+        embedding_dimensions: 768  # text-embedding-004 outputs 768 dimensions
 
     # [Use Case: Local Privacy / Offline]
     # Ollama (running locally)
@@ -79,6 +92,7 @@ ai:
         api_key: "ollama" # Any string works
         model: "llama3"
         embedding_model: "nomic-embed-text"
+        embedding_dimensions: 768  # nomic-embed-text outputs 768 dimensions
 
     # [Use Case: Other OpenAI-Compatible Vendors]
     # Example: Moonshot / Kimi, SiliconFlow, Groq
@@ -86,13 +100,14 @@ ai:
       protocol: "openai"
       settings:
         base_url: "https://api.moonshot.cn/v1"
-        api_key: "your-moonshot-api-key-here"
+        api_key: "your-moonshot-api-key-here"  # Replace with your Moonshot API key
         model: "moonshot-v1-8k"
 
     # [Use Case: Testing]
     mock:
       protocol: "mock"
-      settings: {}
+      settings:
+        embedding_dimensions: 1024  # Mock uses 1024 dimensions by default
 
   # ---------------------------------------------------------------------------
   # 3. Prompt Templates (提示词模板)
@@ -101,7 +116,7 @@ ai:
   # 1. Output JSON strictly where requested.
   # 2. Do not change the JSON keys (summary, category, etc.) as the backend parses them.
   prompts:
-    
+
     # Input: Email Content (Text)
     # Output: JSON Structure
     summary: |
@@ -112,7 +127,7 @@ ai:
       - "urgency": 确定紧急程度：'High' (高), 'Medium' (中), 'Low' (低)。请返回英文紧急程度名称。
       - "action_items": 提取邮件中的待办事项或行动项列表（中文）。如果没有，返回空数组。
       - "smart_actions": 分析邮件中是否包含具体的会议邀请、任务截止日期或需要添加到日历/待办的事项。如果是，请生成一个对象数组。支持的类型：'calendar_event' (日历事件), 'create_task' (创建任务)。如果没有，返回空数组。
-      
+
       Smart Action 格式示例：
       ```json
       {

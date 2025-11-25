@@ -17,9 +17,9 @@ func TestContactService_UpdateContactFromEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to connect to db: %v", err)
 	}
-	        if err := db.AutoMigrate(&model.Contact{}); err != nil {
-	                t.Fatalf("Failed to auto migrate database: %v", err)
-	        }
+	if err := db.AutoMigrate(&model.Contact{}); err != nil {
+		t.Fatalf("Failed to auto migrate database: %v", err)
+	}
 	svc := service.NewContactService(db)
 	now := time.Now()
 	ctx := context.Background()

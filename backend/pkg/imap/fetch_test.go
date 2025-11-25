@@ -11,10 +11,10 @@ func TestFetchEmails(t *testing.T) {
 	// 1. Setup Mock Server with MockBackend
 	be := &MockBackend{}
 	s := server.New(be)
-	s.Addr = "127.0.0.1:3001" 
+	s.Addr = "127.0.0.1:3001"
 	s.AllowInsecureAuth = true
-	
-go func() {
+
+	go func() {
 		_ = s.ListenAndServe()
 	}()
 	defer s.Close()
@@ -25,11 +25,11 @@ go func() {
 	if err != nil {
 		t.Fatalf("Connect failed: %v", err)
 	}
-	        defer func() {
-	                if err := c.Logout(); err != nil {
-	                        t.Errorf("Error logging out from IMAP: %v", err)
-	                }
-	        }()
+	defer func() {
+		if err := c.Logout(); err != nil {
+			t.Errorf("Error logging out from IMAP: %v", err)
+		}
+	}()
 	// 3. Call FetchEmails
 	emails, err := FetchEmails(c, "INBOX", 10)
 	if err != nil {

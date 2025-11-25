@@ -27,7 +27,7 @@ export default function DashboardLayout({
           {/* Page Content */}
           <div className="flex-1 overflow-y-auto scroll-smooth">
             {/* Added a container to constrain width on large screens for better readability */}
-            <div className="max-w-7xl mx-auto p-4 md:p-8 w-full">
+            <div className="max-w-7xl mx-auto p-6 md:p-10 w-full">
               {children}
             </div>
           </div>

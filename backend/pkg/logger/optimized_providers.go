@@ -341,8 +341,8 @@ type LokiPayload struct {
 
 // LokiStream Loki 流
 type LokiStream struct {
-	Stream map[string]string   `json:"stream"`
-	Values [][]interface{}     `json:"values"`
+	Stream map[string]string `json:"stream"`
+	Values [][]interface{}   `json:"values"`
 }
 
 // Ping 健康检查
@@ -366,12 +366,12 @@ func (p *OptimizedLokiProvider) Close() error {
 // OptimizedSplunkProvider 优化的 Splunk 提供者
 type OptimizedSplunkProvider struct {
 	*Batches
-	url     string
-	token   string
-	index   string
-	source  string
-	client  *http.Client
-	mu      sync.RWMutex
+	url    string
+	token  string
+	index  string
+	source string
+	client *http.Client
+	mu     sync.RWMutex
 }
 
 // NewOptimizedSplunkProvider 创建优化的 Splunk 提供者
@@ -449,9 +449,9 @@ func (p *OptimizedSplunkProvider) WriteBatch(entries []*LogEntry) error {
 // writeSingle 写入单个条目
 func (p *OptimizedSplunkProvider) writeSingle(entry *LogEntry) error {
 	event := map[string]interface{}{
-		"time": entry.Timestamp.Unix(),
-		"index": p.index,
-		"source": p.source,
+		"time":       entry.Timestamp.Unix(),
+		"index":      p.index,
+		"source":     p.source,
 		"sourcetype": "json",
 		"event": map[string]interface{}{
 			"level":   entry.Level.String(),

@@ -17,6 +17,6 @@ type User struct {
 	UpdatedAt    time.Time
 
 	// Associations
-	Memberships []OrganizationMember `gorm:"foreignKey:UserID"`
-	TeamMemberships []TeamMember `gorm:"foreignKey:UserID"`
+	Memberships     []OrganizationMember `gorm:"foreignKey:UserID"`
+	TeamMemberships []TeamMember         `gorm:"foreignKey:UserID"`
 }

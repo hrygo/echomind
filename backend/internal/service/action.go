@@ -44,7 +44,7 @@ func (s *ActionService) ApproveEmail(ctx context.Context, userID, emailID uuid.U
 	// Or better: Add `IsArchived` field?
 	// The plan said: "Approve/Dismiss".
 	// Let's stick to Soft Delete for "Done" to get it out of the way.
-	
+
 	return s.db.WithContext(ctx).Delete(&email).Error
 }
 
@@ -53,7 +53,7 @@ func (s *ActionService) SnoozeEmail(ctx context.Context, userID, emailID uuid.UU
 	result := s.db.WithContext(ctx).Model(&model.Email{}).
 		Where("id = ? AND user_id = ?", emailID, userID).
 		Update("snoozed_until", until)
-	
+
 	if result.Error != nil {
 		return result.Error
 	}
@@ -68,7 +68,7 @@ func (s *ActionService) DismissEmail(ctx context.Context, userID, emailID uuid.U
 	result := s.db.WithContext(ctx).Model(&model.Email{}).
 		Where("id = ? AND user_id = ?", emailID, userID).
 		Update("urgency", "Low")
-		
+
 	if result.Error != nil {
 		return result.Error
 	}

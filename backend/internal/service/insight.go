@@ -13,8 +13,8 @@ type Node struct {
 	ID    uuid.UUID `json:"id"`
 	Label string    `json:"label"` // Display name for the node (e.g., contact's email or name)
 	// Add other relevant contact attributes here if needed for visualization
-	InteractionCount int       `json:"interactionCount"`
-	AvgSentiment     float64   `json:"avgSentiment"`
+	InteractionCount int     `json:"interactionCount"`
+	AvgSentiment     float64 `json:"avgSentiment"`
 }
 
 // Link represents a connection between two nodes (contacts).
@@ -57,8 +57,8 @@ func (s *DefaultInsightService) GetNetworkGraph(ctx context.Context, userID uuid
 	nodes := make([]Node, len(contacts))
 	for i, contact := range contacts {
 		nodes[i] = Node{
-			ID:    contact.ID,
-			Label: contact.Email, // Use email as label for now, can be improved to use Name if available
+			ID:               contact.ID,
+			Label:            contact.Email, // Use email as label for now, can be improved to use Name if available
 			InteractionCount: contact.InteractionCount,
 			AvgSentiment:     contact.AvgSentiment,
 		}
@@ -67,6 +67,6 @@ func (s *DefaultInsightService) GetNetworkGraph(ctx context.Context, userID uuid
 	// For now, links are empty. This can be extended later.
 	return &NetworkGraph{
 		Nodes: nodes,
-		Links: []Link{}, 
+		Links: []Link{},
 	}, nil
 }

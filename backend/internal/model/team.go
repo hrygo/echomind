@@ -17,6 +17,6 @@ type Team struct {
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
 
 	// Associations
-	Organization Organization   `gorm:"foreignKey:OrganizationID"`
-	Members      []TeamMember   `gorm:"foreignKey:TeamID"`
+	Organization Organization `gorm:"foreignKey:OrganizationID"`
+	Members      []TeamMember `gorm:"foreignKey:TeamID"`
 }

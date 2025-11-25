@@ -12,12 +12,12 @@ func DefaultConfig() *Config {
 		Production: false,
 		Output: OutputConfig{
 			File: FileOutputConfig{
-				Enabled:   false,
-				Path:      "logs/app.log",
-				MaxSize:   100,
-				MaxAge:    7,
+				Enabled:    false,
+				Path:       "logs/app.log",
+				MaxSize:    100,
+				MaxAge:     7,
 				MaxBackups: 3,
-				Compress:  true,
+				Compress:   true,
 			},
 			Console: ConsoleOutputConfig{
 				Enabled: true,

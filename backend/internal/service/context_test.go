@@ -24,7 +24,7 @@ func TestMatchContexts(t *testing.T) {
 	// 1. Create Contexts
 	kw := []string{"Project Alpha", "Q4 Budget"}
 	sh := []string{"boss@example.com"}
-	
+
 	input := model.ContextInput{
 		Name:         "Important Project",
 		Keywords:     kw,

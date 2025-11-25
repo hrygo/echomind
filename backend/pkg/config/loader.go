@@ -25,10 +25,10 @@ func Load(path string) (*configs.Config, error) {
 		return nil, fmt.Errorf("unable to decode into struct: %w", err)
 	}
 
-	// Helper: If using viper elsewhere, we might want to return the viper instance too, 
+	// Helper: If using viper elsewhere, we might want to return the viper instance too,
 	// but mapping to struct is cleaner.
 	// For now, we rely on the struct.
-	
+
 	// Inject global Viper fallback if needed by other packages (legacy support)
 	// viper.Reset()
 	// viper.MergeConfigMap(vip.AllSettings())

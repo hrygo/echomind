@@ -7,10 +7,16 @@ import (
 	"github.com/hrygo/echomind/pkg/ai"
 )
 
-type MockProvider struct{}
+type MockProvider struct {
+	dimensions int
+}
 
 func NewProvider() *MockProvider {
-	return &MockProvider{}
+	return &MockProvider{dimensions: 1024} // Default to 1024 dimensions
+}
+
+func NewProviderWithDimensions(dimensions int) *MockProvider {
+	return &MockProvider{dimensions: dimensions}
 }
 
 // AIProvider implementation
@@ -64,7 +70,7 @@ func (m *MockProvider) StreamChat(ctx context.Context, messages []ai.Message, ch
 		default:
 			// Simulate network delay
 			time.Sleep(50 * time.Millisecond)
-			
+
 			chunk := ai.ChatCompletionChunk{
 				ID: "mock-id",
 				Choices: []ai.Choice{
@@ -83,10 +89,8 @@ func (m *MockProvider) StreamChat(ctx context.Context, messages []ai.Message, ch
 // EmbeddingProvider implementation
 
 func (m *MockProvider) Embed(ctx context.Context, text string) ([]float32, error) {
-	// Return a random vector of dimension 1536 (OpenAI standard) or similar
-	// For simplicity, we return a small vector, but in real scenarios it should match the DB dimension.
-	// Assuming 1536 dims for compatibility.
-	vec := make([]float32, 1536)
+	// Return a vector with the configured dimensions
+	vec := make([]float32, m.dimensions)
 	for i := range vec {
 		vec[i] = 0.01 // Dummy value
 	}
@@ -102,4 +106,8 @@ func (m *MockProvider) EmbedBatch(ctx context.Context, texts []string) ([][]floa
 		results = append(results, vec)
 	}
 	return results, nil
+}
+
+func (m *MockProvider) GetDimensions() int {
+	return m.dimensions
 }

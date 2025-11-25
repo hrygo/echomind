@@ -21,16 +21,20 @@ import (
 type MockEmbeddingProvider struct{}
 
 func (m *MockEmbeddingProvider) Embed(ctx context.Context, text string) ([]float32, error) {
-	// Return a random normalized vector of dimension 1536
-	return randomVector(1536), nil
+	// Return a random normalized vector of dimension 1024 (matching current config)
+	return randomVector(1024), nil
 }
 
 func (m *MockEmbeddingProvider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
 	var results [][]float32
 	for range texts {
-		results = append(results, randomVector(1536))
+		results = append(results, randomVector(1024))
 	}
 	return results, nil
+}
+
+func (m *MockEmbeddingProvider) GetDimensions() int {
+	return 1024
 }
 
 func randomVector(dim int) []float32 {
@@ -128,14 +132,15 @@ func cleanupBenchmarkData(db *gorm.DB, userID uuid.UUID) {
 
 func BenchmarkSearch_100(b *testing.B)  { benchmarkSearch(b, 100) }
 func BenchmarkSearch_1000(b *testing.B) { benchmarkSearch(b, 1000) }
+
 // func BenchmarkSearch_10000(b *testing.B) { benchmarkSearch(b, 10000) } // Uncomment for heavier tests
 
 func benchmarkSearch(b *testing.B, count int) {
 	db := getBenchmarkDB(b)
-	
+
 	// Ensure vector extension
 	db.Exec("CREATE EXTENSION IF NOT EXISTS vector")
-	
+
 	// Ensure schema
 	if err := db.AutoMigrate(&model.Email{}, &model.EmailEmbedding{}); err != nil {
 		b.Fatalf("Failed to migrate: %v", err)

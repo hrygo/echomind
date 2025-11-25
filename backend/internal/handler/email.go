@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/hrygo/echomind/internal/middleware"
-	"github.com/hrygo/echomind/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/hrygo/echomind/internal/middleware"
+	"github.com/hrygo/echomind/internal/model"
 	"gorm.io/gorm"
 )
 

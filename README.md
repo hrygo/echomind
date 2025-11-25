@@ -132,8 +132,12 @@ Our development is organized into clear, feature-driven phases. Here are our mos
 
 For detailed architecture and product specifications, please refer to our key documents:
 
-- **[📚 Unified Product & Technical Architecture](docs/product-design.md)**
-- **[🗺️ Product Roadmap](docs/product-roadmap.md)**
+- **[🏗️ Technical Architecture](docs/architecture.md)** - System design, vector search, AI services, and performance optimization
+- **[📚 API Documentation](docs/api.md)** - Complete REST API reference with OpenAPI 3.0 specification
+- **[📄 Unified Product & Technical Architecture](docs/product-design.md)** - Product design and user experience
+- **[🗺️ Product Roadmap](docs/product-roadmap.md)** - Development roadmap and milestones
+- **[📋 Product Requirements](docs/prd.md)** - Product requirements document
+- **[🔧 Backend Configuration](backend/configs/README.md)** - Development setup and configuration guide
 
 ---
 

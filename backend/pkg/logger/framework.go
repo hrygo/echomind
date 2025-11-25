@@ -15,14 +15,14 @@ import (
 
 // zapLoggerImpl 基于 zap 的日志实现
 type zapLoggerImpl struct {
-	config   *Config
-	zap      *zap.Logger
-	sugar    *zap.SugaredLogger
+	config    *Config
+	zap       *zap.Logger
+	sugar     *zap.SugaredLogger
 	providers []Provider
 
 	// 采样控制
-	sampler  *sampler
-	mu       sync.RWMutex
+	sampler *sampler
+	mu      sync.RWMutex
 }
 
 // NewLogger 创建新的日志实例

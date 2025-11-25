@@ -4,7 +4,7 @@ import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { QueryProvider } from "@/components/providers/QueryClientProvider";
 import { ToastContainer } from "@/components/ui/ToastContainer";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProviderNext";
 
 export const metadata: Metadata = {
   title: "EchoMind",
@@ -23,7 +23,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider
+          attribute="class"
           defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
           <QueryProvider>
             <LanguageProvider>

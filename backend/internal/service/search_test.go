@@ -84,7 +84,7 @@ func TestSearchService_Search_Integration(t *testing.T) {
 	// We simulate this by inserting a vector and querying with a similar one.
 
 	// Create specific vector
-	embeddingVec := make([]float32, 768)
+	embeddingVec := make([]float32, 1024)
 	embeddingVec[0] = 1.0
 
 	embedding := model.EmailEmbedding{
@@ -117,5 +117,13 @@ func (m *MockFixedEmbedder) Embed(ctx context.Context, text string) ([]float32, 
 }
 
 func (m *MockFixedEmbedder) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
-	return [][]float32{m.Vector}, nil
+	var results [][]float32
+	for range texts {
+		results = append(results, m.Vector)
+	}
+	return results, nil
+}
+
+func (m *MockFixedEmbedder) GetDimensions() int {
+	return len(m.Vector)
 }

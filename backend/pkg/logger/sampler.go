@@ -7,11 +7,11 @@ import (
 
 // sampler 采样控制器
 type sampler struct {
-	config  SamplingConfig
-	counts  map[Level]int
-	mu      sync.RWMutex
-	ticker  *time.Ticker
-	stopCh  chan struct{}
+	config SamplingConfig
+	counts map[Level]int
+	mu     sync.RWMutex
+	ticker *time.Ticker
+	stopCh chan struct{}
 }
 
 // newSampler 创建新的采样器

@@ -22,14 +22,14 @@ func ExtractBody(r io.Reader) (string, string, error) {
 	// But mail.Reader is designed for reading parts.
 	// If it's not multipart, NextPart might return EOF?
 	// Let's check the root content type.
-	
+
 	// Note: mail.CreateReader automatically handles the outer structure.
 	// If the message is NOT multipart, it might not return parts via NextPart.
 	// We should check if we can read from mr directly if parts loop is empty?
 	// Actually, go-message's mail.Reader abstracts this.
 	// "If the message is not a multipart message, NextPart returns the message itself as the first part." (checking docs mentally).
 	// If not, we need to check mr.Header.
-	
+
 	// Iterate over parts
 	for {
 		p, err := mr.NextPart()
@@ -41,8 +41,8 @@ func ExtractBody(r io.Reader) (string, string, error) {
 		}
 
 		contentType := p.Header.Get("Content-Type")
-        // fmt.Printf("DEBUG: Part Content-Type: %s\n", contentType)
-		
+		// fmt.Printf("DEBUG: Part Content-Type: %s\n", contentType)
+
 		if strings.Contains(strings.ToLower(contentType), "text/plain") {
 			if _, err := io.Copy(&textBody, p.Body); err != nil {
 				return "", "", err

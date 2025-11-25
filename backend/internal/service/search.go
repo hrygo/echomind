@@ -36,17 +36,25 @@ type SearchResult struct {
 }
 
 type SearchFilters struct {
-	Sender     string
-	StartDate  *time.Time
-	EndDate    *time.Time
-	ContextID  *uuid.UUID
+	Sender    string
+	StartDate *time.Time
+	EndDate   *time.Time
+	ContextID *uuid.UUID
 }
 
 func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query string, filters SearchFilters, limit int) ([]SearchResult, error) {
-	// 1. Generate embedding for the query
-	queryVector, err := s.embedder.Embed(ctx, query)
+	// 1. Generate embedding for the query with timeout
+	embeddingCtx, cancel := context.WithTimeout(ctx, 20*time.Second) // 20 second timeout for embedding
+	defer cancel()
+
+	queryVector, err := s.embedder.Embed(embeddingCtx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to embed query: %w", err)
+	}
+
+	// 2. Validate query vector dimensions (database layer handles conversion)
+	if err := s.validateVectorDimensions(queryVector, "search query"); err != nil {
+		return nil, err
 	}
 
 	// 2. Perform vector search using raw SQL
@@ -127,14 +135,22 @@ func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *mod
 		return nil
 	}
 
-	// 3. Generate Embeddings
-	vectors, err := s.embedder.EmbedBatch(ctx, chunks)
+	// 3. Generate Embeddings with timeout
+	embeddingCtx, cancel := context.WithTimeout(ctx, 45*time.Second) // 45 second timeout for batch embedding
+	defer cancel()
+
+	vectors, err := s.embedder.EmbedBatch(embeddingCtx, chunks)
 	if err != nil {
 		return fmt.Errorf("failed to generate embeddings: %w", err)
 	}
 
 	if len(vectors) != len(chunks) {
 		return fmt.Errorf("mismatch between chunks (%d) and vectors (%d)", len(chunks), len(vectors))
+	}
+
+	// 3. Validate vector dimensions
+	if err := s.validateVectorDimensions(vectors[0], "email embedding generation"); err != nil {
+		return err
 	}
 
 	// 4. Save to DB
@@ -158,5 +174,29 @@ func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *mod
 		}
 	}
 
+	return nil
+}
+
+// validateVectorDimensions validates that the vector dimensions are reasonable for processing
+func (s *SearchService) validateVectorDimensions(vector []float32, context string) error {
+	// Database schema supports up to 1536 dimensions with automatic conversion
+	// This validation ensures vectors are reasonable for processing
+	maxSupportedDimensions := 1536
+	minSupportedDimensions := 1
+
+	vectorLength := len(vector)
+
+	if vectorLength > maxSupportedDimensions {
+		return fmt.Errorf("embedding dimension too large for %s: %d dimensions (max: %d)",
+			context, vectorLength, maxSupportedDimensions)
+	}
+
+	if vectorLength < minSupportedDimensions {
+		return fmt.Errorf("embedding dimension too small for %s: %d dimensions (min: %d)",
+			context, vectorLength, minSupportedDimensions)
+	}
+
+	// Database layer handles automatic padding/truncation in BeforeCreate hook
+	// No need to validate exact dimensions here
 	return nil
 }

@@ -10,7 +10,11 @@
         "developing": "is under development",
         "confirm": "Confirm",
         "cancel": "Cancel",
-        "goToSettings": "Go to Settings"
+        "goToSettings": "Go to Settings",
+        "primary": "Primary",
+        "secondary": "Secondary",
+        "outline": "Outline",
+        "ghost": "Ghost"
     },
     "sidebar": {
         "intelligence": "Intelligence",
@@ -120,10 +124,10 @@
         "noGraphData": "No network data available."
     },
     "settings": {
-        "title": "Settings Center",
+        "title": "Settings",
         "notifications": "Notifications",
-        "security": "Security",
-        "billing": "Billing",
+        "security": "Security & Privacy",
+        "billing": "Subscription & Billing",
         "appearance": "Appearance",
         "accountDesc": "Manage your profile and contact info.",
         "firstName": "First Name",
@@ -157,6 +161,31 @@
             "disconnectSuccess": "Mailbox disconnected successfully",
             "disconnectFailed": "Failed to disconnect account",
             "mailboxConfigDesc": "Configure your mailbox to start syncing"
+        },
+        "appearance": {
+            "title": "Appearance",
+            "description": "Personalize your EchoMind experience",
+            "themeSelector": "Theme Selection",
+            "currentTheme": "Current Theme",
+            "themes": {
+                "light": "Light Theme",
+                "lightDesc": "Bright and clean interface style",
+                "dark": "Dark Theme",
+                "darkDesc": "Eye-friendly dark interface for focus",
+                "system": "Follow System",
+                "systemDesc": "Automatically follow system theme settings"
+            },
+            "additionalSettings": "Additional Settings",
+            "fontSize": "Font Size",
+            "fontSizeDesc": "Adjust interface text size",
+            "animations": "Animations",
+            "animationsDesc": "Interface transitions and micro-interactions",
+            "enable": "Enable",
+            "preview": "Theme Preview",
+            "previewCard": "Sample Card",
+            "previewDesc": "This is a card style preview in current theme",
+            "previewMuted": "Muted Style",
+            "previewMutedDesc": "This is a secondary element style preview"
         }
     },
     "emailDetail": {

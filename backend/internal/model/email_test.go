@@ -17,7 +17,7 @@ func TestEmailModel(t *testing.T) {
 	}
 
 	// 1. Test AutoMigrate (Schema Check)
-    // This will fail if model.Email is undefined
+	// This will fail if model.Email is undefined
 	if err := db.AutoMigrate(&model.Email{}); err != nil {
 		t.Fatalf("Failed to migrate: %v", err)
 	}

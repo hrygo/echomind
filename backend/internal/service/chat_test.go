@@ -74,7 +74,7 @@ func TestChatService_StreamChat(t *testing.T) {
 	mockAI := new(MockAIProvider)
 	mockSearch := new(MockContextSearcher)
 	mockEmail := new(MockEmailRetriever)
-	
+
 	chatService := NewChatService(mockAI, mockSearch, mockEmail)
 
 	userID := uuid.New()
@@ -129,9 +129,9 @@ func TestChatService_StreamChat(t *testing.T) {
 				return false
 			}
 			systemPrompt := msgs[0].Content
-			return msgs[0].Role == "system" && 
-			       strings.Contains(systemPrompt, "Test Email") && 
-				   strings.Contains(systemPrompt, "This is a test email content")
+			return msgs[0].Role == "system" &&
+				strings.Contains(systemPrompt, "Test Email") &&
+				strings.Contains(systemPrompt, "This is a test email content")
 		}), (chan<- ai.ChatCompletionChunk)(ch)).Return(nil).Run(func(args mock.Arguments) {
 			chArg := args.Get(2).(chan<- ai.ChatCompletionChunk)
 			chArg <- ai.ChatCompletionChunk{ID: "1", Choices: []ai.Choice{{Index: 0, Delta: ai.DeltaContent{Content: "Summary..."}}}}

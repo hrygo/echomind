@@ -41,3 +41,8 @@ func Get(protocol string) (FactoryFunc, error) {
 	}
 	return factory, nil
 }
+
+// GetEmbeddingProvider returns the factory function for embedding-specific provider protocol.
+func GetEmbeddingProvider(protocol string) (FactoryFunc, error) {
+	return Get(protocol)
+}

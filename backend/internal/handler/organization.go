@@ -96,7 +96,7 @@ func (h *OrganizationHandler) GetMembers(c *gin.Context) {
 
 // InviteMember handles POST /api/v1/orgs/:id/invites
 func (h *OrganizationHandler) InviteMember(c *gin.Context) {
-	// TODO: Implement actual email invitation. 
+	// TODO: Implement actual email invitation.
 	// For now, we'll just add the user if they exist by email (Mock flow for testing)
 	var req struct {
 		Email string `json:"email" binding:"required"`
@@ -109,6 +109,6 @@ func (h *OrganizationHandler) InviteMember(c *gin.Context) {
 	// Logic: Find user by email, if exists, add to org.
 	// This belongs in Service layer properly, but putting here for rapid prototype
 	// Need to expose UserService or move logic to OrganizationService
-	
+
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "invitation not implemented yet"})
 }

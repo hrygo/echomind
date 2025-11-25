@@ -14,9 +14,9 @@ type AIDraftRequest struct {
 }
 
 type AIReplyRequest struct {
-	EmailID string  `json:"emailId" binding:"required"`
-	Tone    string  `json:"tone,omitempty"`    // "professional", "casual", "friendly", etc.
-	Context string  `json:"context,omitempty"`  // "brief", "detailed", etc.
+	EmailID string `json:"emailId" binding:"required"`
+	Tone    string `json:"tone,omitempty"`    // "professional", "casual", "friendly", etc.
+	Context string `json:"context,omitempty"` // "brief", "detailed", etc.
 }
 
 type AIReplyResponse struct {

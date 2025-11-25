@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/hrygo/echomind/internal/middleware"
 	"github.com/hrygo/echomind/internal/service"
-	"github.com/gin-gonic/gin"
 )
 
 // SyncHandler handles email synchronization requests.

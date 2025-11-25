@@ -20,33 +20,33 @@ const (
 type OpportunityStatus string
 
 const (
-	OpportunityStatusNew       OpportunityStatus = "new"
-	OpportunityStatusActive    OpportunityStatus = "active"
-	OpportunityStatusWon       OpportunityStatus = "won"
-	OpportunityStatusLost      OpportunityStatus = "lost"
-	OpportunityStatusOnHold    OpportunityStatus = "on_hold"
+	OpportunityStatusNew    OpportunityStatus = "new"
+	OpportunityStatusActive OpportunityStatus = "active"
+	OpportunityStatusWon    OpportunityStatus = "won"
+	OpportunityStatusLost   OpportunityStatus = "lost"
+	OpportunityStatusOnHold OpportunityStatus = "on_hold"
 )
 
 // Opportunity represents a business opportunity
 type Opportunity struct {
-	ID          string           `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-	Title       string           `gorm:"not null;size:500" json:"title"`
-	Description string           `gorm:"type:text" json:"description"`
-	Company     string           `gorm:"not null;size:200" json:"company"`
-	Value       string           `gorm:"size:100" json:"value"`
-	Type        OpportunityType  `gorm:"type:opportunity_type;default:'buying'" json:"type"`
-	Status      OpportunityStatus `gorm:"type:opportunity_status;default:'new'" json:"status"`
-	Confidence  int              `gorm:"check:confidence >= 0 AND confidence <= 100" json:"confidence"`
-	UserID      string           `gorm:"type:uuid;not null;index" json:"user_id"`
-	TeamID      string           `gorm:"type:uuid;index" json:"team_id"`
-	OrgID       string           `gorm:"type:uuid;index" json:"org_id"`
-	SourceEmailID *string         `gorm:"type:uuid" json:"source_email_id"`
-	CreatedAt   time.Time        `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt   time.Time        `gorm:"autoUpdateTime" json:"updated_at"`
-	DeletedAt   gorm.DeletedAt   `gorm:"index" json:"-"`
+	ID            string            `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
+	Title         string            `gorm:"not null;size:500" json:"title"`
+	Description   string            `gorm:"type:text" json:"description"`
+	Company       string            `gorm:"not null;size:200" json:"company"`
+	Value         string            `gorm:"size:100" json:"value"`
+	Type          OpportunityType   `gorm:"type:opportunity_type;default:'buying'" json:"type"`
+	Status        OpportunityStatus `gorm:"type:opportunity_status;default:'new'" json:"status"`
+	Confidence    int               `gorm:"check:confidence >= 0 AND confidence <= 100" json:"confidence"`
+	UserID        string            `gorm:"type:uuid;not null;index" json:"user_id"`
+	TeamID        string            `gorm:"type:uuid;index" json:"team_id"`
+	OrgID         string            `gorm:"type:uuid;index" json:"org_id"`
+	SourceEmailID *string           `gorm:"type:uuid" json:"source_email_id"`
+	CreatedAt     time.Time         `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt     time.Time         `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt     gorm.DeletedAt    `gorm:"index" json:"-"`
 
 	// Associations
-	Contacts   []Contact   `gorm:"many2many:opportunity_contacts;" json:"contacts,omitempty"`
+	Contacts   []Contact  `gorm:"many2many:opportunity_contacts;" json:"contacts,omitempty"`
 	Activities []Activity `gorm:"foreignKey:OpportunityID" json:"activities,omitempty"`
 }
 
@@ -72,12 +72,12 @@ func (OpportunityContact) TableName() string {
 
 // Activity represents activities related to an opportunity
 type Activity struct {
-	ID            string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	OpportunityID string `gorm:"type:uuid;not null;index"`
-	UserID        string `gorm:"type:uuid;not null"`
-	Type          string `gorm:"size:50"` // e.g., "call", "email", "meeting", "note"
-	Title         string `gorm:"not null;size:200"`
-	Description   string `gorm:"type:text"`
+	ID            string    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	OpportunityID string    `gorm:"type:uuid;not null;index"`
+	UserID        string    `gorm:"type:uuid;not null"`
+	Type          string    `gorm:"size:50"` // e.g., "call", "email", "meeting", "note"
+	Title         string    `gorm:"not null;size:200"`
+	Description   string    `gorm:"type:text"`
 	CreatedAt     time.Time `gorm:"autoCreateTime"`
 	UpdatedAt     time.Time `gorm:"autoUpdateTime"`
 }

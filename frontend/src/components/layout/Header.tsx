@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { Bell, Settings, LogOut, Globe, Sparkles, Menu } from "lucide-react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useUIStore } from "@/store/ui";
 import { CopilotWidget } from "@/components/copilot/CopilotWidget";
@@ -96,7 +95,6 @@ export function Header() {
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4 ml-auto shrink-0">
-                    <ThemeToggle />
                     <button
                         onClick={toggleLanguage}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"

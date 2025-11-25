@@ -3,7 +3,7 @@ package imap
 import (
 	"crypto/tls"
 	"log"
-	
+
 	"github.com/emersion/go-imap/client"
 )
 
@@ -26,19 +26,19 @@ func Connect(addr, username, password string, useTLS bool) (*client.Client, erro
 		return nil, err
 	}
 
-	        if err := c.Login(username, password); err != nil {
-	                // If login fails, try to logout (best effort), then return the login error.
-	                if logoutErr := c.Logout(); logoutErr != nil {
-	                        log.Printf("Error logging out from IMAP after login failure: %v", logoutErr)
-	                }
-	                return nil, err
-	        }
+	if err := c.Login(username, password); err != nil {
+		// If login fails, try to logout (best effort), then return the login error.
+		if logoutErr := c.Logout(); logoutErr != nil {
+			log.Printf("Error logging out from IMAP after login failure: %v", logoutErr)
+		}
+		return nil, err
+	}
 	return c, nil
 }
 
 // ConnectWithConfig allows passing a custom TLS config if needed (e.g. for self-signed certs)
 func ConnectWithConfig(addr, username, password string, tlsConfig *tls.Config) (*client.Client, error) {
-    // MVP extension: Not needed yet, but good to have in mind.
-    // adhering to YAGNI, I won't implement it yet.
-    return nil, nil 
+	// MVP extension: Not needed yet, but good to have in mind.
+	// adhering to YAGNI, I won't implement it yet.
+	return nil, nil
 }

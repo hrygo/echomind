@@ -10,7 +10,11 @@
         "developing": "正在开发中",
         "confirm": "确认",
         "cancel": "取消",
-        "goToSettings": "前往设置"
+        "goToSettings": "前往设置",
+        "primary": "主要",
+        "secondary": "次要",
+        "outline": "轮廓",
+        "ghost": "幽灵"
     },
     "sidebar": {
         "intelligence": "智能驾驶舱",
@@ -121,16 +125,16 @@
     },
     "settings": {
         "title": "设置中心",
-        "notifications": "通知偏好",
-        "security": "安全设置",
-        "billing": "订阅管理",
-        "appearance": "界面外观",
+        "notifications": "通知设置",
+        "security": "安全与隐私",
+        "billing": "订阅与计费",
+        "appearance": "外观设置",
         "accountDesc": "管理您的个人资料和联系方式。",
+        "connectedMailboxDesc": "管理与 EchoMind 同步的邮箱账号。",
         "firstName": "名字",
         "lastName": "姓氏",
         "loginEmail": "登录邮箱",
         "loginEmailDesc": "用于登录 EchoMind 的账号邮箱",
-        "connectedMailboxDesc": "管理与 EchoMind 同步的邮箱账号。",
         "profile": {
             "title": "个人资料设置",
             "uploadAvatar": "上传新头像",
@@ -157,6 +161,31 @@
             "disconnectSuccess": "邮箱连接已断开",
             "disconnectFailed": "断开连接失败",
             "mailboxConfigDesc": "配置您的邮箱以开始同步"
+        },
+        "appearance": {
+            "title": "界面外观",
+            "description": "个性化您的 EchoMind 使用体验",
+            "themeSelector": "主题选择",
+            "currentTheme": "当前主题",
+            "themes": {
+                "light": "浅色主题",
+                "lightDesc": "明亮清爽的界面风格",
+                "dark": "深色主题",
+                "darkDesc": "护眼专注的深色界面",
+                "system": "跟随系统",
+                "systemDesc": "自动跟随系统主题设置"
+            },
+            "additionalSettings": "其他设置",
+            "fontSize": "字体大小",
+            "fontSizeDesc": "调整界面文字大小",
+            "animations": "动画效果",
+            "animationsDesc": "界面过渡动画和微交互",
+            "enable": "启用",
+            "preview": "主题预览",
+            "previewCard": "示例卡片",
+            "previewDesc": "这是当前主题下的卡片样式展示",
+            "previewMuted": "柔和样式",
+            "previewMutedDesc": "这是次要元素的样式展示"
         }
     },
     "emailDetail": {

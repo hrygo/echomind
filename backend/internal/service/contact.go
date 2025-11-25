@@ -26,13 +26,14 @@ func (s *ContactService) UpdateContactFromEmail(ctx context.Context, userID uuid
 	// Upsert contact:
 	// If exists, increment count and update last interacted time.
 	// If new, create.
-	
-			// Note: GORM's Upsert support varies by DB. For Postgres:
-		return s.db.WithContext(ctx).Create(&model.Contact{
-			ID:               uuid.New(), // Explicitly set ID
-			UserID:           &userID,
-			Email:            email,
-			Name:             name,
-			InteractionCount: 1,
-			LastInteractedAt: interactionTime,
-		}).Error}
+
+	// Note: GORM's Upsert support varies by DB. For Postgres:
+	return s.db.WithContext(ctx).Create(&model.Contact{
+		ID:               uuid.New(), // Explicitly set ID
+		UserID:           &userID,
+		Email:            email,
+		Name:             name,
+		InteractionCount: 1,
+		LastInteractedAt: interactionTime,
+	}).Error
+}
