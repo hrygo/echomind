@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuthStore } from '@/store/auth';
 
 type ViewType = "executive" | "manager" | "dealmaker";
 
@@ -13,9 +14,10 @@ interface AIBriefingHeaderProps {
 export function AIBriefingHeader({ currentView, userName }: AIBriefingHeaderProps) {
   const { t } = useLanguage();
   const { data: userProfile, isLoading: profileLoading } = useUserProfile();
+  const currentUser = useAuthStore(state => state.user);
 
-  // Use actual user name from API or fallback to provided userName
-  const actualUserName = userProfile?.name || userName || "演示用户";
+  // Prioritize real user data from auth store, fallback to API profile, then provided userName
+  const actualUserName = currentUser?.name || userProfile?.name || userName || "演示用户";
   
   // Mock data logic - in real app this comes from API
   const hour = new Date().getHours();

@@ -130,7 +130,7 @@ export function Header() {
                                 {user?.name?.[0].toUpperCase() || 'D'}
                             </div>
                             <div className="hidden lg:block text-left">
-                                <p className="text-sm font-semibold text-slate-700 leading-none">{user?.name || '演示用户'}</p>
+                                <p className="text-sm font-semibold text-slate-700 leading-none">{user?.name || '请登录'}</p>
                                 <p className="text-[10px] text-slate-400 font-medium mt-1">{t('sidebar.freePlan')}</p>
                             </div>
                         </button>
