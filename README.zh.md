@@ -130,8 +130,10 @@ docker-compose -f deploy/docker-compose.prod.yml up -d
 
 我们的开发围绕清晰的、以功能为导向的阶段进行。以下是我们最近完成和正在进行的阶段：
 
-- ✅ **v0.9.2-4 (智能中枢 / Neural Nexus)**: 上下文桥梁、全能入口、生成式UI组件。
-- 🚧 **v0.9.5+ (微信操作系统 / WeChat OS)**: 语音指令、一键决策、日历守护、晨间简报。
+- ✅ **v0.9.8 (Dashboard集成阶段二)**: 完整主题系统、商机管理、增强的Dashboard API集成
+- ✅ **v0.9.6-7 (Dashboard集成阶段一)**: SmartFeed AI功能、任务管理、基础Dashboard组件
+- ✅ **v0.9.2-4 (智能中枢 / Neural Nexus)**: 上下文桥梁、全能入口、生成式UI组件
+- 🚧 **v0.9.9+ (微信操作系统 / WeChat OS)**: 语音指令、一键决策、日历守护、晨间简报
 
 有关详细的架构和产品规格，请参阅我们的主要文档：
 
