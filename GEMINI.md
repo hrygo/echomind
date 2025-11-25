@@ -21,7 +21,7 @@
 
 - 🚀 **Delivery (Frequent & Versioned)**
     - **Commits**: Atomic, frequent, use conventional prefixes (`feat:`, `fix:`).
-    - **Versioning**: Tag releases often. Update version in `Makefile`, `package.json`, `backend/cmd/main.go`.
+    - **Versioning**: Tag releases often. Update version in `Makefile`, `package.json`, `backend/cmd/main.go`, `README.md`, `README-zh.md`, `docs/openapi.yaml`, `docs/*.md`.
 
 - 🏗️ **Architecture & Code**
     - **Refactor**: Use `grep` to find all usages. Keep old APIs temporarily for core changes.

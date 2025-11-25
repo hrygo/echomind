@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { QueryProvider } from "@/components/providers/QueryClientProvider";
 import { ToastContainer } from "@/components/ui/ToastContainer";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "EchoMind",
@@ -15,13 +17,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-gray-100 text-gray-900 antialiased">
-        <LanguageProvider>
-          {children}
-          <ToastContainer />
-          <ConfirmDialog />
-        </LanguageProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className="antialiased"
+        suppressHydrationWarning
+      >
+        <ThemeProvider
+          defaultTheme="system"
+        >
+          <QueryProvider>
+            <LanguageProvider>
+              {children}
+              <ToastContainer />
+              <ConfirmDialog />
+            </LanguageProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

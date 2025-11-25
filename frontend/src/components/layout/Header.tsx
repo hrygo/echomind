@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { Bell, Settings, LogOut, Globe, Sparkles, Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useUIStore } from "@/store/ui";
 import { CopilotWidget } from "@/components/copilot/CopilotWidget";
@@ -65,7 +66,7 @@ export function Header() {
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shadow-sm"
                         >
-                            {user?.name?.[0].toUpperCase() || 'U'}
+                            {user?.name?.[0].toUpperCase() || 'D'}
                         </button>
                         {isUserMenuOpen && (
                             // Dropdown menu content remains the same, just for mobile
@@ -95,6 +96,7 @@ export function Header() {
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4 ml-auto shrink-0">
+                    <ThemeToggle />
                     <button
                         onClick={toggleLanguage}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
@@ -125,10 +127,10 @@ export function Header() {
                             className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-slate-100 transition-all duration-200 focus:outline-none"
                         >
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-200">
-                                {user?.name?.[0].toUpperCase() || 'U'}
+                                {user?.name?.[0].toUpperCase() || 'D'}
                             </div>
                             <div className="hidden lg:block text-left">
-                                <p className="text-sm font-semibold text-slate-700 leading-none">{user?.name || t('sidebar.user')}</p>
+                                <p className="text-sm font-semibold text-slate-700 leading-none">{user?.name || '演示用户'}</p>
                                 <p className="text-[10px] text-slate-400 font-medium mt-1">{t('sidebar.freePlan')}</p>
                             </div>
                         </button>

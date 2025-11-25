@@ -1,6 +1,7 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 type ViewType = "executive" | "manager" | "dealmaker";
 
@@ -9,8 +10,12 @@ interface AIBriefingHeaderProps {
   userName?: string;
 }
 
-export function AIBriefingHeader({ currentView, userName = "Alex" }: AIBriefingHeaderProps) {
+export function AIBriefingHeader({ currentView, userName }: AIBriefingHeaderProps) {
   const { t } = useLanguage();
+  const { data: userProfile, isLoading: profileLoading } = useUserProfile();
+
+  // Use actual user name from API or fallback to provided userName
+  const actualUserName = userProfile?.name || userName || "演示用户";
   
   // Mock data logic - in real app this comes from API
   const hour = new Date().getHours();
@@ -47,7 +52,13 @@ export function AIBriefingHeader({ currentView, userName = "Alex" }: AIBriefingH
           <span className="text-xs font-bold uppercase tracking-wider">{t('dashboard.aiBriefing')}</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-          {t(`dashboard.${timeOfDay}`)}, {userName}.
+          {profileLoading ? (
+            <span className="flex items-center gap-2">
+              {t(`dashboard.${timeOfDay}`)}, <Loader2 className="w-6 h-6 animate-spin" />
+            </span>
+          ) : (
+            `${t(`dashboard.${timeOfDay}`)}, ${actualUserName}.`
+          )}
         </h1>
         <p className="text-blue-50 text-lg md:text-xl leading-relaxed max-w-3xl font-medium">
           {getSummary()}

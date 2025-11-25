@@ -220,20 +220,4 @@ graph TD
 ---
 
 ## 9. (附录) 开发任务清单 (Appendix: Development Task List)
-
-### Phase 0: 准备工作
-1.  [ ] 创建 `frontend/src/lib/constants/mail_providers.ts`。
-2.  [ ] 在 `en.json` 和 `zh.json` 中添加 i18n Key。
-
-### Phase 1: 认证页面 (`/auth`)
-1.  [ ] 创建 `AuthLayout` 及 `LoginForm` / `RegisterForm` 组件。
-2.  [ ] 编写 `tests/e2e/auth-flow.spec.ts`。
-
-### Phase 2: 引导流程 (`/onboarding`)
-1.  [ ] 创建 `onboarding` store (Zustand)。
-2.  [ ] 开发 `RoleSelector` 及 `SmartMailboxForm` 组件。
-3.  [ ] 编写 `tests/e2e/onboarding-flow.spec.ts`。
-
-### Phase 3: 设置与路由守卫
-1.  [ ] 更新 `AuthGuard`，未配置用户强制跳转 `/onboarding`。
-2.  [ ] 使用 Tabs 布局重构设置页面。
+ 

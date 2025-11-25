@@ -1,0 +1,1659 @@
+---
+openapi: 3.0.3
+info:
+  title: "EchoMind API"
+  description: >-
+      EchoMind API - 您的个人智能神经中枢。该 API 允许您与 EchoMind 后端服务进行交互，
+      管理用户、组织、任务和上下文等。
+  version: "0.9.6"
+  contact:
+    name: "EchoMind Support"
+    url: "https://github.com/hrygo/echomind"
+    email: "610195979@qq.com"
+servers:
+  - url: "/api/v1"
+    description: "主 API V1 网关"
+tags:
+  - name: "Auth"
+    description: "用户认证，包括注册、登录和会话管理"
+  - name: "Organization"
+    description: "组织、团队和成员管理"
+  - name: "Task"
+    description: "任务管理操作"
+  - name: "Context"
+    description: "上下文和知识库管理"
+  - name: "Email"
+    description: "邮件管理和操作"
+  - name: "Search"
+    description: "全局搜索功能"
+  - name: "Sync"
+    description: "数据同步操作"
+  - name: "AI"
+    description: "AI 草稿生成和聊天功能"
+  - name: "Actions"
+    description: "邮件操作（批准、推迟、忽略）"
+  - name: "Insights"
+    description: "数据洞察和网络图谱"
+  - name: "Settings"
+    description: "账户设置和管理"
+  - name: "Health"
+    description: "服务健康检查"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "在 Authorization 头中输入 'Bearer ' 后跟上您的 JWT"
+
+  responses:
+    BadRequest:
+      description: "无效的请求 (Bad Request)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: "未认证 (Unauthorized)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: "资源未找到 (Not Found)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: "请求冲突 (Conflict)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: "内部服务器错误 (Internal Server Error)"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NoContent:
+      description: "请求成功，无返回内容 (No Content)"
+    Created:
+      description: "资源创建成功 (Created)"
+
+  schemas:
+    # General
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: "错误的详细描述"
+          example: "invalid credentials"
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+
+    # Auth & User Schemas
+    UserRole:
+      type: string
+      enum: ["executive", "manager", "dealmaker"]
+      description: "用户在组织中的角色"
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "用户的全名"
+          example: "John Doe"
+        role:
+          $ref: '#/components/schemas/UserRole'
+    UserWithStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        has_account:
+          type: boolean
+          description: "用户是否已连接了至少一个邮箱账户"
+
+    # Auth Responses & Requests
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        password:
+          type: string
+          format: password
+          example: "yourSecureP@ssw0rd"
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        password:
+          type: string
+          format: password
+          example: "yourSecureP@ssw0rd"
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: "用于后续认证的 JWT"
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/UserWithStatus'
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "User registered successfully"
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserWithStatus'
+
+    # Organization Schemas
+    CreateOrganizationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: "新组织的名称"
+          example: "Acme Corporation"
+
+    # Account & Sync
+    EmailAccountInput:
+      type: object
+      required:
+        - email
+        - server_address
+        - server_port
+        - username
+        - smtp_server
+        - smtp_port
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        server_address:
+          type: string
+          description: "IMAP 服务器地址"
+        server_port:
+          type: integer
+          description: "IMAP 服务器端口"
+        username:
+          type: string
+        smtp_server:
+          type: string
+          description: "SMTP 服务器地址"
+        smtp_port:
+          type: integer
+          description: "SMTP 服务器端口"
+        password:
+          type: string
+          format: password
+          description: "邮箱密码或应用专用密码"
+          writeOnly: true
+        team_id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+    AccountStatusResponse:
+      type: object
+      properties:
+        has_account:
+          type: boolean
+        email:
+          type: string
+          format: email
+        server_address:
+          type: string
+        server_port:
+          type: integer
+        username:
+          type: string
+        is_connected:
+          type: boolean
+          description: "当前是否成功连接到邮箱服务器"
+        last_sync_at:
+          type: string
+          format: date-time
+        error_message:
+          type: string
+          description: "如果连接失败，此字段将包含错误信息"
+
+    # User & Organization
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        avatar_url:
+          type: string
+          format: url
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        owner_id:
+          type: string
+          format: uuid
+
+    # Task Schemas
+    TaskStatus:
+      type: string
+      enum: ["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]
+      description: "任务的当前状态"
+    TaskPriority:
+      type: string
+      enum: ["LOW", "MEDIUM", "HIGH", "URGENT"]
+      description: "任务的优先级"
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        assignee_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+    CreateTaskRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: "任务的标题"
+          example: "实现 OpenAPI 文档"
+        description:
+          type: string
+          description: "任务的详细描述"
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        due_date:
+          type: string
+          format: date-time
+        assignee_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        assignee_id:
+          type: string
+          format: uuid
+
+    # Email Schemas
+    Email:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          description: "邮件主题"
+        body:
+          type: string
+          description: "邮件正文内容"
+        sender:
+          type: string
+          format: email
+          description: "发件人邮箱地址"
+        recipients:
+          type: array
+          items:
+            type: string
+            format: email
+          description: "收件人列表"
+        cc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: "抄送列表"
+        bcc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: "密送列表"
+        sent_at:
+          type: string
+          format: date-time
+          description: "发送时间"
+        received_at:
+          type: string
+          format: date-time
+          description: "接收时间"
+        is_read:
+          type: boolean
+          description: "是否已读"
+        is_important:
+          type: boolean
+          description: "是否标记为重要"
+        folder:
+          type: string
+          description: "所属文件夹（如 INBOX, SENT, DRAFT 等）"
+        category:
+          type: string
+          description: "邮件分类（如 WORK, PERSONAL, PROMOTION 等）"
+        context_id:
+          type: string
+          format: uuid
+          description: "关联的上下文ID"
+        team_id:
+          type: string
+          format: uuid
+          description: "关联的团队ID"
+        organization_id:
+          type: string
+          format: uuid
+          description: "关联的组织ID"
+
+    EmailListResponse:
+      type: object
+      properties:
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/Email'
+        total:
+          type: integer
+          description: "总邮件数量"
+        limit:
+          type: integer
+          description: "每页数量限制"
+        offset:
+          type: integer
+          description: "偏移量"
+
+    # Context Schemas
+    Context:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: "上下文名称"
+        description:
+          type: string
+          description: "上下文描述"
+        type:
+          type: string
+          enum: ["project", "client", "topic", "custom"]
+          description: "上下文类型"
+        team_id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ContextInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: "上下文名称"
+          example: "Project Alpha"
+        description:
+          type: string
+          description: "上下文描述"
+          example: "关于Alpha项目的所有相关邮件和文档"
+        type:
+          type: string
+          enum: ["project", "client", "topic", "custom"]
+          default: "custom"
+          description: "上下文类型"
+
+    # Search Schemas
+    SearchResult:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ["email", "task", "context"]
+          description: "结果类型"
+        id:
+          type: string
+          format: uuid
+          description: "结果项的ID"
+        title:
+          type: string
+          description: "结果标题"
+        content:
+          type: string
+          description: "结果内容片段"
+        score:
+          type: number
+          format: float
+          description: "相关性得分"
+        highlight:
+          type: string
+          description: "高亮显示的匹配片段"
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        total:
+          type: integer
+          description: "总结果数量"
+        query:
+          type: string
+          description: "搜索查询"
+
+    # AI Schemas
+    AIDraftRequest:
+      type: object
+      required:
+        - prompt
+        - recipients
+      properties:
+        prompt:
+          type: string
+          description: "邮件生成提示"
+          example: "请帮我写一封会议邀请邮件"
+        recipients:
+          type: array
+          items:
+            type: string
+            format: email
+          description: "收件人列表"
+        cc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: "抄送列表"
+        tone:
+          type: string
+          enum: ["formal", "casual", "friendly", "professional"]
+          default: "professional"
+          description: "邮件语气"
+        context_id:
+          type: string
+          format: uuid
+          description: "关联的上下文ID（可选）"
+    AIDraftResponse:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: "生成的邮件主题"
+        body:
+          type: string
+          description: "生成的邮件正文"
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: "用户消息"
+        conversation_id:
+          type: string
+          format: uuid
+          description: "对话ID（可选）"
+        context_id:
+          type: string
+          format: uuid
+          description: "上下文ID（可选）"
+
+    # Actions Schemas
+    ApproveRequest:
+      type: object
+      required:
+        - email_id
+      properties:
+        email_id:
+          type: string
+          format: uuid
+          description: "要批准的邮件ID"
+        comment:
+          type: string
+          description: "审批备注（可选）"
+    SnoozeRequest:
+      type: object
+      required:
+        - email_id
+        - until
+      properties:
+        email_id:
+          type: string
+          format: uuid
+          description: "要推迟的邮件ID"
+        until:
+          type: string
+          format: date-time
+          description: "推迟到何时"
+        reason:
+          type: string
+          description: "推迟原因（可选）"
+    DismissRequest:
+      type: object
+      required:
+        - email_id
+      properties:
+        email_id:
+          type: string
+          format: uuid
+          description: "要忽略的邮件ID"
+        reason:
+          type: string
+          description: "忽略原因（可选）"
+    ActionResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: "操作结果消息"
+        status:
+          type: string
+          enum: ["success", "error"]
+          description: "操作状态"
+
+    # Insights Schemas
+    NetworkNode:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "节点ID（通常是邮箱地址）"
+        name:
+          type: string
+          description: "节点名称"
+        email:
+          type: string
+          format: email
+          description: "邮箱地址"
+        weight:
+          type: integer
+          description: "节点权重（通信频率）"
+        type:
+          type: string
+          enum: ["person", "organization", "self"]
+          description: "节点类型"
+    NetworkEdge:
+      type: object
+      properties:
+        source:
+          type: string
+          description: "源节点ID"
+        target:
+          type: string
+          description: "目标节点ID"
+        weight:
+          type: integer
+          description: "连接权重（通信次数）"
+        last_interaction:
+          type: string
+          format: date-time
+          description: "最后交互时间"
+    NetworkGraph:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkEdge'
+        total_connections:
+          type: integer
+          description: "总连接数"
+        most_active_contacts:
+          type: array
+          items:
+            type: string
+          description: "最活跃的联系人列表"
+
+paths:
+  # Health Check
+  /health:
+    get:
+      tags:
+        - "Health"
+      summary: "健康检查"
+      description: "检查 API 服务的健康状况。"
+      operationId: "healthCheck"
+      responses:
+        '200':
+          description: "服务健康"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+
+  # Authentication
+  /auth/register:
+    post:
+      tags:
+        - "Auth"
+      summary: "用户注册"
+      description: "创建一个新用户账户。"
+      operationId: "registerUser"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: "用户注册成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/login:
+    post:
+      tags:
+        - "Auth"
+      summary: "用户登录"
+      description: "使用邮箱和密码登录，获取 JWT。"
+      operationId: "loginUser"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: "登录成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me:
+    patch:
+      tags:
+        - "Auth"
+      summary: "更新当前用户信息"
+      description: "更新当前已认证用户的个人资料（例如姓名或角色）。"
+      operationId: "updateCurrentUserProfile"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: "个人资料更新成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Organizations
+  /orgs:
+    get:
+      tags:
+        - "Organization"
+      summary: "列出用户所属的组织"
+      description: "获取当前已认证用户所属的所有组织的列表。"
+      operationId: "listOrganizations"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "成功"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - "Organization"
+      summary: "创建新组织"
+      description: "为当前用户创建一个新的组织，该用户将成为组织的所有者。"
+      operationId: "createOrganization"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /orgs/{id}:
+    get:
+      tags:
+        - "Organization"
+      summary: "获取组织详情"
+      description: "通过ID获取特定组织的详细信息。"
+      operationId: "getOrganizationById"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "要获取的组织的ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "组织详情"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orgs/{id}/members:
+    get:
+      tags:
+        - "Organization"
+      summary: "获取组织成员列表"
+      description: "获取特定组织的所有成员列表。"
+      operationId: "getOrganizationMembers"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "要获取其成员的组织的ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "成员列表"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Settings & Account Management
+  /settings/account:
+    get:
+      tags:
+        - "Settings"
+      summary: "获取邮箱账户状态"
+      description: "获取当前用户的邮箱账户连接状态和配置信息"
+      operationId: "getAccountStatus"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "账户状态信息"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - "Settings"
+      summary: "连接邮箱账户"
+      description: "配置并连接一个新的邮箱账户用于数据同步"
+      operationId: "connectEmailAccount"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailAccountInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - "Settings"
+      summary: "断开邮箱账户"
+      description: "断开当前连接的邮箱账户并停止同步"
+      operationId: "disconnectEmailAccount"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "账户断开成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Email Synchronization
+  /sync:
+    post:
+      tags:
+        - "Sync"
+      summary: "手动同步邮件"
+      description: "触发邮件同步操作，从邮箱服务器拉取最新邮件"
+      operationId: "syncEmails"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: team_id
+          in: query
+          required: true
+          description: "团队ID"
+          schema:
+            type: string
+            format: uuid
+        - name: organization_id
+          in: query
+          required: true
+          description: "组织ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: "同步任务已启动"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Email Management
+  /emails:
+    get:
+      tags:
+        - "Email"
+      summary: "获取邮件列表"
+      description: "获取邮件列表，支持分页和过滤"
+      operationId: "listEmails"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: "每页返回的邮件数量"
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: "分页偏移量"
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: context_id
+          in: query
+          description: "按上下文ID过滤"
+          schema:
+            type: string
+            format: uuid
+        - name: folder
+          in: query
+          description: "按文件夹过滤（如 INBOX, SENT）"
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: "按分类过滤（如 WORK, PERSONAL）"
+          schema:
+            type: string
+        - name: filter
+          in: query
+          description: "过滤条件（如 unread, important）"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "邮件列表"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /emails/{id}:
+    get:
+      tags:
+        - "Email"
+      summary: "获取单封邮件详情"
+      description: "通过ID获取特定邮件的完整内容和元数据"
+      operationId: "getEmailById"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "邮件ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "邮件详情"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /emails/all:
+    delete:
+      tags:
+        - "Email"
+      summary: "删除所有邮件"
+      description: "删除用户的所有邮件（危险操作，需谨慎）"
+      operationId: "deleteAllEmails"
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Context Management
+  /contexts:
+    get:
+      tags:
+        - "Context"
+      summary: "获取上下文列表"
+      description: "获取当前用户的所有上下文列表"
+      operationId: "listContexts"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "上下文列表"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Context'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - "Context"
+      summary: "创建新上下文"
+      description: "创建一个新的上下文用于组织相关邮件和信息"
+      operationId: "createContext"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Context'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /contexts/{id}:
+    get:
+      tags:
+        - "Context"
+      summary: "获取上下文详情"
+      description: "通过ID获取特定上下文的详细信息"
+      operationId: "getContextById"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "上下文ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "上下文详情"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Context'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - "Context"
+      summary: "更新上下文"
+      description: "更新现有上下文的信息"
+      operationId: "updateContext"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "上下文ID"
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextInput'
+      responses:
+        '200':
+          description: "上下文更新成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Context'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - "Context"
+      summary: "删除上下文"
+      description: "删除指定的上下文"
+      operationId: "deleteContext"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "上下文ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Search
+  /search:
+    get:
+      tags:
+        - "Search"
+      summary: "全局搜索"
+      description: "在邮件、任务和上下文中进行全文搜索"
+      operationId: "globalSearch"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: "搜索查询字符串"
+          schema:
+            type: string
+        - name: sender
+          in: query
+          description: "按发件人过滤"
+          schema:
+            type: string
+            format: email
+        - name: context_id
+          in: query
+          description: "按上下文ID过滤"
+          schema:
+            type: string
+            format: uuid
+        - name: start_date
+          in: query
+          description: "开始日期（ISO 8601格式）"
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          description: "结束日期（ISO 8601格式）"
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: "结果数量限制"
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: "搜索结果"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # AI Features
+  /ai/draft:
+    post:
+      tags:
+        - "AI"
+      summary: "AI生成邮件草稿"
+      description: "使用AI根据提示生成邮件草稿"
+      operationId: "generateAIDraft"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIDraftRequest'
+      responses:
+        '200':
+          description: "邮件草稿生成成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIDraftResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /chat/completions:
+    post:
+      tags:
+        - "AI"
+      summary: "流式聊天对话"
+      description: "与AI进行流式对话，支持上下文感知的对话"
+      operationId: "chatCompletions"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: "流式响应（Server-Sent Events）"
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Email Actions
+  /actions/approve:
+    post:
+      tags:
+        - "Actions"
+      summary: "批准邮件"
+      description: "批准待处理的邮件，可添加审批备注"
+      operationId: "approveEmail"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveRequest'
+      responses:
+        '200':
+          description: "邮件批准成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /actions/snooze:
+    post:
+      tags:
+        - "Actions"
+      summary: "推迟邮件"
+      description: "将邮件推迟到指定时间处理"
+      operationId: "snoozeEmail"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnoozeRequest'
+      responses:
+        '200':
+          description: "邮件推迟成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /actions/dismiss:
+    post:
+      tags:
+        - "Actions"
+      summary: "忽略邮件"
+      description: "忽略邮件，可提供忽略原因"
+      operationId: "dismissEmail"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DismissRequest'
+      responses:
+        '200':
+          description: "邮件忽略成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Insights
+  /insights/network:
+    get:
+      tags:
+        - "Insights"
+      summary: "获取网络图谱"
+      description: "获取用户通信网络的可视化图谱数据"
+      operationId: "getNetworkInsights"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "网络图谱数据"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkGraph'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Task Management
+  /tasks:
+    get:
+      tags:
+        - "Task"
+      summary: "获取任务列表"
+      description: "获取当前组织的所有任务，支持分页和过滤。"
+      operationId: "listTasks"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: "按状态过滤"
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+        - name: priority
+          in: query
+          description: "按优先级过滤"
+          schema:
+            $ref: '#/components/schemas/TaskPriority'
+        - name: assignee_id
+          in: query
+          description: "按指派人过滤"
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: "每页返回的任务数量"
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: "分页偏移量"
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: "任务列表"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - "Task"
+      summary: "创建新任务"
+      description: "在当前组织中创建一个新任务。"
+      operationId: "createTask"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tasks/{id}:
+    get:
+      tags:
+        - "Task"
+      summary: "获取特定任务详情"
+      description: "通过 ID 获取单个任务的详细信息。"
+      operationId: "getTaskById"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "任务ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "任务详情"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - "Task"
+      summary: "更新任务"
+      description: "更新一个现有任务的属性。"
+      operationId: "updateTask"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "任务ID"
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: "任务更新成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - "Task"
+      summary: "删除任务"
+      description: "删除指定的任务"
+      operationId: "deleteTask"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "任务ID"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tasks/{id}/status:
+    patch:
+      tags:
+        - "Task"
+      summary: "更新任务状态"
+      description: "更新特定任务的状态"
+      operationId: "updateTaskStatus"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "任务ID"
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  $ref: '#/components/schemas/TaskStatus'
+                  description: "新的任务状态"
+      responses:
+        '200':
+          description: "任务状态更新成功"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'

@@ -1,88 +1,13 @@
-# EchoMind API Documentation
+# EchoMind API 文档
 
-Base URL: `/api/v1`
+本文档是 EchoMind API 的主要参考。为了获得更好的交互式体验和最准确的定义，请参考我们的 OpenAPI 3.0 规范。
 
-## Authentication
+- **[OpenAPI 规范文件 (openapi.yaml)](./openapi.yaml)**
 
-All endpoints (except `/auth/*` and `/health`) require a JWT token in the header:
-`Authorization: Bearer <token>`
+## 使用方法
 
----
+您可以使用任何兼容 OpenAPI 3.0 的工具来查看和交互此规范，例如：
 
-## Search API
-
-### `GET /search`
-
-Performs a semantic search over the user's emails.
-
-**Parameters:**
-
-| Name | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `q` | string | Yes | - | The natural language query string. |
-| `limit` | int | No | 10 | Maximum number of results to return (1-100). |
-| `sender` | string | No | - | Filter results by sender name or email (partial match). |
-| `start_date` | string | No | - | Filter emails on or after this date (Format: `YYYY-MM-DD`). |
-| `end_date` | string | No | - | Filter emails on or before this date (Format: `YYYY-MM-DD`). |
-
-**Response:**
-
-```json
-{
-  "query": "project update",
-  "count": 2,
-  "results": [
-    {
-      "email_id": "uuid-string",
-      "subject": "Project Alpha Weekly Update",
-      "snippet": "Here is the status of...",
-      "sender": "alice@example.com",
-      "date": "2025-11-20T10:00:00Z",
-      "score": 0.89
-    },
-    ...
-  ]
-}
-```
-
-**Error Responses:**
-
-*   `400 Bad Request`: Missing `q` parameter.
-*   `401 Unauthorized`: Missing or invalid token.
-*   `500 Internal Server Error`: Search failure (DB or AI provider issue).
-
----
-
-## Organization API
-
-### `POST /orgs`
-Create a new organization.
-
-**Body:**
-```json
-{
-  "name": "My New Organization"
-}
-```
-
-### `GET /orgs`
-List all organizations the authenticated user belongs to.
-
-### `GET /orgs/:id`
-Get details of a specific organization.
-
-### `GET /orgs/:id/members`
-List members of an organization.
-
----
-
-## Other Endpoints
-
-### `GET /health`
-Returns the system health status.
-
-### `POST /auth/login`
-Login with email and password.
-
-### `POST /auth/register`
-Register a new user account.
+- [Swagger Editor](https://editor.swagger.io/): 一个在线编辑器，用于查看、编辑和测试 OpenAPI 规范。
+- [Redocly](https://redocly.github.io/redoc/): 生成一个三栏式的、响应式的文档页面。
+- [Postman](https://www.postman.com/): 可以导入 OpenAPI 规范来自动创建请求集合。
