@@ -1,7 +1,7 @@
 # 🛡️ EchoMind Project Specification
 
 **Vision**: Personal Neural Interface | **Version**: v1.1.0 (Enterprise Release)
-**Tech Stack**: Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
+**Go Module**: `github.com/hrygo/echomind` | **Tech Stack**: 📖 [详细技术栈](./docs/framework.md) | Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
 
 ---
 
