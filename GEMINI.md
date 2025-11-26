@@ -1,13 +1,13 @@
 # 🛡️ EchoMind Project Specification
 
 **Vision**: Personal Neural Interface | **Version**: v1.1.0 (Enterprise Release)
-**Go Module**: `github.com/hrygo/echomind` | **Tech Stack**: 📖 [详细技术栈](./docs/framework.md) | Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
+**Go Module**: `github.com/hrygo/echomind` | **Tech Stack**: 📖 [详细技术栈](./docs/architecture/framework.md) | Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
 
 ---
 
 ## 🚀 Version Release
 
-**Checklist**: `frontend/package.json` | `backend/pkg/logger/config.go` | `Makefile` | `docs/openapi.yaml` | `backend/configs/logger*.yaml` | `README*.md` | `CHANGELOG.md` | `docs/product-roadmap.md` | `docs/logger/README.md`
+**Checklist**: `frontend/package.json` | `backend/pkg/logger/config.go` | `Makefile` | `docs/api/openapi.yaml` | `backend/configs/logger*.yaml` | `README*.md` | `CHANGELOG.md` | `docs/product/product-roadmap.md` | `docs/architecture/logger/README.md`
 
 **Release**: `git add . && git commit -m "feat: v{version} - description" && git tag -a v{version}`
 

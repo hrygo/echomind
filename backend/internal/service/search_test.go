@@ -98,7 +98,7 @@ func TestSearchService_Search_Integration(t *testing.T) {
 	// This ensures distance is 0 (Score 1.0)
 	fixedEmbedder := &MockFixedEmbedder{Vector: embeddingVec}
 
-	svc := service.NewSearchService(db, fixedEmbedder)
+	svc := service.NewSearchService(db, fixedEmbedder, nil)
 
 	// Test Search
 	results, err := svc.Search(context.Background(), userID, "Project", service.SearchFilters{}, 10)

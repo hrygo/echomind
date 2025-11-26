@@ -9,20 +9,38 @@ import (
 	"github.com/google/uuid"
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/pkg/ai"
+	"github.com/hrygo/echomind/pkg/telemetry"
 	"github.com/hrygo/echomind/pkg/utils"
 	"github.com/pgvector/pgvector-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
+
+var tracer = otel.Tracer("echomind.search")
 
 type SearchService struct {
 	db       *gorm.DB
 	embedder ai.EmbeddingProvider
+	metrics  *telemetry.SearchMetrics
+	cache    *SearchCache
 }
 
-func NewSearchService(db *gorm.DB, embedder ai.EmbeddingProvider) *SearchService {
+func NewSearchService(db *gorm.DB, embedder ai.EmbeddingProvider, cache *SearchCache) *SearchService {
+	// Initialize metrics (best effort)
+	metrics, err := telemetry.NewSearchMetrics(context.Background())
+	if err != nil {
+		// Log error but don't fail service creation
+		fmt.Printf("Warning: Failed to initialize search metrics: %v\n", err)
+	}
+
 	return &SearchService{
 		db:       db,
 		embedder: embedder,
+		metrics:  metrics,
+		cache:    cache,
 	}
 }
 
@@ -43,13 +61,80 @@ type SearchFilters struct {
 }
 
 func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query string, filters SearchFilters, limit int) ([]SearchResult, error) {
-	// Generate query embedding
+	// Create root span
+	ctx, span := tracer.Start(ctx, "SearchService.Search",
+		trace.WithAttributes(
+			attribute.String("user.id", userID.String()),
+			attribute.String("search.query", query),
+			attribute.Int("search.limit", limit),
+		),
+	)
+	defer span.End()
+
+	start := time.Now()
+
+	// Track active searches
+	if s.metrics != nil {
+		s.metrics.IncrementActiveSearches(ctx)
+		defer s.metrics.DecrementActiveSearches(ctx)
+		s.metrics.IncrementSearchRequests(ctx)
+	}
+
+	// Check cache first
+	if s.cache != nil {
+		cachedResults, found, err := s.cache.Get(ctx, userID, query, filters, limit)
+		if err != nil {
+			// Log cache error but continue with normal search
+			span.AddEvent("cache_error", trace.WithAttributes(
+				attribute.String("error", err.Error()),
+			))
+		} else if found {
+			// Cache hit
+			if s.metrics != nil {
+				s.metrics.IncrementCacheHits(ctx)
+				s.metrics.RecordSearchLatency(ctx, time.Since(start))
+				s.metrics.RecordResultsReturned(ctx, len(cachedResults))
+			}
+			span.SetStatus(codes.Ok, "search completed (cached)")
+			span.SetAttributes(
+				attribute.Bool("cache.hit", true),
+				attribute.Int("results.total", len(cachedResults)),
+			)
+			return cachedResults, nil
+		}
+		// Cache miss
+		if s.metrics != nil {
+			s.metrics.IncrementCacheMisses(ctx)
+		}
+		span.AddEvent("cache_miss")
+	}
+
+	// 1. Generate query embedding
+	embedStart := time.Now()
+	ctx, embedSpan := tracer.Start(ctx, "generate_query_embedding")
 	queryVector, err := s.embedder.Embed(ctx, query)
 	if err != nil {
+		embedSpan.RecordError(err)
+		embedSpan.SetStatus(codes.Error, "failed to embed query")
+		embedSpan.End()
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "search failed")
+		if s.metrics != nil {
+			s.metrics.IncrementSearchErrors(ctx)
+		}
 		return nil, fmt.Errorf("failed to embed query: %w", err)
+	}
+	embedSpan.SetAttributes(
+		attribute.Int("embedding.dimensions", len(queryVector)),
+	)
+	embedSpan.End()
+	if s.metrics != nil {
+		s.metrics.RecordEmbeddingLatency(ctx, time.Since(embedStart))
 	}
 
 	// 2. Perform vector search using raw SQL
+	dbStart := time.Now()
+	ctx, dbSpan := tracer.Start(ctx, "vector_database_search")
 	var results []SearchResult
 
 	// Base query
@@ -99,8 +184,46 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 
 	err = s.db.WithContext(ctx).Raw(sql, args...).Scan(&results).Error
 	if err != nil {
+		dbSpan.RecordError(err)
+		dbSpan.SetStatus(codes.Error, "database query failed")
+		dbSpan.End()
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "search failed")
+		if s.metrics != nil {
+			s.metrics.IncrementSearchErrors(ctx)
+		}
 		return nil, fmt.Errorf("search query failed: %w", err)
 	}
+
+	dbSpan.SetAttributes(
+		attribute.Int("results.count", len(results)),
+	)
+	dbSpan.End()
+	if s.metrics != nil {
+		s.metrics.RecordDBQueryLatency(ctx, time.Since(dbStart))
+	}
+
+	// Store in cache
+	if s.cache != nil && len(results) > 0 {
+		if err := s.cache.Set(ctx, userID, query, filters, limit, results); err != nil {
+			// Log cache error but don't fail the request
+			span.AddEvent("cache_set_error", trace.WithAttributes(
+				attribute.String("error", err.Error()),
+			))
+		}
+	}
+
+	// Record overall metrics
+	if s.metrics != nil {
+		s.metrics.RecordSearchLatency(ctx, time.Since(start))
+		s.metrics.RecordResultsReturned(ctx, len(results))
+	}
+
+	span.SetStatus(codes.Ok, "search completed")
+	span.SetAttributes(
+		attribute.Bool("cache.hit", false),
+		attribute.Int("results.total", len(results)),
+	)
 
 	return results, nil
 }

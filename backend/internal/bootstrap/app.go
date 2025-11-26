@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"github.com/hrygo/echomind/pkg/config"
 	"github.com/hrygo/echomind/pkg/database"
 	"github.com/hrygo/echomind/pkg/logger"
+	"github.com/hrygo/echomind/pkg/telemetry"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +21,7 @@ type App struct {
 	DB          *gorm.DB
 	Logger      logger.Logger
 	AsynqClient *asynq.Client
+	Telemetry   *telemetry.Telemetry
 }
 
 func Init(configPath string, production bool) (*App, error) {
@@ -93,11 +96,40 @@ func Init(configPath string, production bool) (*App, error) {
 		})
 	}
 
+	// 5. Telemetry (OpenTelemetry)
+	var tel *telemetry.Telemetry
+	if cfg.Telemetry.Enabled {
+		telCfg := &telemetry.TelemetryConfig{
+			ServiceName:     cfg.Telemetry.ServiceName,
+			ServiceVersion:  cfg.Telemetry.ServiceVersion,
+			Environment:     cfg.Telemetry.Environment,
+			ExporterType:    cfg.Telemetry.Exporter.Type,
+			TracesFilePath:  cfg.Telemetry.Exporter.File.TracesPath,
+			MetricsFilePath: cfg.Telemetry.Exporter.File.MetricsPath,
+			OTLPEndpoint:    cfg.Telemetry.Exporter.OTLP.Endpoint,
+			OTLPInsecure:    cfg.Telemetry.Exporter.OTLP.Insecure,
+			SamplingType:    cfg.Telemetry.Sampling.Type,
+			SamplingRatio:   cfg.Telemetry.Sampling.Ratio,
+		}
+
+		tel, err = telemetry.InitTelemetry(context.Background(), telCfg)
+		if err != nil {
+			log.Warn("Failed to initialize telemetry, continuing without it",
+				logger.Error(err))
+		} else {
+			log.Info("OpenTelemetry initialized",
+				logger.String("service", telCfg.ServiceName),
+				logger.String("version", telCfg.ServiceVersion),
+				logger.String("exporter", telCfg.ExporterType))
+		}
+	}
+
 	app := &App{
 		Config:      cfg,
 		DB:          db,
 		Logger:      log,
 		AsynqClient: asynqClient,
+		Telemetry:   tel,
 	}
 
 	return app, nil
@@ -141,6 +173,12 @@ func (app *App) SetupDB() error {
 func (app *App) Close() {
 	if app.AsynqClient != nil {
 		app.AsynqClient.Close()
+	}
+	// Shutdown telemetry
+	if app.Telemetry != nil {
+		if err := app.Telemetry.Shutdown(context.Background()); err != nil {
+			app.Logger.Error("Failed to shutdown telemetry", logger.Error(err))
+		}
 	}
 	// 新日志框架会自动清理
 	_ = logger.Close()

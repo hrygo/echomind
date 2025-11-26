@@ -17,10 +17,16 @@ import (
 	"github.com/hrygo/echomind/pkg/event/bus"
 	"github.com/hrygo/echomind/pkg/imap"
 	echologger "github.com/hrygo/echomind/pkg/logger"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
-var ErrAccountNotConfigured = errors.New("email account not configured")
+var (
+	ErrAccountNotConfigured = errors.New("email account not configured")
+	syncTracer              = otel.Tracer("sync-service")
+)
 
 type EmailFetcher interface {
 	FetchEmails(c *clientimap.Client, mailbox string, limit int) ([]imap.EmailData, error)
@@ -103,9 +109,27 @@ func NewSyncService(accountRepo repository.AccountRepository, connector IMAPConn
 
 // SyncEmails fetches emails for a specific user, saves them, and enqueues analysis tasks.
 func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *uuid.UUID, organizationID *uuid.UUID) error {
+	ctx, span := syncTracer.Start(ctx, "SyncService.SyncEmails",
+		trace.WithAttributes(
+			attribute.String("user.id", userID.String()),
+		),
+	)
+	defer span.End()
+
+	if teamID != nil {
+		span.SetAttributes(attribute.String("team.id", teamID.String()))
+	}
+	if organizationID != nil {
+		span.SetAttributes(attribute.String("organization.id", organizationID.String()))
+	}
+
 	// 1. Get user's email account configuration (or team/org account)
+	ctx, accountSpan := syncTracer.Start(ctx, "fetch_account_config")
 	account, err := s.accountRepo.FindConfiguredAccount(ctx, userID, teamID, organizationID)
+	accountSpan.End()
+
 	if err != nil {
+		span.RecordError(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) || strings.Contains(err.Error(), "record not found") {
 			return ErrAccountNotConfigured
 		}
@@ -117,9 +141,18 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 		return fmt.Errorf("failed to retrieve email account: %w", err)
 	}
 
+	span.SetAttributes(
+		attribute.String("account.email", account.Email),
+		attribute.String("account.server", account.ServerAddress),
+	)
+
 	// 2. Connect to IMAP
+	ctx, imapSpan := syncTracer.Start(ctx, "imap_connect")
 	session, err := s.connector.Connect(ctx, account)
+	imapSpan.End()
+
 	if err != nil {
+		imapSpan.RecordError(err)
 		s.logger.Errorw("Failed to connect to IMAP", "error", err)
 		return err
 	}
@@ -132,13 +165,26 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 		lastSyncTime = *account.LastSyncAt
 	}
 
+	span.SetAttributes(
+		attribute.String("sync.last_sync_time", lastSyncTime.Format(time.RFC3339)),
+	)
+
+	ctx, ingestSpan := syncTracer.Start(ctx, "ingest_emails")
 	newEmails, err := s.ingestor.Ingest(ctx, session, account, lastSyncTime)
+	ingestSpan.End()
+
 	if err != nil {
+		ingestSpan.RecordError(err)
 		s.logger.Errorw("Failed to ingest emails", "error", err)
 		return err
 	}
 
+	span.SetAttributes(
+		attribute.Int("sync.new_emails_count", len(newEmails)),
+	)
+
 	// 4. Publish Events
+	ctx, eventSpan := syncTracer.Start(ctx, "publish_events")
 	for _, email := range newEmails {
 		// Publish Email Synced Event
 		event := event.EmailSyncedEvent{
@@ -152,6 +198,7 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 				"error", err)
 		}
 	}
+	eventSpan.End()
 
 	return nil
 }

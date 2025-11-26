@@ -1,13 +1,20 @@
 'use client';
 
 import React, { KeyboardEvent } from 'react';
-import { Search, Sparkles, X } from 'lucide-react';
+import { Search, Sparkles, X, Settings } from 'lucide-react';
 import { useCopilotStore } from '@/store'; // Updated import
 import { cn } from '@/lib/utils'; // Assuming this exists, standard in shadcn/ui projects
 import { useAuthStore } from '@/store/auth'; // Import useAuthStore
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import type { SearchResponse } from '@/types/search';
 
-export function CopilotInput() {
+interface CopilotInputProps {
+  showSettings?: boolean;
+  onToggleSettings?: () => void;
+  onCloseSettings?: () => void;  // 新增：关闭设置面板的回调
+}
+
+export function CopilotInput({ showSettings, onToggleSettings, onCloseSettings }: CopilotInputProps = {}) {
   const { t } = useLanguage();
   const { 
     query, 
@@ -18,7 +25,13 @@ export function CopilotInput() {
     setSearchResults, 
     setIsChatting, 
     addMessage,
-    activeContextId
+    activeContextId,
+    // Search enhancement
+    enableClustering,
+    enableSummary,
+    clusterType,
+    setClusters,
+    setSummary,
   } = useCopilotStore();
 
   const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
@@ -40,6 +53,8 @@ export function CopilotInput() {
     setMode('search');
     setIsSearching(true);
     setSearchResults([]); // Clear previous
+    setClusters([]); // Clear previous clusters
+    setSummary(null); // Clear previous summary
 
     try {
       const token = useAuthStore.getState().token; // Get token from AuthStore
@@ -49,6 +64,15 @@ export function CopilotInput() {
       });
       if (activeContextId) {
           params.append('context_id', activeContextId);
+      }
+      
+      // Add search enhancement parameters
+      if (enableClustering) {
+          params.append('enable_clustering', 'true');
+          params.append('cluster_type', clusterType);
+      }
+      if (enableSummary) {
+          params.append('enable_summary', 'true');
       }
 
       const response = await fetch(`/api/v1/search?${params.toString()}`, {
@@ -65,8 +89,16 @@ export function CopilotInput() {
           throw new Error(`Search failed: ${response.status} ${errorText}`);
       }
       
-      const data = await response.json();
+      const data: SearchResponse = await response.json();
       setSearchResults(data.results || []);
+      
+      // Handle enhanced search data
+      if (data.clusters) {
+          setClusters(data.clusters);
+      }
+      if (data.summary) {
+          setSummary(data.summary);
+      }
     } catch (error) {
       console.error('Search error:', error);
     } finally {
@@ -102,6 +134,12 @@ export function CopilotInput() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={() => {
+            // 当输入框获得焦点时，关闭设置面板
+            if (showSettings && onCloseSettings) {
+              onCloseSettings();
+            }
+          }}
         />
 
         {query && (
@@ -113,7 +151,22 @@ export function CopilotInput() {
           </button>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-1">
+           {/* Settings Button */}
+           {onToggleSettings && (
+             <button 
+              onClick={onToggleSettings}
+              className={cn(
+                  "p-2 rounded-lg transition-colors",
+                  showSettings ? "bg-blue-50 text-blue-600" : "hover:bg-slate-50 text-slate-400"
+              )}
+              title={t('copilot.searchEnhancement.title')}
+             >
+               <Settings className="w-4 h-4" />
+             </button>
+           )}
+           
+           {/* Chat Mode Toggle */}
            <button 
             onClick={() => setMode('chat')}
             className={cn(

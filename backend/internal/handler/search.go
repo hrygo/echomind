@@ -17,15 +17,28 @@ type Searcher interface {
 	Search(ctx context.Context, userID uuid.UUID, query string, filters service.SearchFilters, limit int) ([]service.SearchResult, error)
 }
 
-type SearchHandler struct {
-	searchService Searcher
-	logger        logger.Logger
+type SearchClusterer interface {
+	ClusterResults(results []service.SearchResult, clusterType service.ClusterType) []service.SearchCluster
 }
 
-func NewSearchHandler(searchService Searcher, log logger.Logger) *SearchHandler {
+type SearchSummarizer interface {
+	GenerateSummary(ctx context.Context, results []service.SearchResult, query string) (*service.SearchResultsSummary, error)
+	GenerateQuickSummary(results []service.SearchResult) *service.SearchResultsSummary
+}
+
+type SearchHandler struct {
+	searchService    Searcher
+	clusteringService SearchClusterer
+	summaryService   SearchSummarizer
+	logger           logger.Logger
+}
+
+func NewSearchHandler(searchService Searcher, clusteringService SearchClusterer, summaryService SearchSummarizer, log logger.Logger) *SearchHandler {
 	return &SearchHandler{
-		searchService: searchService,
-		logger:        log,
+		searchService:    searchService,
+		clusteringService: clusteringService,
+		summaryService:   summaryService,
+		logger:           log,
 	}
 }
 
@@ -90,6 +103,11 @@ func (h *SearchHandler) Search(c *gin.Context) {
 		limit = 10
 	}
 
+	// Get enhancement flags
+	enableClustering := c.DefaultQuery("enable_clustering", "false") == "true"
+	enableSummary := c.DefaultQuery("enable_summary", "false") == "true"
+	clusterTypeStr := c.DefaultQuery("cluster_type", "sender") // sender, time, topic
+
 	h.logger.Info("Search request",
 		logger.Any("userID", userID),
 		logger.String("query", query),
@@ -119,9 +137,42 @@ func (h *SearchHandler) Search(c *gin.Context) {
 		logger.Duration("duration", duration),
 	)
 
-	c.JSON(http.StatusOK, gin.H{
+	// Prepare response with base data
+	response := gin.H{
 		"query":   query,
 		"results": results,
 		"count":   len(results),
-	})
+	}
+
+	// Add clustering if enabled
+	if enableClustering && h.clusteringService != nil && len(results) > 0 {
+		var clusterType service.ClusterType
+		switch clusterTypeStr {
+		case "time":
+			clusterType = service.ClusterByTime
+		case "topic":
+			clusterType = service.ClusterByTopic
+		default:
+			clusterType = service.ClusterBySender
+		}
+
+		clusters := h.clusteringService.ClusterResults(results, clusterType)
+		response["clusters"] = clusters
+		response["cluster_type"] = clusterTypeStr
+	}
+
+	// Add AI summary if enabled
+	if enableSummary && h.summaryService != nil && len(results) > 0 {
+		summary, err := h.summaryService.GenerateSummary(c.Request.Context(), results, query)
+		if err != nil {
+			// Fallback to quick summary if AI fails
+			h.logger.Warn("AI summary generation failed, using quick summary",
+				logger.Error(err),
+			)
+			summary = h.summaryService.GenerateQuickSummary(results)
+		}
+		response["summary"] = summary
+	}
+
+	c.JSON(http.StatusOK, response)
 }

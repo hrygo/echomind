@@ -37,13 +37,13 @@
 
 ## 🔧 技术栈
 
-| 类别       | 技术栈                                   |
-|------------|------------------------------------------|
-| **后端**   | Go, Gin, GORM, Asynq                     |
+| 类别       | 技术栈                                     |
+| ---------- | ------------------------------------------ |
+| **后端**   | Go, Gin, GORM, Asynq                       |
 | **前端**   | Next.js, TypeScript, Tailwind CSS, Zustand |
-| **数据库** | PostgreSQL (with pgvector), Redis        |
-| **容器化** | Docker                                   |
-| **AI**     | OpenAI, Gemini                           |
+| **数据库** | PostgreSQL (with pgvector), Redis          |
+| **容器化** | Docker                                     |
+| **AI**     | OpenAI, Gemini                             |
 
 ---
 
@@ -158,9 +158,9 @@ docker-compose -f deploy/docker-compose.prod.yml up -d
 
 有关详细的架构和产品规格，请参阅我们的主要文档：
 
-- **[📚 统一产品与技术架构](docs/product-design.md)**
-- **[🗺️ 产品路线图](docs/product-roadmap.md)**
-- **[🔄 EchoMind 邮件处理系统时序图](docs/api_search_sequence_diagram.md)** - 完整的系统流程时序图和架构说明
+- **[📚 统一产品与技术架构](docs/product/product-design.md)**
+- **[🗺️ 产品路线图](docs/product/product-roadmap.md)**
+- **[🔄 EchoMind 邮件处理系统时序图](docs/api/api_search_sequence_diagram.md)** - 完整的系统流程时序图和架构说明
 
 ---
 

@@ -10,7 +10,7 @@ type Dictionary = typeof en;
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -35,7 +35,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('app-language', lang);
     };
 
-    const t = (key: string): string => {
+    const t = (key: string, params?: Record<string, string | number>): string => {
         const keys = key.split('.');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let value: any = dictionaries[language];
@@ -48,7 +48,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             }
         }
 
-        return typeof value === 'string' ? value : key;
+        let result = typeof value === 'string' ? value : key;
+        
+        // Replace parameters in the format {paramName}
+        if (params) {
+            Object.entries(params).forEach(([paramKey, paramValue]) => {
+                result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
+            });
+        }
+        
+        return result;
     };
 
     return (

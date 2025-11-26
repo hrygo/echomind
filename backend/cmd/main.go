@@ -73,7 +73,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(userService)
 	insightHandler := handler.NewInsightHandlerWithServices(insightService, taskService, emailService)
 	aiDraftHandler := handler.NewAIDraftHandler(aiDraftService, emailService)
-	searchHandler := handler.NewSearchHandler(container.SearchService, container.Logger)
+	searchHandler := handler.NewSearchHandler(container.SearchService, container.SearchClusteringService, container.SearchSummaryService, container.Logger)
 	healthHandler := handler.NewHealthHandler(container.DB)
 	orgHandler := handler.NewOrganizationHandler(organizationService)
 	chatHandler := handler.NewChatHandler(chatService)

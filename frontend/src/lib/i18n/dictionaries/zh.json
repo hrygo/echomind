@@ -244,7 +244,27 @@
         "topResults": "最佳结果",
         "noResults": "未找到结果。请尝试不同的查询。",
         "match": "匹配度",
-        "welcomeMessage": "今天我能为您做什么？"
+        "welcomeMessage": "今天我能为您做什么？",
+        "searchEnhancement": {
+            "title": "搜索增强设置",
+            "aiSummary": "AI 智能摘要",
+            "clustering": "结果聚类",
+            "clusterType": "聚类方式",
+            "clusterBySender": "发件人",
+            "clusterByTime": "时间",
+            "clusterByTopic": "主题",
+            "summaryTitle": "AI 智能摘要",
+            "keyTopics": "关键主题",
+            "importantPeople": "重要联系人",
+            "noSummary": "暂无摘要信息",
+            "noClusterData": "暂无聚类数据",
+            "emailCount": "{count} 封邮件",
+            "from": "来自",
+            "matchScore": "匹配度: {score}%",
+            "allResults": "全部结果",
+            "clustered": "聚类视图",
+            "clusteredResults": "聚类结果"
+        }
     },
     "onboarding": {
         "step1": {

@@ -31,6 +31,40 @@ func (m *MockSearcher) Search(ctx context.Context, userID uuid.UUID, query strin
 	return args.Get(0).([]service.SearchResult), args.Error(1)
 }
 
+// MockSearchClusterer implements handler.SearchClusterer
+type MockSearchClusterer struct {
+	mock.Mock
+}
+
+func (m *MockSearchClusterer) ClusterResults(results []service.SearchResult, clusterType service.ClusterType) []service.SearchCluster {
+	args := m.Called(results, clusterType)
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Get(0).([]service.SearchCluster)
+}
+
+// MockSearchSummarizer implements handler.SearchSummarizer
+type MockSearchSummarizer struct {
+	mock.Mock
+}
+
+func (m *MockSearchSummarizer) GenerateSummary(ctx context.Context, results []service.SearchResult, query string) (*service.SearchResultsSummary, error) {
+	args := m.Called(ctx, results, query)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*service.SearchResultsSummary), args.Error(1)
+}
+
+func (m *MockSearchSummarizer) GenerateQuickSummary(results []service.SearchResult) *service.SearchResultsSummary {
+	args := m.Called(results)
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Get(0).(*service.SearchResultsSummary)
+}
+
 // NoopLogger implements logger.Logger for testing
 type NoopLogger struct{}
 
@@ -54,7 +88,9 @@ func TestSearchHandler_Search(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, testLogger)
+		mockClusterer := new(MockSearchClusterer)
+		mockSummarizer := new(MockSearchSummarizer)
+		h := handler.NewSearchHandler(mockSearcher, mockClusterer, mockSummarizer, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -82,7 +118,9 @@ func TestSearchHandler_Search(t *testing.T) {
 
 	t.Run("Missing Query", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, testLogger)
+		mockClusterer := new(MockSearchClusterer)
+		mockSummarizer := new(MockSearchSummarizer)
+		h := handler.NewSearchHandler(mockSearcher, mockClusterer, mockSummarizer, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -98,7 +136,9 @@ func TestSearchHandler_Search(t *testing.T) {
 
 	t.Run("Service Error", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, testLogger)
+		mockClusterer := new(MockSearchClusterer)
+		mockSummarizer := new(MockSearchSummarizer)
+		h := handler.NewSearchHandler(mockSearcher, mockClusterer, mockSummarizer, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -116,7 +156,9 @@ func TestSearchHandler_Search(t *testing.T) {
 
 	t.Run("Unauthorized", func(t *testing.T) {
 		mockSearcher := new(MockSearcher)
-		h := handler.NewSearchHandler(mockSearcher, testLogger)
+		mockClusterer := new(MockSearchClusterer)
+		mockSummarizer := new(MockSearchSummarizer)
+		h := handler.NewSearchHandler(mockSearcher, mockClusterer, mockSummarizer, testLogger)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)

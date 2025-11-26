@@ -156,7 +156,7 @@ func benchmarkSearch(b *testing.B, count int) {
 	userID := setupBenchmarkData(b, db, count)
 	defer cleanupBenchmarkData(db, userID)
 
-	svc := service.NewSearchService(db, &MockEmbeddingProvider{})
+	svc := service.NewSearchService(db, &MockEmbeddingProvider{}, nil)
 	ctx := context.Background()
 
 	b.ResetTimer()

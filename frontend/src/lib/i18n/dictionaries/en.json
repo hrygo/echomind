@@ -241,7 +241,27 @@
         "topResults": "Top Results",
         "noResults": "No results found. Try a different query.",
         "match": "match",
-        "welcomeMessage": "How can I help you today?"
+        "welcomeMessage": "How can I help you today?",
+        "searchEnhancement": {
+            "title": "Search Enhancement Settings",
+            "aiSummary": "AI Summary",
+            "clustering": "Result Clustering",
+            "clusterType": "Cluster By",
+            "clusterBySender": "Sender",
+            "clusterByTime": "Time",
+            "clusterByTopic": "Topic",
+            "summaryTitle": "AI Smart Summary",
+            "keyTopics": "Key Topics",
+            "importantPeople": "Important People",
+            "noSummary": "No summary available",
+            "noClusterData": "No cluster data available",
+            "emailCount": "{count} emails",
+            "from": "From",
+            "matchScore": "Match: {score}%",
+            "allResults": "All Results",
+            "clustered": "Clustered",
+            "clusteredResults": "Clustered Results"
+        }
     },
     "onboarding": {
         "step1": {

@@ -176,5 +176,44 @@ ai:
     # Input: Original Email + User Prompt
     # Output: String (Draft Email Body)
     draft_reply: |
-      你是一位高效的职业经理人。请根据原始邮件内容和用户的简短提示，用中文起草一封专业、得体且切中要点的回复邮件。
-      保持语气专业、友好。如果用户提示很简略，请根据上下文合理补充。
+      你是一位高效的职业经理人。请根据原始邮件内容和用户的简短提示,用中文起草一封专业、得体且切中要点的回复邮件。
+      保持语气专业、友好。如果用户提示很简略,请根据上下文合理补充。
+
+# ==============================================================================
+# OpenTelemetry Configuration (可观测性配置)
+# ==============================================================================
+telemetry:
+  enabled: true
+  service_name: "echomind-backend"
+  service_version: "v1.2.0"
+  environment: "development"  # development, staging, production
+  
+  # Exporter 配置
+  exporter:
+    type: "console"  # console, file, otlp
+    
+    # 控制台输出 (开发环境)
+    console:
+      enable_color: true
+      pretty_print: true
+    
+    # 文件输出
+    file:
+      traces_path: "./logs/traces.jsonl"
+      metrics_path: "./logs/metrics.jsonl"
+    
+    # OTLP Collector (生产环境预留)
+    otlp:
+      endpoint: "localhost:4318"
+      insecure: true
+      timeout: "10s"
+  
+  # 采样策略
+  sampling:
+    type: "always_on"  # always_on, always_off, traceidratio
+    ratio: 1.0         # 采样率 (0.0-1.0)
+  
+  # Metrics 配置
+  metrics:
+    export_interval: "60s"  # 指标导出间隔
+    export_timeout: "30s"

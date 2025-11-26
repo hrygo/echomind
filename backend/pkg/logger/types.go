@@ -37,6 +37,30 @@ func (l Level) String() string {
 	}
 }
 
+// ParseLevel 解析日志级别字符串
+func ParseLevel(s string) Level {
+	switch s {
+	case "DEBUG", "debug":
+		return DebugLevel
+	case "INFO", "info":
+		return InfoLevel
+	case "WARN", "warn":
+		return WarnLevel
+	case "ERROR", "error":
+		return ErrorLevel
+	case "FATAL", "fatal":
+		return FatalLevel
+	default:
+		return InfoLevel
+	}
+}
+
+// UnmarshalText 实现 encoding.TextUnmarshaler 接口
+func (l *Level) UnmarshalText(text []byte) error {
+	*l = ParseLevel(string(text))
+	return nil
+}
+
 // Field 结构化日志字段
 type Field struct {
 	Key   string

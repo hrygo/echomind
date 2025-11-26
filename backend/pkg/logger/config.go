@@ -72,7 +72,7 @@ func LoadConfigFromEnv() *Config {
 
 	// 日志级别
 	if levelStr := os.Getenv("LOG_LEVEL"); levelStr != "" {
-		config.Level = parseLevel(levelStr)
+		config.Level = ParseLevel(levelStr)
 	}
 
 	// 生产模式
@@ -157,22 +157,4 @@ func expandEnvVars(data []byte) []byte {
 	})
 
 	return []byte(result)
-}
-
-// parseLevel 解析日志级别字符串
-func parseLevel(s string) Level {
-	switch s {
-	case "DEBUG", "debug":
-		return DebugLevel
-	case "INFO", "info":
-		return InfoLevel
-	case "WARN", "warn":
-		return WarnLevel
-	case "ERROR", "error":
-		return ErrorLevel
-	case "FATAL", "fatal":
-		return FatalLevel
-	default:
-		return InfoLevel
-	}
 }

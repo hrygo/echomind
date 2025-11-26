@@ -3,6 +3,8 @@ package logger
 import (
 	"testing"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 func TestLevel_String(t *testing.T) {
@@ -165,4 +167,66 @@ type customTestError struct{}
 
 func (e *customTestError) Error() string {
 	return "test error"
+}
+
+func TestLevel_UnmarshalText(t *testing.T) {
+	tests := []struct {
+		name    string
+		text    string
+		want    Level
+		wantErr bool
+	}{
+		{"DEBUG", "DEBUG", DebugLevel, false},
+		{"info", "info", InfoLevel, false},
+		{"WARN", "WARN", WarnLevel, false},
+		{"error", "error", ErrorLevel, false},
+		{"fatal", "fatal", FatalLevel, false},
+		{"unknown", "unknown", InfoLevel, false}, // Default to Info
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var l Level
+			if err := l.UnmarshalText([]byte(tt.text)); (err != nil) != tt.wantErr {
+				t.Errorf("Level.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if l != tt.want {
+				t.Errorf("Level.UnmarshalText() = %v, want %v", l, tt.want)
+			}
+		})
+	}
+}
+
+func TestLevel_YAML(t *testing.T) {
+	configYaml := `
+level: DEBUG
+sampling:
+  levels:
+    - INFO
+    - ERROR
+`
+	type TestConfig struct {
+		Level    Level `yaml:"level"`
+		Sampling struct {
+			Levels []Level `yaml:"levels"`
+		} `yaml:"sampling"`
+	}
+
+	var cfg TestConfig
+	err := yaml.Unmarshal([]byte(configYaml), &cfg)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal YAML: %v", err)
+	}
+
+	if cfg.Level != DebugLevel {
+		t.Errorf("Expected Level to be DebugLevel, got %v", cfg.Level)
+	}
+	if len(cfg.Sampling.Levels) != 2 {
+		t.Fatalf("Expected 2 sampling levels, got %d", len(cfg.Sampling.Levels))
+	}
+	if cfg.Sampling.Levels[0] != InfoLevel {
+		t.Errorf("Expected first sampling level to be InfoLevel, got %v", cfg.Sampling.Levels[0])
+	}
+	if cfg.Sampling.Levels[1] != ErrorLevel {
+		t.Errorf("Expected second sampling level to be ErrorLevel, got %v", cfg.Sampling.Levels[1])
+	}
 }

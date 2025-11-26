@@ -12,9 +12,14 @@ import (
 	"github.com/hrygo/echomind/configs"
 	"github.com/hrygo/echomind/pkg/ai"
 	"github.com/hrygo/echomind/pkg/ai/registry"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
+
+var tracer = otel.Tracer("gemini-provider")
 
 func init() {
 	registry.Register("gemini", NewProvider)
@@ -55,9 +60,19 @@ func NewProvider(ctx context.Context, settings configs.ProviderSettings, prompts
 }
 
 func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResult, error) {
+	ctx, span := tracer.Start(ctx, "gemini.Summarize",
+		trace.WithAttributes(
+			attribute.String("ai.model", p.model),
+			attribute.Int("text.length", len(text)),
+		),
+	)
+	defer span.End()
+
 	systemPrompt := p.prompts["summary"]
 	if systemPrompt == "" {
-		return ai.AnalysisResult{}, errors.New("summary prompt not configured")
+		err := errors.New("summary prompt not configured")
+		span.RecordError(err)
+		return ai.AnalysisResult{}, err
 	}
 
 	model := p.client.GenerativeModel(p.model)
@@ -66,6 +81,7 @@ func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResul
 
 	resp, err := model.GenerateContent(ctx, genai.Text(text))
 	if err != nil {
+		span.RecordError(err)
 		return ai.AnalysisResult{}, err
 	}
 
@@ -74,9 +90,17 @@ func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResul
 
 	var result ai.AnalysisResult
 	if err := json.Unmarshal([]byte(cleaned), &result); err != nil {
+		span.SetAttributes(
+			attribute.Bool("json.parsing.failed", true),
+		)
 		return ai.AnalysisResult{Summary: response}, nil
 	}
 
+	span.SetAttributes(
+			attribute.String("result.category", result.Category),
+			attribute.Int("result.action_items", len(result.ActionItems)),
+			attribute.Int("result.smart_actions", len(result.SmartActions)),
+	)
 	return result, nil
 }
 
@@ -280,16 +304,39 @@ func extractContentAndWidget(resp *genai.GenerateContentResponse) (string, *ai.W
 
 // Embed generates a vector for a single text.
 func (p *Provider) Embed(ctx context.Context, text string) ([]float32, error) {
+	ctx, span := tracer.Start(ctx, "gemini.Embed",
+		trace.WithAttributes(
+			attribute.String("ai.model", p.embeddingModel),
+			attribute.Int("ai.dimensions", p.dimensions),
+			attribute.Int("text.length", len(text)),
+		),
+	)
+	defer span.End()
+
 	em := p.client.EmbeddingModel(p.embeddingModel)
 	res, err := em.EmbedContent(ctx, genai.Text(text))
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
+
+	span.SetAttributes(
+		attribute.Int("embedding.dimensions", len(res.Embedding.Values)),
+	)
 	return res.Embedding.Values, nil
 }
 
 // EmbedBatch generates vectors for multiple texts.
 func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
+	ctx, span := tracer.Start(ctx, "gemini.EmbedBatch",
+		trace.WithAttributes(
+			attribute.String("ai.model", p.embeddingModel),
+			attribute.Int("ai.dimensions", p.dimensions),
+			attribute.Int("batch.size", len(texts)),
+		),
+	)
+	defer span.End()
+
 	em := p.client.EmbeddingModel(p.embeddingModel)
 	batch := em.NewBatch()
 	for _, text := range texts {
@@ -297,12 +344,17 @@ func (p *Provider) EmbedBatch(ctx context.Context, texts []string) ([][]float32,
 	}
 	res, err := em.BatchEmbedContents(ctx, batch)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	var embeddings [][]float32
 	for _, e := range res.Embeddings {
 		embeddings = append(embeddings, e.Values)
 	}
+
+	span.SetAttributes(
+		attribute.Int("embeddings.count", len(embeddings)),
+	)
 	return embeddings, nil
 }
 

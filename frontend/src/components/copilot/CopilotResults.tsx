@@ -1,9 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Mail, Calendar, User } from 'lucide-react';
+import { Mail, Calendar, User, List, Grid } from 'lucide-react';
 import { useCopilotStore, SearchResult } from '@/store/useCopilotStore';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { SearchSummaryCard } from './SearchSummaryCard';
+import { SearchClusterView } from './SearchClusterView';
+import { cn } from '@/lib/utils';
 
 function ResultItem({ result }: { result: SearchResult }) {
   const { t } = useLanguage();
@@ -39,25 +42,93 @@ function ResultItem({ result }: { result: SearchResult }) {
 
 export function CopilotResults() {
   const { t } = useLanguage();
-  const { searchResults, isSearching, mode } = useCopilotStore();
+  const { 
+    searchResults, 
+    isSearching, 
+    mode,
+    // Search enhancement
+    summary,
+    clusters,
+    clusterType,
+    searchViewMode,
+    setSearchViewMode,
+  } = useCopilotStore();
 
   if (mode !== 'search') return null;
 
+  const hasEnhancedData = summary || (clusters && clusters.length > 0);
+
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white border border-t-0 rounded-b-xl shadow-lg max-h-[60vh] overflow-y-auto">
+    <div className="w-full max-w-2xl mx-auto bg-white border border-t-0 rounded-b-xl shadow-lg max-h-[70vh] overflow-y-auto">
       {isSearching ? (
         <div className="p-8 text-center text-slate-500">
           <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
           {t('copilot.searching')}
         </div>
       ) : searchResults.length > 0 ? (
-        <div className="p-2 space-y-1">
-            <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                {t('copilot.topResults')}
+        <div className="p-2">
+          {/* AI Summary Card */}
+          {summary && (
+            <div className="px-2 py-2">
+              <SearchSummaryCard 
+                summary={summary} 
+                resultCount={searchResults.length}
+              />
             </div>
-          {searchResults.map((result) => (
-            <ResultItem key={result.email_id} result={result} />
-          ))}
+          )}
+          
+          {/* View Mode Toggle (only show if we have clusters) */}
+          {clusters && clusters.length > 0 && (
+            <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
+              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                {searchViewMode === 'all' ? t('copilot.topResults') : t('copilot.clusteredResults')}
+              </div>
+              <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+                <button
+                  onClick={() => setSearchViewMode('all')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded transition-colors flex items-center gap-1.5",
+                    searchViewMode === 'all'
+                      ? "bg-white text-slate-700 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  <List className="w-3.5 h-3.5" />
+                  {t('copilot.searchEnhancement.allResults')}
+                </button>
+                <button
+                  onClick={() => setSearchViewMode('clustered')}
+                  className={cn(
+                    "px-3 py-1 text-xs rounded transition-colors flex items-center gap-1.5",
+                    searchViewMode === 'clustered'
+                      ? "bg-white text-slate-700 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  <Grid className="w-3.5 h-3.5" />
+                  {t('copilot.searchEnhancement.clustered')}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Results Display */}
+          {searchViewMode === 'clustered' && clusters && clusters.length > 0 ? (
+            <div className="px-2 py-2">
+              <SearchClusterView clusters={clusters} clusterType={clusterType} />
+            </div>
+          ) : (
+            <div className="space-y-1 mt-2">
+              {!hasEnhancedData && (
+                <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  {t('copilot.topResults')}
+                </div>
+              )}
+              {searchResults.map((result) => (
+                <ResultItem key={result.email_id} result={result} />
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <div className="p-8 text-center text-slate-400">
