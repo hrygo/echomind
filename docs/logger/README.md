@@ -94,7 +94,7 @@ context:
   auto_fields: ["trace_id", "user_id", "org_id"]
   global_fields:
     service: "echomind"
-    version: "0.9.4"
+    version: "1.1.0"
 
 providers:
   - name: "elasticsearch"
