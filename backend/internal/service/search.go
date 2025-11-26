@@ -43,19 +43,10 @@ type SearchFilters struct {
 }
 
 func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query string, filters SearchFilters, limit int) ([]SearchResult, error) {
-	// 1. Generate embedding for the query with timeout
-	embeddingCtx, cancel := context.WithTimeout(ctx, 20*time.Second) // 20 second timeout for embedding
-	defer cancel()
-
-	queryVector, err := s.embedder.Embed(embeddingCtx, query)
+	// Generate query embedding
+	queryVector, err := s.embedder.Embed(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to embed query: %w", err)
-	}
-
-	// 2. Validate query vector dimensions match system configuration
-	// Note: Vector dimension changes require full system reindexing (see docs)
-	if len(queryVector) == 0 {
-		return nil, fmt.Errorf("empty query vector generated")
 	}
 
 	// 2. Perform vector search using raw SQL

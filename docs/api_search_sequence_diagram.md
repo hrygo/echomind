@@ -203,33 +203,24 @@ flowchart TD
 | **local_ollama** | nomic-embed-text | 768 | 768 | 直接使用 |
 | **mock** | - | 1024 | 1024 | 模拟生成 |
 
-##### 2.1.2.3 向量维度验证机制
+##### 2.1.2.3 向量维度规约化机制
 
 ```go
-// backend/internal/model/embedding.go:41-69
-func (e *EmailEmbedding) validateAndConvertVector(tx *gorm.DB) error {
-    vectorSlice := e.Vector.Slice()
-    actualDimensions := len(vectorSlice)
-    e.Dimensions = actualDimensions
+// backend/internal/model/embedding.go (规约化方法)
+type EmailEmbedding struct {
+    ID        uint            `gorm:"primaryKey" json:"id"`
+    EmailID   uuid.UUID       `gorm:"type:uuid;not null;index" json:"email_id"`
+    Content   string          `gorm:"type:text" json:"content"` // Text chunk
+    Vector    pgvector.Vector `gorm:"type:vector(1024)" json:"vector"` // Fixed dimension: 1024
+    Dimensions int             `gorm:"not null;default:1024" json:"dimensions"` // Always 1024
+    CreatedAt time.Time       `json:"created_at"`
 
-    maxDimensions := 1536 // OpenAI最大标准维度
-
-    // 超过最大维度则截断
-    if actualDimensions > maxDimensions {
-        truncatedSlice := vectorSlice[:maxDimensions]
-        e.Vector = pgvector.NewVector(truncatedSlice)
-        e.Dimensions = maxDimensions
-    }
-
-    // 小于最大维度则用零填充
-    if actualDimensions < maxDimensions {
-        paddedVector := make([]float32, maxDimensions)
-        copy(paddedVector, vectorSlice)
-        e.Vector = pgvector.NewVector(paddedVector)
-    }
-
-    return nil
+    // Associations
+    Email Email `gorm:"foreignKey:EmailID;constraint:OnDelete:CASCADE;" json:"-"`
 }
+
+// 规约化方法：无复杂验证逻辑，直接使用固定1024维度
+// 向量维度不匹配时需要通过 Reindex 工具全量重建
 ```
 
 ##### 2.1.2.4 数据库搜索算法
@@ -614,8 +605,27 @@ func (cli *ReindexCLI) processEmail(email *model.Email) error {
 |------|--------|------|------|
 | **ChunkSize** | 1000 | 文本分块大小(字符) | API调用稳定性 |
 | **MaxChunks** | 10 | 最大分块数量 | 处理效果和成本 |
-| **BatchSize** | 50 | 批量处理大小(预留) | 未来性能优化 |
+| **VectorDimensions** | 1024 | 向量维度(固定) | 规约化约束 |
 | **LogLevel** | info | 日志记录级别 | 调试便利性 |
+
+##### 2.3.2.3.1 规约化配置示例
+
+```yaml
+# configs/config.yaml (规约化配置示例)
+ai:
+  active_services:
+    embedding: "siliconflow"  # 当前活跃嵌入提供者
+
+  providers:
+    siliconflow:
+      embedding_model: "Pro/BAAI/bge-m3"
+      embedding_dimensions: 1024  # 固定配置，不可动态调整
+
+    # 其他提供者配置需要更换时执行完整迁移流程
+    openai:
+      embedding_model: "text-embedding-3-small"
+      embedding_dimensions: 1536  # 切换时需重建所有向量
+```
 
 ##### 2.3.2.4 数据完整性保障
 
@@ -649,6 +659,77 @@ func (s *EmbeddingService) GenerateEmbedding(content string) ([]float32, error) 
     return s.validateAndNormalizeVector(finalEmbedding)
 }
 ```
+
+#### 3.1.1 ⚠️ 向量维度规约化与嵌入模型更换指南
+
+**重要说明**: EchoMind系统采用**规约化向量维度管理策略**，不支持动态维度调整。更换嵌入模型需要执行必要的迁移步骤。
+
+##### 📊 向量维度规约化原则
+
+| 原则 | 说明 | 实现方式 |
+|------|------|----------|
+| **单一维度** | 系统在运行时只支持一种向量维度 | 数据库schema + 配置文件约定 |
+| **模型绑定** | 每个嵌入模型与特定维度绑定 | `embedding_dimensions`配置项 |
+| **全量重建** | 更换模型时必须重建所有向量 | Reindex工具 + 数据库迁移 |
+| **向后兼容** | 新版本保持现有向量格式不变 | 版本管理 + 降级策略 |
+
+##### 🔄 更换嵌入模型的必要步骤
+
+当需要更换嵌入模型时（例如从1536维OpenAI模型切换到1024维SiliconFlow模型），**必须**执行以下步骤：
+
+```bash
+# 1. 备份现有向量数据（重要！）
+docker exec deploy-db-1 pg_dump -U user -d echomind_db -t email_embeddings > embeddings_backup.sql
+
+# 2. 停止应用服务
+make stop-backend
+
+# 3. 更新数据库schema
+docker exec deploy-db-1 psql -U user -d echomind_db -c "ALTER TABLE email_embeddings ALTER COLUMN vector TYPE vector(1024);"
+
+# 4. 更新应用配置（configs/config.yaml）
+# 修改 ai.active_services.embedding 和 ai.providers.siliconflow.embedding_dimensions
+
+# 5. 删除现有向量数据
+docker exec deploy-db-1 psql -U user -d echomind_db -c "DELETE FROM email_embeddings;"
+
+# 6. 重新生成所有向量
+go run cmd/reindex/main.go --config configs/config.yaml
+
+# 7. 验证向量维度
+docker exec deploy-db-1 psql -U user -d echomind_db -c "SELECT dimensions, COUNT(*) FROM email_embeddings GROUP BY dimensions;"
+
+# 8. 重启应用服务
+make run-backend
+```
+
+##### ⚡ 常见嵌入模型维度对照表
+
+| Provider | 模型名称 | 原生维度 | 系统配置 | 使用场景 |
+|----------|----------|----------|----------|----------|
+| **OpenAI** | text-embedding-3-small | 1536 | `embedding_dimensions: 1536` | 高精度英文场景 |
+| **OpenAI** | text-embedding-ada-002 | 1536 | `embedding_dimensions: 1536` | 传统OpenAI模型 |
+| **SiliconFlow** | BAAI/bge-m3 | 1024 | `embedding_dimensions: 1024` | 中文优化/成本效益 |
+| **Gemini** | text-embedding-004 | 768 | `embedding_dimensions: 768` | Google生态集成 |
+| **Ollama** | nomic-embed-text | 768 | `embedding_dimensions: 768` | 本地部署方案 |
+
+##### 🚨 关键注意事项
+
+1. **数据丢失风险**: 更换维度会导致现有向量数据不可用，必须先备份
+2. **服务中断**: 重建过程可能需要较长时间，建议在维护窗口执行
+3. **内存消耗**: 向量维度直接影响内存使用，高维度需要更多资源
+4. **搜索性能**: 维度变化会影响向量搜索的性能和准确性
+5. **配置一致性**: 确保所有节点的配置文件保持一致
+
+##### 🔧 故障排除
+
+**错误信息**: `ERROR: different vector dimensions 1536 and 1024 (SQLSTATE 22000)`
+
+**解决方案**:
+1. 确认配置文件中的`embedding_dimensions`设置
+2. 检查数据库schema中的vector列类型
+3. 运行Reindex工具重建所有向量
+4. 验证生成的新向量维度与配置一致
 
 ### 3.2 AI Provider架构
 
@@ -694,14 +775,13 @@ CREATE TABLE emails (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 向量嵌入表
+-- 向量嵌入表 (规约化：固定1024维度)
 CREATE TABLE email_embeddings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email_id UUID NOT NULL REFERENCES emails(id) ON DELETE CASCADE,
     content TEXT NOT NULL,        -- 用于嵌入的文本内容
-    vector vector(1536),          -- pgvector向量
-    dimensions INTEGER NOT NULL,  -- 实际维度
-    model_version TEXT,           -- 嵌入模型版本
+    vector vector(1024),          -- pgvector向量 (固定1024维度)
+    dimensions INTEGER NOT NULL DEFAULT 1024,  -- 始终1024
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
