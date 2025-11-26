@@ -58,3 +58,4 @@ backend/configs/config.yaml
 .vercel
 backend/echomind-server
 coverage.out
+tmp/*

@@ -21,6 +21,7 @@ type Handlers struct {
 	Context     *handler.ContextHandler
 	Action      *handler.ActionHandler
 	Opportunity *handler.OpportunityHandler
+	WeChat      interface{ Callback(c *gin.Context) } // WeChat gateway handler
 }
 
 // SetupRoutes registers all API routes
@@ -31,6 +32,11 @@ func SetupRoutes(router *gin.Engine, h *Handlers, authMiddleware gin.HandlerFunc
 		api.GET("/health", h.Health.HealthCheck)
 		api.POST("/auth/register", h.Auth.Register)
 		api.POST("/auth/login", h.Auth.Login)
+
+		// WeChat callback (public)
+		if h.WeChat != nil {
+			api.Any("/wechat/callback", h.WeChat.Callback)
+		}
 
 		// Protected routes
 		protected := api.Group("/").Use(authMiddleware)
