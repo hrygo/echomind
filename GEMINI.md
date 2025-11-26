@@ -10,15 +10,25 @@
 
 ### 发布检查清单
 ```bash
-# 1. 版本文件更新
+# 1. 核心版本文件
 - frontend/package.json
-- backend/pkg/logger/config.go (DefaultConfig version)
-- docs/logger/README.md (examples)
-- docs/product-roadmap.md (当前版本 & 历史记录)
-- README.md (路线图)
-- CHANGELOG.md (版本记录)
+- backend/pkg/logger/config.go (DefaultConfig version: "0.9.4")
+- Makefile (VERSION := 0.9.8)
+- backend/configs/logger.example.yaml (示例配置)
+- docs/openapi.yaml (version: "0.9.8")
 
-# 2. 发布命令序列
+# 2. 文档版本更新
+- README.md (路线图)
+- README.zh.md (中文路线图)
+- CHANGELOG.md (版本记录)
+- docs/product-roadmap.md (当前版本 & 历史记录)
+- docs/logger/README.md (示例配置)
+
+# 3. 其他配置文件
+- backend/configs/logger.yaml (如存在)
+- GEMINI.md (版本信息)
+
+# 4. 发布命令序列
 git add .
 git commit -m "feat: v1.1.0 - 版本描述"
 git tag -a v1.1.0 -m "详细发布说明"
