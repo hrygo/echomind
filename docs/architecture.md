@@ -9,6 +9,7 @@
 
 ## 📚 相关文档
 
+- **[EchoMind 邮件处理系统时序图](./api_search_sequence_diagram.md)** - 完整的邮件搜索、同步和Reindex流程时序图
 - **[向量搜索技术指南](./vector-search-guide.md)** - 详细的向量搜索实现、性能优化和最佳实践
 - **[API 文档](./api.md)** - 完整的 REST API 接口文档
 - **[产品需求文档](./prd.md)** - 产品功能规划和需求说明

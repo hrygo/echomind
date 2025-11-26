@@ -139,6 +139,7 @@ docker-compose -f deploy/docker-compose.prod.yml up -d
 
 - **[📚 统一产品与技术架构](docs/product-design.md)**
 - **[🗺️ 产品路线图](docs/product-roadmap.md)**
+- **[🔄 EchoMind 邮件处理系统时序图](docs/api_search_sequence_diagram.md)** - 完整的系统流程时序图和架构说明
 
 ---
 
