@@ -17,7 +17,20 @@
 - [email.go](file://backend/internal/model/email.go)
 - [context.go](file://backend/internal/model/context.go)
 - [app_config.go](file://backend/configs/app_config.go)
+- [search_cache.go](file://backend/internal/service/search_cache.go)
+- [search_clustering.go](file://backend/internal/service/search_clustering.go)
+- [search_summary.go](file://backend/internal/service/search_summary.go)
+- [otel.go](file://backend/pkg/telemetry/otel.go)
+- [metrics.go](file://backend/pkg/telemetry/metrics.go)
 </cite>
+
+## 更新摘要
+**变更内容**
+- 新增了OpenTelemetry集成的详细说明，包括配置、初始化和分布式追踪实现
+- 扩展了SearchService以支持AI搜索聚类和摘要功能，新增了enable_clustering、enable_summary等查询参数
+- 新增了SearchCache服务的详细指标说明，包括GetLatency、SetLatency、DeleteLatency等9个核心缓存指标
+- 扩展了监控与可观测性章节，详细描述了性能监控指标和分布式追踪的实现方式
+- 更新了架构图以反映新的服务依赖关系
 
 ## 目录
 1. [概述](#概述)
@@ -42,6 +55,7 @@ Service层的主要特点包括：
 - **事务管理**：确保数据一致性
 - **异步处理**：支持后台任务调度
 - **错误处理**：统一的错误传播机制
+- **可观测性**：通过OpenTelemetry实现全面的监控和追踪
 
 ## Service层架构设计
 
@@ -63,6 +77,9 @@ S4[ChatService]
 S5[AccountService]
 S6[EmailService]
 S7[ContextService]
+S8[SearchClusteringService]
+S9[SearchSummaryService]
+S10[SearchCache]
 end
 subgraph "Repository层"
 R1[AccountRepository]
@@ -76,6 +93,11 @@ end
 subgraph "数据库层"
 D1[(PostgreSQL)]
 D2[(Redis)]
+end
+subgraph "可观测性"
+O1[OpenTelemetry]
+O2[Metrics]
+O3[Tracing]
 end
 H1 --> S1
 H2 --> S2
@@ -96,12 +118,25 @@ S5 --> D1
 S6 --> D1
 S7 --> D1
 S3 --> D2
+S2 --> S10
+S2 --> S8
+S2 --> S9
+S2 --> O1
+S2 --> O2
+S2 --> O3
+S10 --> D2
+S10 --> O1
+S10 --> O2
+S10 --> O3
 ```
 
 **图表来源**
 - [ai_draft.go](file://backend/internal/service/ai_draft.go#L9-L20)
 - [search.go](file://backend/internal/service/search.go#L17-L27)
 - [sync.go](file://backend/internal/service/sync.go#L78-L101)
+- [search_cache.go](file://backend/internal/service/search_cache.go#L21-L26)
+- [search_clustering.go](file://backend/internal/service/search_clustering.go#L55-L55)
+- [search_summary.go](file://backend/internal/service/search_summary.go#L11-L14)
 
 ### 核心组件关系图
 
@@ -114,6 +149,8 @@ class AIDraftService {
 class SearchService {
 -db *gorm.DB
 -embedder EmbeddingProvider
+-metrics *telemetry.SearchMetrics
+-cache *SearchCache
 +Search(ctx, userID, query, filters, limit) []SearchResult
 +GenerateAndSaveEmbedding(ctx, email, chunkSize) error
 }
@@ -158,8 +195,30 @@ class ContextService {
 +MatchContexts(email) []Context
 +AssignContextsToEmail(emailID, contextIDs) error
 }
+class SearchCache {
+-redis *redis.Client
+-ttl time.Duration
+-metrics *telemetry.CacheMetrics
+-tracer trace.Tracer
++Get(ctx, userID, query, filters, limit) []SearchResult
++Set(ctx, userID, query, filters, limit, results) error
++Invalidate(ctx, userID) error
++InvalidateAll(ctx) error
+}
+class SearchClusteringService {
++ClusterResults(results, clusterType) []SearchCluster
++ClusterAll(results) *ClusteredSearchResults
+}
+class SearchSummaryService {
+-aiProvider AIProvider
++GenerateSummary(ctx, results, query) *SearchResultsSummary
++GenerateQuickSummary(results) *SearchResultsSummary
+}
 AIDraftService --> AIProvider
 SearchService --> EmbeddingProvider
+SearchService --> SearchCache
+SearchService --> SearchClusteringService
+SearchService --> SearchSummaryService
 SyncService --> AccountRepository
 SyncService --> IMAPConnector
 SyncService --> EmailIngestor
@@ -169,6 +228,11 @@ ChatService --> EmailRetriever
 AccountService --> SecurityConfig
 EmailService --> GORMDB
 ContextService --> GORMDB
+SearchCache --> RedisClient
+SearchCache --> CacheMetrics
+SearchCache --> Tracer
+SearchClusteringService --> ClusterType
+SearchSummaryService --> AIProvider
 ```
 
 **图表来源**
@@ -179,6 +243,9 @@ ContextService --> GORMDB
 - [account.go](file://backend/internal/service/account.go#L18-L29)
 - [email.go](file://backend/internal/service/email.go#L14-L23)
 - [context.go](file://backend/internal/service/context.go#L14-L20)
+- [search_cache.go](file://backend/internal/service/search_cache.go#L21-L26)
+- [search_clustering.go](file://backend/internal/service/search_clustering.go#L55-L55)
+- [search_summary.go](file://backend/internal/service/search_summary.go#L11-L14)
 
 ## 核心业务逻辑模块
 
@@ -430,6 +497,48 @@ ReturnMatches --> End([结束])
 
 **节来源**
 - [context.go](file://backend/internal/service/context.go#L1-L169)
+
+### AI搜索增强功能
+
+SearchService新增了AI驱动的搜索增强功能，包括结果聚类和智能摘要，显著提升了搜索结果的可读性和实用性。
+
+#### 核心特性
+- **AI聚类**：根据发件人、时间或主题自动分组搜索结果
+- **智能摘要**：生成搜索结果的自然语言总结和关键信息提取
+- **可配置性**：通过查询参数灵活控制增强功能的启用状态
+- **性能优化**：缓存机制减少AI调用开销
+
+#### 新增查询参数
+- **enable_clustering**: 布尔值，控制是否启用结果聚类功能
+- **enable_summary**: 布尔值，控制是否生成AI摘要
+- **cluster_type**: 字符串，指定聚类类型（sender, time, topic）
+
+#### 实现流程图
+
+```mermaid
+sequenceDiagram
+participant Handler as SearchHandler
+participant Service as SearchService
+participant Clusterer as SearchClusteringService
+participant Summarizer as SearchSummaryService
+participant AI as AI服务
+Handler->>Service : Search(ctx, userID, query, filters, limit)
+Service->>Service : 执行向量搜索
+Service-->>Handler : 返回基础结果
+Handler->>Clusterer : ClusterResults(results, clusterType)
+Clusterer-->>Handler : 返回聚类结果
+Handler->>Summarizer : GenerateSummary(results, query)
+Summarizer->>AI : 调用AI摘要API
+AI-->>Summarizer : 返回摘要结果
+Summarizer-->>Handler : 返回摘要
+Handler-->>Client : 返回完整响应
+```
+
+**节来源**
+- [search.go](file://backend/internal/service/search.go#L62-L228)
+- [search_clustering.go](file://backend/internal/service/search_clustering.go#L63-L74)
+- [search_summary.go](file://backend/internal/service/search_summary.go#L32-L49)
+- [search.go](file://backend/internal/handler/search.go#L107-L110)
 
 ## 依赖注入与工厂模式
 
@@ -743,6 +852,185 @@ ORDER BY ee.vector <=> ? LIMIT ?
 - **及时释放资源**：使用defer确保资源正确释放
 - **减少反射使用**：在性能关键路径避免反射
 
+### 监控与可观测性
+
+#### OpenTelemetry集成
+
+SearchService和SearchCache服务已全面集成OpenTelemetry，提供完整的分布式追踪和性能监控能力。
+
+##### 1. 配置初始化
+
+```go
+// 5. Telemetry (OpenTelemetry)
+var tel *telemetry.Telemetry
+if cfg.Telemetry.Enabled {
+    telCfg := &telemetry.TelemetryConfig{
+        ServiceName:     cfg.Telemetry.ServiceName,
+        ServiceVersion:  cfg.Telemetry.ServiceVersion,
+        Environment:     cfg.Telemetry.Environment,
+        ExporterType:    cfg.Telemetry.Exporter.Type,
+        TracesFilePath:  cfg.Telemetry.Exporter.File.TracesPath,
+        MetricsFilePath: cfg.Telemetry.Exporter.File.MetricsPath,
+        OTLPEndpoint:    cfg.Telemetry.Exporter.OTLP.Endpoint,
+        OTLPInsecure:    cfg.Telemetry.Exporter.OTLP.Insecure,
+        SamplingType:    cfg.Telemetry.Sampling.Type,
+        SamplingRatio:   cfg.Telemetry.Sampling.Ratio,
+    }
+
+    tel, err = telemetry.InitTelemetry(context.Background(), telCfg)
+    if err != nil {
+        log.Warn("Failed to initialize telemetry, continuing without it",
+            logger.Error(err))
+    } else {
+        log.Info("OpenTelemetry initialized",
+            logger.String("service", telCfg.ServiceName),
+            logger.String("version", telCfg.ServiceVersion),
+            logger.String("exporter", telCfg.ExporterType))
+    }
+}
+```
+
+**节来源**
+- [app.go](file://backend/internal/bootstrap/app.go#L99-L125)
+- [otel.go](file://backend/pkg/telemetry/otel.go#L54-L107)
+- [app_config.go](file://backend/configs/app_config.go#L68-L76)
+
+##### 2. 分布式追踪实现
+
+SearchService的Search方法实现了完整的分布式追踪，包含多个子Span：
+
+- **根Span**：`SearchService.Search`
+- **子Span**：`generate_query_embedding`
+- **子Span**：`vector_database_search`
+- **子Span**：`SearchCache.Get` (如果启用缓存)
+- **子Span**：`SearchCache.Set` (如果启用缓存)
+
+```go
+func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query string, filters SearchFilters, limit int) ([]SearchResult, error) {
+    // 创建根Span
+    ctx, span := tracer.Start(ctx, "SearchService.Search",
+        trace.WithAttributes(
+            attribute.String("user.id", userID.String()),
+            attribute.String("search.query", query),
+            attribute.Int("search.limit", limit),
+        ),
+    )
+    defer span.End()
+
+    // 生成查询嵌入的子Span
+    ctx, embedSpan := tracer.Start(ctx, "generate_query_embedding")
+    queryVector, err := s.embedder.Embed(ctx, query)
+    embedSpan.End()
+
+    // 数据库查询的子Span
+    ctx, dbSpan := tracer.Start(ctx, "vector_database_search")
+    err = s.db.WithContext(ctx).Raw(sql, args...).Scan(&results).Error
+    dbSpan.End()
+}
+```
+
+**节来源**
+- [search.go](file://backend/internal/service/search.go#L64-L71)
+- [search.go](file://backend/internal/service/search.go#L114-L130)
+- [search.go](file://backend/internal/service/search.go#L137-L202)
+
+##### 3. 性能监控指标
+
+###### SearchService核心指标
+
+| 指标名称 | 类型 | 单位 | 说明 |
+|---------|------|------|------|
+| `search.latency` | Histogram | ms | 搜索请求端到端延迟 |
+| `embedding.latency` | Histogram | ms | AI嵌入生成延迟 |
+| `db.query.latency` | Histogram | ms | 数据库向量搜索延迟 |
+| `search.requests.total` | Counter | - | 搜索请求总数 |
+| `search.errors.total` | Counter | - | 搜索错误总数 |
+| `cache.hits.total` | Counter | - | 缓存命中次数 |
+| `cache.misses.total` | Counter | - | 缓存未命中次数 |
+| `search.active` | UpDownCounter | - | 当前活跃搜索操作数 |
+| `search.results.total` | Counter | - | 返回的搜索结果总数 |
+
+###### SearchCache核心指标
+
+| 指标名称 | 类型 | 单位 | 说明 |
+|---------|------|------|------|
+| `cache.get.latency` | Histogram | ms | 缓存获取操作延迟 |
+| `cache.set.latency` | Histogram | ms | 缓存设置操作延迟 |
+| `cache.delete.latency` | Histogram | ms | 缓存删除操作延迟 |
+| `cache.operations.total` | Counter | - | 缓存操作总数 |
+| `cache.errors.total` | Counter | - | 缓存错误总数 |
+| `cache.key.size` | Histogram | bytes | 缓存键大小分布 |
+| `cache.value.size` | Histogram | bytes | 缓存值大小分布 |
+| `cache.hits.total` | Counter | - | 缓存命中次数 |
+| `cache.misses.total` | Counter | - | 缓存未命中次数 |
+
+```go
+// CacheMetrics结构定义
+type CacheMetrics struct {
+    // 延迟直方图
+    GetLatency    metric.Float64Histogram
+    SetLatency    metric.Float64Histogram
+    DeleteLatency metric.Float64Histogram
+    
+    // 操作计数器
+    Operations metric.Int64Counter
+    Errors     metric.Int64Counter
+    
+    // 大小直方图
+    KeySize   metric.Int64Histogram
+    ValueSize metric.Int64Histogram
+    
+    // 命中/未命中计数器
+    Hits   metric.Int64Counter
+    Misses metric.Int64Counter
+}
+```
+
+**节来源**
+- [metrics.go](file://backend/pkg/telemetry/metrics.go#L292-L310)
+- [search_cache.go](file://backend/internal/service/search_cache.go#L117-L120)
+- [search_cache.go](file://backend/internal/service/search_cache.go#L213-L217)
+
+##### 4. 缓存服务指标详情
+
+SearchCache服务提供了9个核心性能指标，全面监控缓存层的健康状况：
+
+1. **GetLatency**: 记录缓存获取操作的延迟，用于监控缓存响应性能
+2. **SetLatency**: 记录缓存设置操作的延迟，用于评估写入性能
+3. **DeleteLatency**: 记录缓存删除操作的延迟，用于监控失效操作性能
+4. **Operations**: 记录缓存操作总数，用于计算QPS
+5. **Errors**: 记录缓存错误总数，用于监控服务稳定性
+6. **KeySize**: 记录缓存键大小分布，用于优化键设计
+7. **ValueSize**: 记录缓存值大小分布，用于评估内存使用
+8. **Hits**: 记录缓存命中次数，用于计算命中率
+9. **Misses**: 记录缓存未命中次数，用于计算未命中率
+
+```go
+// 记录Get操作延迟
+if c.metrics != nil {
+    c.metrics.RecordGetLatency(ctx, latency.Milliseconds())
+    c.metrics.IncrementOperations(ctx, "get")
+}
+
+// 记录Set操作延迟
+if c.metrics != nil {
+    c.metrics.RecordSetLatency(ctx, latency.Milliseconds())
+    c.metrics.IncrementOperations(ctx, "set")
+    c.metrics.RecordValueSize(ctx, int64(len(data)))
+}
+
+// 记录Delete操作延迟
+if c.metrics != nil {
+    c.metrics.RecordDeleteLatency(ctx, latency.Milliseconds())
+    c.metrics.IncrementOperations(ctx, "invalidate")
+}
+```
+
+**节来源**
+- [search_cache.go](file://backend/internal/service/search_cache.go#L117-L120)
+- [search_cache.go](file://backend/internal/service/search_cache.go#L213-L217)
+- [search_cache.go](file://backend/internal/service/search_cache.go#L304-L305)
+
 ## 开发指南与最佳实践
 
 ### 新服务方法开发规范
@@ -905,6 +1193,7 @@ EchoMind的Service层设计体现了现代Go应用程序的最佳实践，通过
 3. **灵活的扩展机制**：工厂模式和接口抽象支持多种AI提供商和数据源
 4. **完善的错误处理**：分层的错误处理和日志记录确保了系统的可靠性
 5. **高效的性能优化**：针对向量搜索和批量处理的专门优化策略
+6. **全面的可观测性**：通过OpenTelemetry实现完整的分布式追踪和性能监控
 
 ### 技术亮点
 
@@ -913,6 +1202,7 @@ EchoMind的Service层设计体现了现代Go应用程序的最佳实践，通过
 - **异步处理**：通过Asynq实现高效的后台任务处理
 - **事件驱动**：基于事件总线的松耦合系统集成
 - **测试友好**：完整的单元测试和集成测试覆盖
+- **可观测性**：全面的OpenTelemetry集成，提供9个核心缓存指标和完整的分布式追踪
 
 ### 最佳实践总结
 
