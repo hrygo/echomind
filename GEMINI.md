@@ -38,29 +38,11 @@ git add . && git commit -m "feat: v{version} - description" && git tag -a v{vers
 - **Internationalization**: Mandatory bilingual `t('key')`
 
 ### Development Workflow
-**TDD-First Approach**:
-1. **Test-Driven**: Write failing tests first, then implementation
-2. **Make-First**: Always use Makefile commands over direct CLI calls
-3. **Verification**: Each step must pass before proceeding to next
+**TDD + Make-First**: Tests → Implementation → Makefile commands → Verification
 
-**Command Priority** (use in order):
-```bash
-make test          # Run backend tests
-make test-fe       # Run frontend tests
-make build         # Build backend
-make build-fe      # Build frontend
-make run-backend   # Start backend services
-make run-worker    # Start worker services
-make stop          # Clean all processes
-make db-init       # Database migrations
-make lint          # Code quality checks
-```
+**Command Priority**: `make test/test-fe/build/build-fe/run-backend/run-worker/stop/db-init/lint`
 
-**Development Sequence**:
-```bash
-# Feature Development Cycle
-make test && make build && make test-fe && make build-fe  # Pre-commit validation
-```
+**Pre-commit Validation**: `make test && make build && make test-fe && make build-fe`
 
 ---
 
@@ -68,11 +50,11 @@ make test && make build && make test-fe && make build-fe  # Pre-commit validatio
 
 ### Working Environment
 - **Directory**: Must be `~/aicoding/echomind`
+- **Make-First**: Prioritize Makefile commands over direct tool calls
 - **Verification**: Confirm working directory before command execution
-- **Make-First**: Always prioritize Makefile commands over direct tool calls
 
 ### Development Operations
-- **TDD Approach**: Write tests before implementation, ensure red-green-refactor cycle
+- **TDD Cycle**: Write tests first (red-green-refactor)
 - **File Operations**: Minimize context, prioritize state checks on failure
 - **Commit Standards**: `feat:` `fix:` `docs:` `refactor:` prefixes
 - **Atomic Commits**: Frequent, small-granularity commits
