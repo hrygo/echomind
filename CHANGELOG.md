@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.0] - 2025-11-26
+
+### 🎉 Major Release: Enterprise-Grade Logging & 规约化 Vector Architecture
+
+### Added
+- **规约化 Vector Dimension Management**:
+  - Fixed 1024-dimensional vector architecture across all embeddings
+  - Eliminated dynamic vector dimensions for consistent performance and storage
+  - Updated all embedding models to use standardized dimensions
+- **Enterprise-Grade Logging Framework**:
+  - Comprehensive YAML-based logging configuration with environment variable support
+  - Multi-process log file management with conflict prevention
+  - Structured JSON logging with contextual fields (trace_id, user_id, org_id, etc.)
+  - Production-ready configuration with sampling and enterprise log providers
+  - Support for Elasticsearch, Grafana Loki, and Splunk integration
+- **Environment Variable Configuration**:
+  - Dynamic log file path configuration using `${LOG_FILE_PATH:default}` syntax
+  - Process-specific log files (backend.log, worker.log) to prevent conflicts
+  - Enhanced configuration loading with YAML file support
+
+### Changed
+- **Vector Architecture**: Migrated from dynamic to fixed-dimension vector storage (规约化 approach)
+- **Logging System**: Complete overhaul from basic logging to enterprise-grade framework
+- **Configuration Management**: Enhanced with YAML support and environment variable expansion
+- **Backend Services**: Improved multi-process logging with separate log files
+- **Development Workflow**: Enhanced Makefile targets with proper environment variable handling
+
+### Improved
+- **Performance**: Consistent vector dimensions improve query performance and storage efficiency
+- **Monitoring**: Enhanced logging provides better observability and debugging capabilities
+- **Reliability**: Multi-process logging prevents file conflicts and improves system stability
+- **Maintainability**: Centralized logging configuration with enterprise-grade features
+
 ## [v0.9.4] - 2025-11-23
 
 ### Added

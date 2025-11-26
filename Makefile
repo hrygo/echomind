@@ -333,15 +333,15 @@ redis-shell:
 
 run-backend: ensure-log-dir build
 	@echo "$(BLUE)Starting backend server...$(NC)"
-	@cd backend && nohup ../$(BUILD_DIR)/server >> ../$(BACKEND_LOG) 2>&1 & \
+	@cd backend && LOG_FILE_PATH=../$(BACKEND_LOG) nohup ../$(BUILD_DIR)/server >> ../$(BACKEND_LOG) 2>&1 & \
 	BACKEND_PID=$$!; \
-	echo "$(GREEN)✅ Backend started (PID: $$BACKEND_PID)$(NC)"
+	echo "$(GREEN)✅ Backend started (PID: $$BACKEND_PID) with log: $(BACKEND_LOG)$(NC)"
 
 run-worker: ensure-log-dir build
-	@echo "$(BLUE)Starting worker...$(NC)"
-	@cd backend && nohup ../$(BUILD_DIR)/worker >> ../$(WORKER_LOG) 2>&1 & \
+	@echo "$(BLUE)Starting worker with dedicated log file...$(NC)"
+	@cd backend && LOG_FILE_PATH=../$(WORKER_LOG) nohup ../$(BUILD_DIR)/worker >> ../$(WORKER_LOG) 2>&1 & \
 	WORKER_PID=$$!; \
-	echo "$(GREEN)✅ Worker started (PID: $$WORKER_PID)$(NC)"
+	echo "$(GREEN)✅ Worker started (PID: $$WORKER_PID) with log: $(WORKER_LOG)$(NC)"
 
 run-frontend: ensure-log-dir
 	@echo "$(BLUE)Starting frontend development server...$(NC)"

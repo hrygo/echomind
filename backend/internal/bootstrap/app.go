@@ -2,6 +2,8 @@ package bootstrap
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/hibiken/asynq"
 	"github.com/hrygo/echomind/configs"
@@ -28,14 +30,43 @@ func Init(configPath string, production bool) (*App, error) {
 
 	// 2. Logger - 使用新的日志框架
 	var logConfig *logger.Config
-	if production {
-		logConfig = logger.ProductionConfig()
-		// 从环境变量加载配置
-		logConfig = logger.LoadConfigFromEnv()
-		logConfig.Production = true
+
+	// 尝试从YAML文件加载配置
+	if configPath != "" {
+		loggerConfigPath := filepath.Join(filepath.Dir(configPath), "logger.yaml")
+		if _, err := os.Stat(loggerConfigPath); err == nil {
+			logConfig, err = logger.LoadConfigFromFile(loggerConfigPath)
+			if err != nil {
+				fmt.Printf("Warning: Failed to load logger config from %s: %v, using default config\n", loggerConfigPath, err)
+				if production {
+					logConfig = logger.ProductionConfig()
+				} else {
+					logConfig = logger.DevelopmentConfig()
+				}
+			}
+		} else {
+			// YAML文件不存在，使用默认配置
+			if production {
+				logConfig = logger.ProductionConfig()
+			} else {
+				logConfig = logger.DevelopmentConfig()
+			}
+		}
 	} else {
-		logConfig = logger.DevelopmentConfig()
-		logConfig = logger.LoadConfigFromEnv()
+		// 未指定配置路径，使用默认配置
+		if production {
+			logConfig = logger.ProductionConfig()
+		} else {
+			logConfig = logger.DevelopmentConfig()
+		}
+	}
+
+	// 从环境变量加载配置（覆盖YAML配置）
+	logConfig = logger.LoadConfigFromEnv()
+
+	// 确保生产模式设置正确
+	if production {
+		logConfig.Production = true
 	}
 
 	if err := logger.Init(logConfig); err != nil {

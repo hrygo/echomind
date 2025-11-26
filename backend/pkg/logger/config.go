@@ -3,6 +3,10 @@ package logger
 import (
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 // DefaultConfig 返回默认配置
@@ -100,6 +104,59 @@ func LoadConfigFromEnv() *Config {
 	}
 
 	return config
+}
+
+// LoadConfigFromFile 从YAML文件加载配置
+func LoadConfigFromFile(path string) (*Config, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// 处理环境变量替换
+	data = expandEnvVars(data)
+
+	config := DefaultConfig()
+	if err := yaml.Unmarshal(data, config); err != nil {
+		return nil, err
+	}
+
+	// 确保日志目录存在
+	if config.Output.File.Enabled {
+		if err := os.MkdirAll(filepath.Dir(config.Output.File.Path), 0755); err != nil {
+			// 如果创建目录失败，禁用文件输出
+			config.Output.File.Enabled = false
+		}
+	}
+
+	return config, nil
+}
+
+// expandEnvVars 展开YAML中的环境变量 ${VAR:default}
+func expandEnvVars(data []byte) []byte {
+	// 简单的环境变量替换，处理 ${VAR:default} 格式
+	content := string(data)
+
+	// 使用正则表达式查找并替换环境变量
+	re := regexp.MustCompile(`\$\{([^}:}]+):([^}]*)\}`)
+
+	result := re.ReplaceAllStringFunc(content, func(match string) string {
+		// 提取变量名和默认值
+		parts := strings.SplitN(match[2:len(match)-1], ":", 2)
+		if len(parts) != 2 {
+			return match
+		}
+
+		varName := parts[0]
+		defaultValue := parts[1]
+
+		if envValue := os.Getenv(varName); envValue != "" {
+			return envValue
+		}
+		return defaultValue
+	})
+
+	return []byte(result)
 }
 
 // parseLevel 解析日志级别字符串

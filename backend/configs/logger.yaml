@@ -1,6 +1,5 @@
 # EchoMind Logger Configuration v1.1.0
 # 规约化Vector Dimension Management - 企业级日志配置
-# 复制此文件为 logger.yaml 并根据需要修改配置
 
 # 基础配置
 level: INFO        # DEBUG, INFO, WARN, ERROR, FATAL
