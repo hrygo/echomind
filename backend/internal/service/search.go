@@ -168,4 +168,3 @@ func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *mod
 
 	return nil
 }
-

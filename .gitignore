@@ -57,3 +57,4 @@ backend/configs/config.yaml
 *.pem
 .vercel
 backend/echomind-server
+coverage.out

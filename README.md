@@ -115,55 +115,20 @@ Make sure you have the following tools installed:
 
 EchoMind includes a powerful CI/CD monitoring tool to help you track build status, analyze failures, and get actionable insights.
 
-### Quick Setup
+For complete setup instructions, usage examples, and advanced features, see [scripts/CI_README.md](scripts/CI_README.md).
 
+**Quick Start**:
 ```bash
-# Set up a simple alias for daily use
-echo 'alias ci="./scripts/ci.sh"' >> ~/.zshrc
-source ~/.zshrc
+# Set up alias for daily use
+echo 'alias ci="./scripts/ci.sh"' >> ~/.zshrc && source ~/.zshrc
+
+# Basic usage
+ci                 # Current status
+ci watch           # Watch live workflow
+ci history         # View history
+ci analyze         # Deep analysis
+ci interactive     # Interactive menu
 ```
-
-### Basic Usage
-
-```bash
-# Check current CI/CD status
-./scripts/ci.sh
-
-# Watch live running workflow
-./scripts/ci.sh watch
-
-# View history of recent runs
-./scripts/ci.sh history
-
-# Deep analysis with success rate tracking
-./scripts/ci.sh analyze
-
-# Interactive menu mode
-./scripts/ci.sh interactive
-```
-
-### Advanced Features
-
-- **Smart Error Detection**: Automatically identifies TypeScript, test, and build failures
-- **Fix Suggestions**: Provides actionable recommendations based on error patterns
-- **Success Rate Analytics**: Track CI/CD health over time
-- **Live Monitoring**: Watch workflows in real-time
-- **Custom Configuration**: Set environment variables for personalized behavior
-
-### Examples
-
-```bash
-# Custom history count
-HISTORY_COUNT=10 ./scripts/ci.sh history
-
-# Monitor specific branch
-BRANCH=feature/api ./scripts/ci.sh
-
-# Get detailed help
-./scripts/ci.sh help
-```
-
-For complete documentation, see [scripts/CI_README.md](scripts/CI_README.md).
 
 ---
 

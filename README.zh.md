@@ -120,55 +120,20 @@
 
 EchoMind 包含一个强大的 CI/CD 监控工具，帮助您跟踪构建状态、分析失败原因，并获得可行的洞察。
 
-### 快速设置
+完整的设置说明、使用示例和高级功能，请参阅 [scripts/CI_README.md](scripts/CI_README.md)。
 
+**快速开始**：
 ```bash
-# 为日常使用设置简单别名
-echo 'alias ci="./scripts/ci.sh"' >> ~/.zshrc
-source ~/.zshrc
+# 设置日常使用别名
+echo 'alias ci="./scripts/ci.sh"' >> ~/.zshrc && source ~/.zshrc
+
+# 基本使用
+ci                 # 当前状态
+ci watch           # 监控运行
+ci history         # 查看历史
+ci analyze         # 深度分析
+ci interactive     # 交互菜单
 ```
-
-### 基本使用
-
-```bash
-# 检查当前 CI/CD 状态
-./scripts/ci.sh
-
-# 监控运行中的工作流
-./scripts/ci.sh watch
-
-# 查看最近运行历史
-./scripts/ci.sh history
-
-# 深度分析与成功率跟踪
-./scripts/ci.sh analyze
-
-# 交互式菜单模式
-./scripts/ci.sh interactive
-```
-
-### 高级功能
-
-- **智能错误检测**: 自动识别 TypeScript、测试和构建失败
-- **修复建议**: 基于错误模式提供可行的建议
-- **成功率分析**: 跟踪 CI/CD 健康状况
-- **实时监控**: 实时观察工作流
-- **自定义配置**: 设置环境变量以获得个性化行为
-
-### 使用示例
-
-```bash
-# 自定义历史记录数量
-HISTORY_COUNT=10 ./scripts/ci.sh history
-
-# 监控特定分支
-BRANCH=feature/api ./scripts/ci.sh
-
-# 获取详细帮助
-./scripts/ci.sh help
-```
-
-完整文档请参阅 [scripts/CI_README.md](scripts/CI_README.md)。
 
 ---
 
