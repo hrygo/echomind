@@ -62,7 +62,7 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 
 	// Base query
 	sql := `
-		SELECT 
+		SELECT
 			e.id as email_id,
 			e.subject,
 			ee.content as snippet,
@@ -179,9 +179,9 @@ func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *mod
 
 // validateVectorDimensions validates that the vector dimensions are reasonable for processing
 func (s *SearchService) validateVectorDimensions(vector []float32, context string) error {
-	// Database schema supports up to 1536 dimensions with automatic conversion
+	// Database schema supports up to 1024 dimensions with automatic conversion
 	// This validation ensures vectors are reasonable for processing
-	maxSupportedDimensions := 1536
+	maxSupportedDimensions := 1024
 	minSupportedDimensions := 1
 
 	vectorLength := len(vector)

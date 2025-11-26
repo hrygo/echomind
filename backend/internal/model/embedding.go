@@ -12,7 +12,7 @@ type EmailEmbedding struct {
 	ID        uint            `gorm:"primaryKey" json:"id"`
 	EmailID   uuid.UUID       `gorm:"type:uuid;not null;index" json:"email_id"`
 	Content   string          `gorm:"type:text" json:"content"` // The actual text chunk
-	Vector    pgvector.Vector `gorm:"type:vector(1536)" json:"vector"` // Maximum dimension: 1536 (OpenAI standard)
+	Vector    pgvector.Vector `gorm:"type:vector(1024)" json:"vector"` // Maximum dimension: 1024 (current provider standard)
 	Dimensions int             `gorm:"not null;default:1024" json:"dimensions"` // Track actual vector dimensions
 	CreatedAt time.Time       `json:"created_at"`
 
@@ -48,22 +48,16 @@ func (e *EmailEmbedding) validateAndConvertVector(tx *gorm.DB) error {
 	actualDimensions := len(vectorSlice)
 	e.Dimensions = actualDimensions
 
-	// If vector is longer than max dimension (1536), truncate it
-	maxDimensions := 1536
+	// If vector is longer than max dimension (1024), truncate it
+	maxDimensions := 1024
 	if actualDimensions > maxDimensions {
 		truncatedSlice := vectorSlice[:maxDimensions]
 		e.Vector = pgvector.NewVector(truncatedSlice)
 		e.Dimensions = maxDimensions
 	}
 
-	// If vector is shorter than max dimensions, pad with zeros
-	if actualDimensions < maxDimensions {
-		paddedVector := make([]float32, maxDimensions)
-		copy(paddedVector, vectorSlice)
-		// Remaining elements remain zero
-		e.Vector = pgvector.NewVector(paddedVector)
-		// Keep original dimensions in the field
-	}
+	// NO PADDING: Keep vectors at their original dimensions to avoid dimension mismatch
+	// This allows compatibility with different AI providers
 
 	return nil
 }
