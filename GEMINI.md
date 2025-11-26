@@ -17,15 +17,13 @@
 
 ## ⚡ Development Rules
 
-**Quality**: Pre-commit `make test build test-fe build-fe` | Test-first (mock AI/DB) | Build verification
+**Quality**: Pre-commit `make test && make build && make test-fe && make build-fe` | Test-first (mock AI/DB) | Build verification
 
 **Architecture**: DB compile verification | Frontend `src/components/ui` reuse | `grep` refactoring | Bilingual `t('key')`
 
 **Workflow**: TDD + Make-First (Tests → Implementation → Makefile → Verification)
 
 **Commands**: `make test/test-fe/build/build-fe/run-backend/run-worker/stop/db-init/lint`
-
-**Pre-commit**: `make test && make build && make test-fe && make build-fe`
 
 ---
 
