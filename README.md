@@ -66,10 +66,10 @@ Make sure you have the following tools installed:
 2.  **Configure Environment Variables**
     Copy the example configuration files and update them with your credentials (e.g., OpenAI API key, database passwords).
     ```bash
-    cp backend/configs/config.example.yaml backend/configs/config.local.yaml
-    cp backend/configs/logger.example.yaml backend/configs/logger.local.yaml
+    cp backend/configs/config.example.yaml backend/configs/config.yaml
+    cp backend/configs/logger.example.yaml backend/configs/logger.yaml
     ```
-    - Edit `backend/configs/config.local.yaml` to fill in the required secrets.
+    - Edit `backend/configs/config.yaml` to fill in the required secrets.
 
 3.  **Start Backend Services**
     This command starts the required databases (Postgres, Redis) in Docker containers.
@@ -108,6 +108,62 @@ Make sure you have the following tools installed:
   cd frontend
   pnpm test
   ```
+
+---
+
+## 🔍 CI/CD Monitoring
+
+EchoMind includes a powerful CI/CD monitoring tool to help you track build status, analyze failures, and get actionable insights.
+
+### Quick Setup
+
+```bash
+# Set up a simple alias for daily use
+echo 'alias ci="./scripts/ci.sh"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Basic Usage
+
+```bash
+# Check current CI/CD status
+./scripts/ci.sh
+
+# Watch live running workflow
+./scripts/ci.sh watch
+
+# View history of recent runs
+./scripts/ci.sh history
+
+# Deep analysis with success rate tracking
+./scripts/ci.sh analyze
+
+# Interactive menu mode
+./scripts/ci.sh interactive
+```
+
+### Advanced Features
+
+- **Smart Error Detection**: Automatically identifies TypeScript, test, and build failures
+- **Fix Suggestions**: Provides actionable recommendations based on error patterns
+- **Success Rate Analytics**: Track CI/CD health over time
+- **Live Monitoring**: Watch workflows in real-time
+- **Custom Configuration**: Set environment variables for personalized behavior
+
+### Examples
+
+```bash
+# Custom history count
+HISTORY_COUNT=10 ./scripts/ci.sh history
+
+# Monitor specific branch
+BRANCH=feature/api ./scripts/ci.sh
+
+# Get detailed help
+./scripts/ci.sh help
+```
+
+For complete documentation, see [scripts/CI_README.md](scripts/CI_README.md).
 
 ---
 

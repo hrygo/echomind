@@ -71,10 +71,10 @@
 2.  **配置环境变量**
     复制示例配置文件，并用您的凭据（例如 OpenAI API 密钥、数据库密码）更新它们。
     ```bash
-    cp backend/configs/config.example.yaml backend/configs/config.local.yaml
-    cp backend/configs/logger.example.yaml backend/configs/logger.local.yaml
+    cp backend/configs/config.example.yaml backend/configs/config.yaml
+    cp backend/configs/logger.example.yaml backend/configs/logger.yaml
     ```
-    - 编辑 `backend/configs/config.local.yaml` 文件，填入所需的安全密钥和配置。
+    - 编辑 `backend/configs/config.yaml` 文件，填入所需的安全密钥和配置。
 
 3.  **启动后端服务**
     此命令会在 Docker 容器中启动所需的数据库 (Postgres, Redis)。
@@ -113,6 +113,62 @@
   cd frontend
   pnpm test
   ```
+
+---
+
+## 🔍 CI/CD 监控
+
+EchoMind 包含一个强大的 CI/CD 监控工具，帮助您跟踪构建状态、分析失败原因，并获得可行的洞察。
+
+### 快速设置
+
+```bash
+# 为日常使用设置简单别名
+echo 'alias ci="./scripts/ci.sh"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### 基本使用
+
+```bash
+# 检查当前 CI/CD 状态
+./scripts/ci.sh
+
+# 监控运行中的工作流
+./scripts/ci.sh watch
+
+# 查看最近运行历史
+./scripts/ci.sh history
+
+# 深度分析与成功率跟踪
+./scripts/ci.sh analyze
+
+# 交互式菜单模式
+./scripts/ci.sh interactive
+```
+
+### 高级功能
+
+- **智能错误检测**: 自动识别 TypeScript、测试和构建失败
+- **修复建议**: 基于错误模式提供可行的建议
+- **成功率分析**: 跟踪 CI/CD 健康状况
+- **实时监控**: 实时观察工作流
+- **自定义配置**: 设置环境变量以获得个性化行为
+
+### 使用示例
+
+```bash
+# 自定义历史记录数量
+HISTORY_COUNT=10 ./scripts/ci.sh history
+
+# 监控特定分支
+BRANCH=feature/api ./scripts/ci.sh
+
+# 获取详细帮助
+./scripts/ci.sh help
+```
+
+完整文档请参阅 [scripts/CI_README.md](scripts/CI_README.md)。
 
 ---
 
