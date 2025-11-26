@@ -8,21 +8,13 @@
 ## 🚀 Version Release Specification
 
 ### Version Checklist
-- `frontend/package.json`
-- `backend/pkg/logger/config.go`
-- `Makefile` (VERSION variable)
-- `docs/openapi.yaml`
-- `backend/configs/logger*.yaml`
-- `README*.md` (roadmap)
-- `CHANGELOG.md`
-- `docs/product-roadmap.md`
-- `docs/logger/README.md`
+- `frontend/package.json` | `backend/pkg/logger/config.go` | `Makefile`
+- `docs/openapi.yaml` | `backend/configs/logger*.yaml`
+- `README*.md` | `CHANGELOG.md` | `docs/product-roadmap.md` | `docs/logger/README.md`
 
 ### Release Process
 ```bash
-git add .
-git commit -m "feat: v{version} - description"
-git tag -a v{version} -m "release notes"
+git add . && git commit -m "feat: v{version} - description" && git tag -a v{version}
 ```
 
 ### Version Strategy
@@ -35,7 +27,7 @@ git tag -a v{version} -m "release notes"
 ## ⚡ Core Development Rules
 
 ### Quality Assurance
-- **Pre-commit**: `make test` + `make build` + `make test-fe` + `make build-fe`
+- **Pre-commit**: `make test build test-fe build-fe`
 - **Test First**: Mock external dependencies (AI, DB)
 - **Build Verification**: Ensure compilation succeeds
 
@@ -47,11 +39,7 @@ git tag -a v{version} -m "release notes"
 
 ### Tool Usage
 ```bash
-# Prioritize Make commands
-make test        # > go test ./...
-make build       # > go build ./cmd/main.go
-make run-backend # > cd backend && go run cmd/main.go
-make stop        # Clean all processes
+make test build run-backend stop  # Core development commands
 ```
 
 ---
@@ -66,7 +54,6 @@ make stop        # Clean all processes
 - **File Operations**: Minimize context, prioritize state checks on failure
 - **Commit Standards**: `feat:` `fix:` `docs:` `refactor:` prefixes
 - **Atomic Commits**: Frequent, small-granularity commits
-- **Version Releases**: Check items according to checklist
 
 ### Guiding Principles
 - **Make Priority**: Use unified Make command interfaces
