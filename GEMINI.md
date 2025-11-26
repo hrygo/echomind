@@ -1,75 +1,75 @@
-# 🛡️ EchoMind 规约
+# 🛡️ EchoMind Project Specification
 
-**愿景**: 个人智能神经中枢 | **版本**: v1.1.0 (Enterprise Release)
-**技术栈**: Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
+**Vision**: Personal Neural Interface | **Version**: v1.1.0 (Enterprise Release)
+**Tech Stack**: Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
 
 ---
 
-## 🚀 版本发布规约
+## 🚀 Version Release Specification
 
-### 版本检查清单
+### Version Checklist
 - `frontend/package.json`
 - `backend/pkg/logger/config.go`
-- `Makefile` (VERSION 变量)
+- `Makefile` (VERSION variable)
 - `docs/openapi.yaml`
 - `backend/configs/logger*.yaml`
-- `README*.md` (路线图)
+- `README*.md` (roadmap)
 - `CHANGELOG.md`
 - `docs/product-roadmap.md`
 - `docs/logger/README.md`
 
-### 发布流程
+### Release Process
 ```bash
 git add .
 git commit -m "feat: v{version} - description"
 git tag -a v{version} -m "release notes"
 ```
 
-### 版本策略
-- **语义化**: `v{MAJOR}.{MINOR}.{PATCH}`
-- **企业级**: v1.0+ 标志生产就绪
-- **配置同步**: 所有版本引用文件保持一致
+### Version Strategy
+- **Semantic**: `v{MAJOR}.{MINOR}.{PATCH}`
+- **Enterprise**: v1.0+ marks production readiness
+- **Sync**: All version references stay consistent
 
 ---
 
-## ⚡ 核心开发规约
+## ⚡ Core Development Rules
 
-### 质量保证
-- **提交前**: `make test` + `make build` + `make test-fe` + `make build-fe`
-- **测试优先**: Mock 外部依赖 (AI, DB)
-- **构建验证**: 确保编译无错误
+### Quality Assurance
+- **Pre-commit**: `make test` + `make build` + `make test-fe` + `make build-fe`
+- **Test First**: Mock external dependencies (AI, DB)
+- **Build Verification**: Ensure compilation succeeds
 
-### 架构原则
-- **数据库**: GORM 模型变更后编译验证
-- **前端**: 优先复用 `src/components/ui` 组件
-- **重构**: `grep` 全局搜索，保留旧API过渡
-- **国际化**: 强制双语 `t('key')`
+### Architecture Principles
+- **Database**: Compile verification after GORM model changes
+- **Frontend**: Prioritize `src/components/ui` component reuse
+- **Refactoring**: `grep` global search, preserve old APIs during transition
+- **Internationalization**: Mandatory bilingual `t('key')`
 
-### 工具使用
+### Tool Usage
 ```bash
-# 优先使用 Make 命令
+# Prioritize Make commands
 make test        # > go test ./...
 make build       # > go build ./cmd/main.go
 make run-backend # > cd backend && go run cmd/main.go
-make stop        # 清理所有进程
+make stop        # Clean all processes
 ```
 
 ---
 
-## 📋 AI 代理操作标准
+## 📋 AI Agent Operating Standards
 
-### 工作环境
-- **目录**: 必须为 `~/aicoding/echomind`
-- **验证**: 命令执行前确认工作目录
+### Working Environment
+- **Directory**: Must be `~/aicoding/echomind`
+- **Verification**: Confirm working directory before command execution
 
-### 开发操作
-- **文件操作**: 最小化上下文，失败时优先状态检查
-- **提交规范**: `feat:` `fix:` `docs:` `refactor:` 前缀
-- **原子提交**: 频繁、小粒度提交
-- **版本发布**: 按照清单逐项检查
+### Development Operations
+- **File Operations**: Minimize context, prioritize state checks on failure
+- **Commit Standards**: `feat:` `fix:` `docs:` `refactor:` prefixes
+- **Atomic Commits**: Frequent, small-granularity commits
+- **Version Releases**: Check items according to checklist
 
-### 指导原则
-- **Make 优先**: 使用统一的 Make 命令接口
-- **状态检查**: 操作失败时使用 `read_file` 验证
-- **全局搜索**: 重构前使用 `grep` 查找所有引用
-- **渐进式**: 保留旧API，逐步迁移
+### Guiding Principles
+- **Make Priority**: Use unified Make command interfaces
+- **State Verification**: Use `read_file` on operation failure
+- **Global Search**: Use `grep` to find all references before refactoring
+- **Progressive**: Preserve old APIs, migrate gradually
