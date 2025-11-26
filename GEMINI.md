@@ -1,44 +1,78 @@
-# 🛡️ EchoMind Project Context
+# 🛡️ EchoMind规约
 
-- **Vision**: Personal Neural Interface (个人智能神经中枢)
-- **Status**: `v0.9.8` | **Current Sprint**: Dashboard API Integration Phase 2
-- **Stack**:
-    - **Backend**: Go 1.22+ (Gin, GORM, Asynq) | Postgres+pgvector | Redis
-    - **Frontend**: Next.js 16 (TypeScript, Tailwind, Zustand)
+**愿景**: 个人智能神经中枢
+**版本**: `v1.1.0` (Enterprise Release)
+**技术栈**: Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
 
 ---
-## Roadmap
 
-- ✅ **v0.9.2-4 (Neural Nexus)**: Context Bridge, Omni-Bar, Generative Widget Framework.
-- 🚧 **v0.9.5+ (WeChat OS)**: Voice Commander, One-Touch Decisions, Calendar Gatekeeper, Morning Briefing.
+## 🚀 版本发布规约
+
+### 发布检查清单
+```bash
+# 1. 版本文件更新
+- frontend/package.json
+- backend/pkg/logger/config.go (DefaultConfig version)
+- docs/logger/README.md (examples)
+- docs/product-roadmap.md (当前版本 & 历史记录)
+- README.md (路线图)
+- CHANGELOG.md (版本记录)
+
+# 2. 发布命令序列
+git add .
+git commit -m "feat: v1.1.0 - 版本描述"
+git tag -a v1.1.0 -m "详细发布说明"
+```
+
+### 版本文件模式
+- **语义化版本**: `v{MAJOR}.{MINOR}.{PATCH}`
+- **企业级**: v1.0+ 标志生产就绪
+- **特性版本**: v0.9.x 用于Beta功能
+- **配置同步**: 所有引用版本号的文件必须一致
 
 ---
-## The Golden Rules (Non-Negotiable)
 
-- 🛡️ **Quality (TDD)**
-    - **CI**: `make test` (BE) & `make test-fe` (FE) must pass before commit.
-    - **Tests**: Mock external dependencies (AI, DB) for speed & stability.
-    - **Build**: Use `make build` (BE) & `make build-fe` (FE) for compilation verification.
+## ⚡ 核心开发规约
 
-- 🚀 **Delivery (Frequent & Versioned)**
-    - **Commits**: Atomic, frequent, use conventional prefixes (`feat:`, `fix:`).
-    - **Versioning**: Tag releases often. Update version in `Makefile`, `package.json`, `backend/cmd/main.go`, `README.md`, `README-zh.md`, `docs/openapi.yaml`, `docs/*.md`.
+### 🛡️ 质量保证
+```bash
+# 提交前必检
+make test        # 后端测试
+make test-fe     # 前端测试
+make build       # 后端构建
+make build-fe    # 前端构建
+```
 
-- 🏗️ **Architecture & Code**
-    - **Refactor**: Use `grep` to find all usages. Keep old APIs temporarily for core changes.
-    - **Frontend**: Check for existing components (`src/components/ui`) before creating new ones.
-    - **Database**: Compile BE after model changes. Avoid DB-specific defaults (e.g., `gen_random_uuid()`) in GORM tags.
+### 🏗️ 架构原则
+- **数据库**: GORM模型变更后必须编译验证
+- **前端**: 优先使用 `src/components/ui` 现有组件
+- **重构**: `grep` 全局搜索，保留旧API作为过渡
+- **国际化**: 所有UI文本必须双语 `t('key')`
 
-- 🌐 **Internationalization (i18n)**
-    - All UI text must be bilingual (en/zh) via `t('key')`. No hardcoded strings.
+### 🔧 工具使用
+```bash
+# 优先使用Make命令
+make test        # ✅ go test ./...
+make build       # ✅ go build ./cmd/main.go
+make run-backend # ✅ cd backend && go run cmd/main.go
+make stop        # ✅ 手动停止所有服务
+```
 
-- 🔧 **Tooling (AI Agent SOP)**
-    - **Working Directory**: Always ensure `~/aicoding/echomind` as the base directory before executing any commands.
-    - **Preferred Commands**: Prioritize `make` commands over direct tool calls:
-      - Use `make test` instead of `go test ./...`
-      - Use `make build` instead of `go build ./cmd/main.go`
-      - Use `make test-fe` instead of `pnpm build && pnpm type-check`
-      - Use `make build-fe` instead of `pnpm build`
-    - **`replace`**: Use minimal, unique context for `old_string`.
-    - **`verify`**: On tool failure, use `read_file` to check state before retrying.
-    - **Directory Awareness**: Before any command execution, verify working directory with `pwd` and navigate to project root if needed.
+---
+
+## 📋 AI代理操作标准
+
+### 工作目录
+```bash
+pwd  # 必须为 ~/aicoding/echomind
+```
+
+### 文件操作
+- **replace**: 最小化、唯一性上下文
+- **验证失败**: 优先 read_file 检查状态
+- **目录感知**: 命令执行前确认工作目录
+
+### 提交规范
+- **原子化**: 频繁、小粒度提交
+- **前缀**: `feat:` `fix:` `docs:` `refactor:`
+- **标签**: 重大功能更新必须打标签
