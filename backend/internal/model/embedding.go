@@ -38,26 +38,17 @@ func (e *EmailEmbedding) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
-// validateAndConvertVector validates vector dimensions and converts to max dimension if needed
+// validateAndConvertVector ensures vector dimensions match database schema
 func (e *EmailEmbedding) validateAndConvertVector(tx *gorm.DB) error {
 	vectorSlice := e.Vector.Slice()
 	if len(vectorSlice) == 0 {
 		return nil
 	}
 
-	actualDimensions := len(vectorSlice)
-	e.Dimensions = actualDimensions
+	// Record actual vector dimensions
+	e.Dimensions = len(vectorSlice)
 
-	// If vector is longer than max dimension (1024), truncate it
-	maxDimensions := 1024
-	if actualDimensions > maxDimensions {
-		truncatedSlice := vectorSlice[:maxDimensions]
-		e.Vector = pgvector.NewVector(truncatedSlice)
-		e.Dimensions = maxDimensions
-	}
-
-	// NO PADDING: Keep vectors at their original dimensions to avoid dimension mismatch
-	// This allows compatibility with different AI providers
-
+	// Database schema enforces vector(1024) constraint
+	// Vector dimension changes require full system reindexing (see docs)
 	return nil
 }

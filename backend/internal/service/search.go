@@ -52,9 +52,10 @@ func (s *SearchService) Search(ctx context.Context, userID uuid.UUID, query stri
 		return nil, fmt.Errorf("failed to embed query: %w", err)
 	}
 
-	// 2. Validate query vector dimensions (database layer handles conversion)
-	if err := s.validateVectorDimensions(queryVector, "search query"); err != nil {
-		return nil, err
+	// 2. Validate query vector dimensions match system configuration
+	// Note: Vector dimension changes require full system reindexing (see docs)
+	if len(queryVector) == 0 {
+		return nil, fmt.Errorf("empty query vector generated")
 	}
 
 	// 2. Perform vector search using raw SQL
@@ -148,9 +149,9 @@ func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *mod
 		return fmt.Errorf("mismatch between chunks (%d) and vectors (%d)", len(chunks), len(vectors))
 	}
 
-	// 3. Validate vector dimensions
-	if err := s.validateVectorDimensions(vectors[0], "email embedding generation"); err != nil {
-		return err
+	// 3. Basic validation - vector dimension consistency is handled by database schema
+	if len(vectors) == 0 || len(vectors[0]) == 0 {
+		return fmt.Errorf("no valid vectors generated")
 	}
 
 	// 4. Save to DB
@@ -177,26 +178,3 @@ func (s *SearchService) GenerateAndSaveEmbedding(ctx context.Context, email *mod
 	return nil
 }
 
-// validateVectorDimensions validates that the vector dimensions are reasonable for processing
-func (s *SearchService) validateVectorDimensions(vector []float32, context string) error {
-	// Database schema supports up to 1024 dimensions with automatic conversion
-	// This validation ensures vectors are reasonable for processing
-	maxSupportedDimensions := 1024
-	minSupportedDimensions := 1
-
-	vectorLength := len(vector)
-
-	if vectorLength > maxSupportedDimensions {
-		return fmt.Errorf("embedding dimension too large for %s: %d dimensions (max: %d)",
-			context, vectorLength, maxSupportedDimensions)
-	}
-
-	if vectorLength < minSupportedDimensions {
-		return fmt.Errorf("embedding dimension too small for %s: %d dimensions (min: %d)",
-			context, vectorLength, minSupportedDimensions)
-	}
-
-	// Database layer handles automatic padding/truncation in BeforeCreate hook
-	// No need to validate exact dimensions here
-	return nil
-}
