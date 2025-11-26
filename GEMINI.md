@@ -1,88 +1,75 @@
-# 🛡️ EchoMind规约
+# 🛡️ EchoMind 规约
 
-**愿景**: 个人智能神经中枢
-**版本**: `v1.1.0` (Enterprise Release)
+**愿景**: 个人智能神经中枢 | **版本**: v1.1.0 (Enterprise Release)
 **技术栈**: Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
 
 ---
 
 ## 🚀 版本发布规约
 
-### 发布检查清单
+### 版本检查清单
+- `frontend/package.json`
+- `backend/pkg/logger/config.go`
+- `Makefile` (VERSION 变量)
+- `docs/openapi.yaml`
+- `backend/configs/logger*.yaml`
+- `README*.md` (路线图)
+- `CHANGELOG.md`
+- `docs/product-roadmap.md`
+- `docs/logger/README.md`
+
+### 发布流程
 ```bash
-# 1. 核心版本文件
-- frontend/package.json
-- backend/pkg/logger/config.go (DefaultConfig version: "0.9.4")
-- Makefile (VERSION := 0.9.8)
-- backend/configs/logger.example.yaml (示例配置)
-- docs/openapi.yaml (version: "0.9.8")
-
-# 2. 文档版本更新
-- README.md (路线图)
-- README.zh.md (中文路线图)
-- CHANGELOG.md (版本记录)
-- docs/product-roadmap.md (当前版本 & 历史记录)
-- docs/logger/README.md (示例配置)
-
-# 3. 其他配置文件
-- backend/configs/logger.yaml (如存在)
-- GEMINI.md (版本信息)
-
-# 4. 发布命令序列
 git add .
-git commit -m "feat: v1.1.0 - 版本描述"
-git tag -a v1.1.0 -m "详细发布说明"
+git commit -m "feat: v{version} - description"
+git tag -a v{version} -m "release notes"
 ```
 
-### 版本文件模式
-- **语义化版本**: `v{MAJOR}.{MINOR}.{PATCH}`
+### 版本策略
+- **语义化**: `v{MAJOR}.{MINOR}.{PATCH}`
 - **企业级**: v1.0+ 标志生产就绪
-- **特性版本**: v0.9.x 用于Beta功能
-- **配置同步**: 所有引用版本号的文件必须一致
+- **配置同步**: 所有版本引用文件保持一致
 
 ---
 
 ## ⚡ 核心开发规约
 
-### 🛡️ 质量保证
-```bash
-# 提交前必检
-make test        # 后端测试
-make test-fe     # 前端测试
-make build       # 后端构建
-make build-fe    # 前端构建
-```
+### 质量保证
+- **提交前**: `make test` + `make build` + `make test-fe` + `make build-fe`
+- **测试优先**: Mock 外部依赖 (AI, DB)
+- **构建验证**: 确保编译无错误
 
-### 🏗️ 架构原则
-- **数据库**: GORM模型变更后必须编译验证
-- **前端**: 优先使用 `src/components/ui` 现有组件
-- **重构**: `grep` 全局搜索，保留旧API作为过渡
-- **国际化**: 所有UI文本必须双语 `t('key')`
+### 架构原则
+- **数据库**: GORM 模型变更后编译验证
+- **前端**: 优先复用 `src/components/ui` 组件
+- **重构**: `grep` 全局搜索，保留旧API过渡
+- **国际化**: 强制双语 `t('key')`
 
-### 🔧 工具使用
+### 工具使用
 ```bash
-# 优先使用Make命令
-make test        # ✅ go test ./...
-make build       # ✅ go build ./cmd/main.go
-make run-backend # ✅ cd backend && go run cmd/main.go
-make stop        # ✅ 手动停止所有服务
+# 优先使用 Make 命令
+make test        # > go test ./...
+make build       # > go build ./cmd/main.go
+make run-backend # > cd backend && go run cmd/main.go
+make stop        # 清理所有进程
 ```
 
 ---
 
-## 📋 AI代理操作标准
+## 📋 AI 代理操作标准
 
-### 工作目录
-```bash
-pwd  # 必须为 ~/aicoding/echomind
-```
+### 工作环境
+- **目录**: 必须为 `~/aicoding/echomind`
+- **验证**: 命令执行前确认工作目录
 
-### 文件操作
-- **replace**: 最小化、唯一性上下文
-- **验证失败**: 优先 read_file 检查状态
-- **目录感知**: 命令执行前确认工作目录
+### 开发操作
+- **文件操作**: 最小化上下文，失败时优先状态检查
+- **提交规范**: `feat:` `fix:` `docs:` `refactor:` 前缀
+- **原子提交**: 频繁、小粒度提交
+- **版本发布**: 按照清单逐项检查
 
-### 提交规范
-- **原子化**: 频繁、小粒度提交
-- **前缀**: `feat:` `fix:` `docs:` `refactor:`
-- **标签**: 重大功能更新必须打标签
+### 指导原则
+- **Make 优先**: 使用统一的 Make 命令接口
+- **状态检查**: 操作失败时使用 `read_file` 验证
+- **全局搜索**: 重构前使用 `grep` 查找所有引用
+- **渐进式**: 保留旧API，逐步迁移
