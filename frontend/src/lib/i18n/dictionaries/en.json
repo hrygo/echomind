@@ -14,7 +14,8 @@
         "primary": "Primary",
         "secondary": "Secondary",
         "outline": "Outline",
-        "ghost": "Ghost"
+        "ghost": "Ghost",
+        "confirmAction": "Confirm Action"
     },
     "sidebar": {
         "intelligence": "Intelligence",
@@ -36,13 +37,9 @@
         "finance": "Finance",
         "notification": "Notification",
         "spam": "Spam",
-        "user": "User",
         "freePlan": "Free Plan"
     },
     "dashboard": {
-        "greetingMorning": "Good morning",
-        "greetingAfternoon": "Good afternoon",
-        "greetingEvening": "Good evening",
         "executiveView": "Executive View",
         "managerView": "Manager View",
         "dealmakerView": "Dealmaker View",
@@ -66,7 +63,6 @@
         "all": "All",
         "highPriority": "High Priority",
         "noPendingTasks": "No pending tasks! Great job.",
-        "completed": "Completed",
         "completedToday": "Completed Today",
         "thisWeek": "This week",
         "overdue": "Overdue",
@@ -86,12 +82,6 @@
         "aiSummary": "AI Summary:",
         "approve": "Approve",
         "replyWithAI": "Reply with AI",
-        "radarBuyingIntent": "Buying Intent",
-        "radarPartnership": "Partnership",
-        "radarHiring": "Hiring",
-        "radarMeeting": "Meeting Request",
-        "radarReferral": "Referral",
-        "radarFollowUp": "Follow-up",
         "snooze4h": "Snooze 4 hours",
         "snoozeTomorrow": "Snooze until tomorrow",
         "snoozeNextWeek": "Snooze until next week",
@@ -128,7 +118,21 @@
         "notifications": "Notifications",
         "security": "Security & Privacy",
         "billing": "Subscription & Billing",
-        "appearance": "Appearance",
+        "appearance": {
+            "title": "Appearance",
+            "description": "Personalize your EchoMind experience",
+            "themeSelector": "Theme Selection",
+            "themes": {
+                "light": "Light Theme",
+                "dark": "Dark Theme",
+                "system": "Follow System"
+            },
+            "preview": "Theme Preview",
+            "previewCard": "Sample Card",
+            "previewDesc": "This is a card style preview in current theme",
+            "previewMuted": "Muted Style",
+            "previewMutedDesc": "This is a secondary element style preview"
+        },
         "accountDesc": "Manage your profile and contact info.",
         "firstName": "First Name",
         "lastName": "Last Name",
@@ -161,31 +165,6 @@
             "disconnectSuccess": "Mailbox disconnected successfully",
             "disconnectFailed": "Failed to disconnect account",
             "mailboxConfigDesc": "Configure your mailbox to start syncing"
-        },
-        "appearance": {
-            "title": "Appearance",
-            "description": "Personalize your EchoMind experience",
-            "themeSelector": "Theme Selection",
-            "currentTheme": "Current Theme",
-            "themes": {
-                "light": "Light Theme",
-                "lightDesc": "Bright and clean interface style",
-                "dark": "Dark Theme",
-                "darkDesc": "Eye-friendly dark interface for focus",
-                "system": "Follow System",
-                "systemDesc": "Automatically follow system theme settings"
-            },
-            "additionalSettings": "Additional Settings",
-            "fontSize": "Font Size",
-            "fontSizeDesc": "Adjust interface text size",
-            "animations": "Animations",
-            "animationsDesc": "Interface transitions and micro-interactions",
-            "enable": "Enable",
-            "preview": "Theme Preview",
-            "previewCard": "Sample Card",
-            "previewDesc": "This is a card style preview in current theme",
-            "previewMuted": "Muted Style",
-            "previewMutedDesc": "This is a secondary element style preview"
         }
     },
     "emailDetail": {
@@ -199,7 +178,50 @@
         "from": "From:",
         "taskCreatedSuccess": "Task created successfully!",
         "taskCreatedError": "Failed to create task.",
-        "createTaskDefault": "New Task from Email"
+        "createTaskDefault": "New Task from Email",
+        "sentiment": {
+            "positive": "Positive",
+            "neutral": "Neutral",
+            "negative": "Negative"
+        },
+        "urgency": {
+            "high": "High Urgency",
+            "medium": "Medium Urgency",
+            "low": "Low Urgency"
+        },
+        "aiDraft": {
+            "title": "AI Email Draft Generator",
+            "description": "Create a professional email reply powered by AI",
+            "originalEmail": "Original Email",
+            "noContent": "No email content provided",
+            "instructions": "Instructions for AI",
+            "instructionsPlaceholder": "Describe how you'd like to reply to this email...",
+            "toneButtons": {
+                "professional": "Professional",
+                "casual": "Casual",
+                "concise": "Concise",
+                "detailed": "Detailed"
+            },
+            "tonePrompts": {
+                "professional": "Generate a brief professional response.",
+                "casual": "Generate a friendly and casual reply.",
+                "concise": "Generate a concise and direct response.",
+                "detailed": "Generate a detailed and comprehensive reply."
+            },
+            "generateButton": "Generate AI Draft",
+            "generating": "Generating AI Draft...",
+            "generatedDraft": "AI Generated Draft",
+            "readyToUse": "Ready to use",
+            "copy": "Copy",
+            "copied": "Copied!",
+            "openInEmail": "Open in Email",
+            "emailShort": "Email",
+            "errors": {
+                "emailRequired": "Email content is required.",
+                "promptRequired": "User prompt is required.",
+                "generateFailed": "Failed to generate draft reply."
+            }
+        }
     },
     "auth": {
         "welcomeBack": "Welcome back",
@@ -219,6 +241,9 @@
         "passwordLabel": "Password",
         "nameLabel": "Full Name",
         "confirmPasswordLabel": "Confirm Password",
+        "dontHaveAccount": "Don't have an account?",
+        "alreadyHaveAccount": "Already have an account?",
+        "signInTitle": "Sign in to your account",
         "errors": {
             "emailRequired": "Email is required",
             "emailInvalid": "Please enter a valid email",
@@ -242,8 +267,11 @@
         "noResults": "No results found. Try a different query.",
         "match": "match",
         "welcomeMessage": "How can I help you today?",
+        "clearHistory": "Clear History",
+        "clearHistoryTitle": "Clear conversation history",
         "searchEnhancement": {
             "title": "Search Enhancement Settings",
+            "disabledHint": "Unavailable during search or chat",
             "aiSummary": "AI Summary",
             "clustering": "Result Clustering",
             "clusterType": "Cluster By",
@@ -255,9 +283,7 @@
             "importantPeople": "Important People",
             "noSummary": "No summary available",
             "noClusterData": "No cluster data available",
-            "emailCount": "{count} emails",
             "from": "From",
-            "matchScore": "Match: {score}%",
             "allResults": "All Results",
             "clustered": "Clustered",
             "clusteredResults": "Clustered Results"
@@ -301,6 +327,12 @@
         "syncFailed": "Sync failed",
         "syncFailedUnknown": "Sync failed: Unknown error occurred",
         "noAccountConfigured": "You have not configured an email account yet. Would you like to go to settings to configure it now?",
-        "configureAccount": "Configure Email Account"
+        "configureAccount": "Configure Email Account",
+        "syncing": "Syncing...",
+        "syncNow": "Sync Now",
+        "loadingEmails": "Loading emails...",
+        "error": "Error",
+        "noEmails": "No emails yet, try syncing!",
+        "analyzing": "Analyzing..."
     }
 }

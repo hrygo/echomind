@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * i18n Configuration Analyzer and Fixer
+ * i18n Configuration Analyzer and Fixer (Enhanced)
  * 
- * This script performs two main tasks:
+ * This script performs multiple tasks:
  * 1. Detects and removes redundant i18n keys that are not used in the codebase
  * 2. Detects hardcoded Chinese/English strings and suggests i18n keys
+ * 3. Validates dictionary consistency across languages
+ * 4. Suggests i18n keys for detected hardcoded strings
+ * 5. Generates auto-fix suggestions for common patterns
  * 
  * Usage:
- *   node scripts/check_i18n.js [--fix] [--detect-hardcoded]
+ *   node scripts/check_i18n.js [--fix] [--detect-hardcoded] [--validate] [--suggest] [--verbose]
  */
 
 const fs = require('fs');
@@ -36,6 +39,25 @@ const CONFIG = {
 const args = process.argv.slice(2);
 const shouldFix = args.includes('--fix');
 const detectHardcoded = args.includes('--detect-hardcoded');
+const validateDicts = args.includes('--validate');
+const suggestKeys = args.includes('--suggest');
+const verbose = args.includes('--verbose');
+
+// Colors for terminal output
+const colors = {
+    reset: '\x1b[0m',
+    bright: '\x1b[1m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+};
+
+function colorize(text, color) {
+    return `${colors[color]}${text}${colors.reset}`;
+}
 
 /**
  * Load JSON file
@@ -82,8 +104,10 @@ function flattenKeys(obj, prefix = '') {
 function findUsedKeys(srcDir) {
     const usedKeys = new Set();
 
-    // Pattern to match t('key') or t("key")
-    const pattern = /t\(['"]([\w.]+)['"]\)/g;
+    // Pattern to match t('key') or t("key") or t(`key`)
+    const directPattern = /t\(['"`]([\w.]+)['"`]\)/g;
+    // Pattern to match dynamic keys like t(`prefix.${variable}`)
+    const dynamicPattern = /t\(['"`]([\w.]+)\.\$\{/g;
 
     // Get all TypeScript/JavaScript/TSX/JSX files
     const findCmd = `find "${srcDir}" -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) ${CONFIG.excludePatterns.map(p => `! -path "*/${p}/*"`).join(' ')}`;
@@ -97,8 +121,21 @@ function findUsedKeys(srcDir) {
             const content = fs.readFileSync(file, 'utf8');
             let match;
 
-            while ((match = pattern.exec(content)) !== null) {
+            // Find direct key usage
+            while ((match = directPattern.exec(content)) !== null) {
                 usedKeys.add(match[1]);
+            }
+
+            // Find dynamic key patterns and add base paths
+            directPattern.lastIndex = 0;
+            while ((match = dynamicPattern.exec(content)) !== null) {
+                // Add the base path and common variations
+                const basePath = match[1];
+                usedKeys.add(basePath);
+                // Add common dynamic suffixes
+                ['positive', 'neutral', 'negative'].forEach(s => usedKeys.add(`${basePath}.${s}`));
+                ['high', 'medium', 'low'].forEach(s => usedKeys.add(`${basePath}.${s}`));
+                ['professional', 'casual', 'concise', 'detailed'].forEach(s => usedKeys.add(`${basePath}.${s}`));
             }
         }
     } catch (error) {
@@ -116,7 +153,29 @@ function detectHardcodedStrings(srcDir) {
 
     // Patterns for Chinese characters and common English UI strings
     const chinesePattern = /["'`]([\u4e00-\u9fa5]+[\u4e00-\u9fa5\s\w]*?)["'`]/g;
-    const englishUIPattern = /["'`]((?:Loading|Error|Success|Failed|Submit|Cancel|Delete|Edit|Save|Search|Filter|Settings|Dashboard|Profile|Logout|Login|Sign up|Sign in|Welcome|Hello|Goodbye|Yes|No|OK|Confirm|Back|Next|Previous|Close|Open|New|Create|Update|Remove|Add|View|Show|Hide)[^"'`]{0,50})["'`]/gi;
+    // 更精准的英文 UI 模式 - 只检测真正的 UI 文本
+    const englishUIPattern = /["'`]((Loading|Error|Success|Failed|Submit|Cancel|Delete|Edit|Save|Search|Filter|Settings|Dashboard|Profile|Logout|Login|Sign up|Sign in|Welcome|Hello|Goodbye|Confirm|Back|Next|Previous|Close|Open|New|Create|Update|Remove|Add|View|Show|Hide|Clear|Reset|Apply|Download|Upload|Export|Import|Print|Share|Copy|Paste|Cut|Refresh|Reload)[^"'`]{0,30})["'`]/gi;
+
+    // 需要排除的模式
+    const excludePatterns = [
+        // API 方法和 HTTP 动词
+        /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i,
+        // 导入路径
+        /^[a-z@][a-z0-9/-]*$/,
+        // 状态常量和类型
+        /^(success|error|warning|info|new|active|pending|completed|failed|idle|loading|search|chat)$/i,
+        // 技术常量
+        /^(true|false|null|undefined)$/i,
+        // CSS 类名或标识符
+        /^[a-z][a-z0-9-_]*$/,
+        // 文件扩展名或 MIME 类型
+        /^\.(json|js|ts|tsx|jsx|css|html|xml|txt)$/,
+        /^(application|text|image|video)\//,
+        // 数据库字段或 API 键名
+        /^[a-z_][a-z0-9_]*$/,
+        // 单个技术词汇
+        /^(id|uuid|url|uri|email|password|token|key|data|type|name|value|status|code)$/i,
+    ];
 
     const findCmd = `find "${srcDir}" -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) ${CONFIG.excludePatterns.map(p => `! -path "*/${p}/*"`).join(' ')}`;
 
@@ -129,22 +188,28 @@ function detectHardcodedStrings(srcDir) {
             const content = fs.readFileSync(file, 'utf8');
             const lines = content.split('\n');
 
-            // Skip dictionary files themselves
-            if (file.includes('/i18n/dictionaries/')) continue;
+            // Skip dictionary files themselves and type definition files
+            if (file.includes('/i18n/dictionaries/') || file.endsWith('.d.ts')) continue;
 
             lines.forEach((line, lineNum) => {
+                // Skip comment lines
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('//') || trimmedLine.startsWith('/*') || trimmedLine.startsWith('*')) {
+                    return;
+                }
+
                 // Check for Chinese strings
                 let match;
                 while ((match = chinesePattern.exec(line)) !== null) {
                     // Skip if it's already in a t() call
                     const beforeMatch = line.substring(0, match.index);
-                    if (!beforeMatch.match(/t\(['"]*$/)) {
+                    if (!beforeMatch.match(/t\(['"`]*$/)) {
                         hardcodedFindings.push({
                             file: path.relative(srcDir, file),
                             line: lineNum + 1,
                             text: match[1],
                             type: 'chinese',
-                            context: line.trim()
+                            context: line.trim().substring(0, 100)
                         });
                     }
                 }
@@ -152,17 +217,34 @@ function detectHardcodedStrings(srcDir) {
                 // Check for English UI strings
                 chinesePattern.lastIndex = 0;
                 while ((match = englishUIPattern.exec(line)) !== null) {
+                    const text = match[1];
                     const beforeMatch = line.substring(0, match.index);
-                    // Skip if already in t() or if it looks like a code identifier
-                    if (!beforeMatch.match(/t\(['"]*$/) && !match[1].includes('_') && match[1].split(' ').length <= 5) {
-                        hardcodedFindings.push({
-                            file: path.relative(srcDir, file),
-                            line: lineNum + 1,
-                            text: match[1],
-                            type: 'english',
-                            context: line.trim()
-                        });
-                    }
+                    
+                    // Skip if already in t() call
+                    if (beforeMatch.match(/t\(['"`]*$/)) continue;
+                    
+                    // Skip if matches any exclude pattern
+                    if (excludePatterns.some(pattern => pattern.test(text))) continue;
+                    
+                    // Skip if it's in an import statement
+                    if (line.includes('import ') && line.includes('from')) continue;
+                    
+                    // Skip if it's a property key (key: 'value' or {key: 'value'})
+                    if (beforeMatch.match(/[{,]\s*\w+\s*:\s*['"`]*$/)) continue;
+                    
+                    // Skip if it's in console.log or console.error
+                    if (line.match(/console\.(log|error|warn|info|debug)/)) continue;
+                    
+                    // Skip if word count is too high (likely a sentence)
+                    if (text.split(' ').length > 6) continue;
+                    
+                    hardcodedFindings.push({
+                        file: path.relative(srcDir, file),
+                        line: lineNum + 1,
+                        text: text,
+                        type: 'english',
+                        context: line.trim().substring(0, 100)
+                    });
                 }
             });
         }
@@ -194,6 +276,120 @@ function removeKey(obj, keyPath) {
 }
 
 /**
+ * Validate dictionary consistency across languages
+ */
+function validateDictionaries(dictionaries) {
+    const issues = [];
+    const flatDicts = {};
+    
+    for (const lang of CONFIG.languages) {
+        flatDicts[lang] = flattenKeys(dictionaries[lang]);
+    }
+    
+    const allKeys = new Set();
+    Object.values(flatDicts).forEach(dict => {
+        Object.keys(dict).forEach(key => allKeys.add(key));
+    });
+    
+    // Check for missing translations
+    for (const key of allKeys) {
+        const missingIn = [];
+        for (const lang of CONFIG.languages) {
+            if (!(key in flatDicts[lang])) {
+                missingIn.push(lang);
+            }
+        }
+        if (missingIn.length > 0) {
+            issues.push({
+                type: 'missing',
+                key: key,
+                languages: missingIn
+            });
+        }
+    }
+    
+    // Check for empty values
+    for (const lang of CONFIG.languages) {
+        for (const [key, value] of Object.entries(flatDicts[lang])) {
+            if (!value || (typeof value === 'string' && value.trim() === '')) {
+                issues.push({
+                    type: 'empty',
+                    key: key,
+                    language: lang
+                });
+            }
+        }
+    }
+    
+    return issues;
+}
+
+/**
+ * Suggest i18n keys for hardcoded strings
+ */
+function suggestI18nKey(text, context, existingKeys) {
+    // Generate key from text
+    let baseKey = text
+        .toLowerCase()
+        .replace(/[^a-z0-9\u4e00-\u9fa5\s]/g, '')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 3)
+        .join('');
+    
+    // Determine module from context
+    let module = 'common';
+    if (context.file.includes('/components/')) {
+        const match = context.file.match(/\/components\/([^\/]+)/);
+        if (match) module = match[1];
+    } else if (context.file.includes('/app/')) {
+        const match = context.file.match(/\/app\/([^\/]+)/);
+        if (match) module = match[1];
+    }
+    
+    // Build suggested key
+    let suggestedKey = `${module}.${baseKey}`;
+    let counter = 1;
+    
+    // Ensure uniqueness
+    while (existingKeys.has(suggestedKey)) {
+        suggestedKey = `${module}.${baseKey}${counter}`;
+        counter++;
+    }
+    
+    return suggestedKey;
+}
+
+/**
+ * Group hardcoded findings by file and priority
+ */
+function prioritizeFindings(findings) {
+    const prioritized = {
+        high: [],    // UI components with Chinese
+        medium: [],  // UI components with English
+        low: []      // Backend/utility files
+    };
+    
+    for (const finding of findings) {
+        if (finding.type === 'chinese') {
+            if (finding.file.includes('/components/') || finding.file.includes('/app/')) {
+                prioritized.high.push(finding);
+            } else {
+                prioritized.medium.push(finding);
+            }
+        } else {
+            if (finding.file.includes('/components/') || finding.file.includes('/app/')) {
+                prioritized.medium.push(finding);
+            } else {
+                prioritized.low.push(finding);
+            }
+        }
+    }
+    
+    return prioritized;
+}
+
+/**
  * Create backup of dictionary files
  */
 function createBackup() {
@@ -215,7 +411,7 @@ function createBackup() {
  * Main function
  */
 function main() {
-    console.log('🔍 i18n Configuration Analyzer\n');
+    console.log(colorize('\n🔍 i18n Configuration Analyzer (Enhanced)\n', 'cyan'));
 
     // Load dictionaries
     const dictionaries = {};
@@ -230,16 +426,47 @@ function main() {
         flatDictionaries[lang] = flattenKeys(dictionaries[lang]);
     }
 
-    console.log(`📚 Loaded dictionaries:`);
+    console.log(colorize('📚 Loaded dictionaries:', 'blue'));
     for (const lang of CONFIG.languages) {
-        console.log(`   ${lang}: ${Object.keys(flatDictionaries[lang]).length} keys`);
+        console.log(`   ${lang.toUpperCase()}: ${colorize(Object.keys(flatDictionaries[lang]).length, 'green')} keys`);
     }
     console.log();
 
+    // Validate dictionaries if requested
+    if (validateDicts) {
+        console.log(colorize('🔍 Validating dictionary consistency...\n', 'cyan'));
+        const validationIssues = validateDictionaries(dictionaries);
+        
+        if (validationIssues.length === 0) {
+            console.log(colorize('✅ All dictionaries are consistent!\n', 'green'));
+        } else {
+            console.log(colorize(`⚠️  Found ${validationIssues.length} validation issues:\n`, 'yellow'));
+            
+            const missingKeys = validationIssues.filter(i => i.type === 'missing');
+            const emptyValues = validationIssues.filter(i => i.type === 'empty');
+            
+            if (missingKeys.length > 0) {
+                console.log(colorize('Missing translations:', 'yellow'));
+                missingKeys.forEach(issue => {
+                    console.log(`   ${colorize(issue.key, 'red')} - missing in: ${issue.languages.join(', ')}`);
+                });
+                console.log();
+            }
+            
+            if (emptyValues.length > 0) {
+                console.log(colorize('Empty values:', 'yellow'));
+                emptyValues.forEach(issue => {
+                    console.log(`   ${colorize(issue.key, 'red')} - empty in: ${issue.language}`);
+                });
+                console.log();
+            }
+        }
+    }
+
     // Find used keys
-    console.log('🔎 Scanning source files for i18n key usage...');
+    console.log(colorize('🔎 Scanning source files for i18n key usage...', 'cyan'));
     const usedKeys = findUsedKeys(CONFIG.frontendSrcDir);
-    console.log(`   Found ${usedKeys.size} unique keys in use\n`);
+    console.log(`   Found ${colorize(usedKeys.size, 'green')} unique keys in use\n`);
 
     // Find redundant keys
     const redundantKeys = {};
@@ -249,23 +476,32 @@ function main() {
     }
 
     // Report redundant keys
-    console.log('📊 Redundant Keys Report:\n');
+    console.log(colorize('📊 Redundant Keys Report:\n', 'cyan'));
     for (const lang of CONFIG.languages) {
-        console.log(`${lang.toUpperCase()}:`);
+        console.log(colorize(`${lang.toUpperCase()}:`, 'blue'));
         if (redundantKeys[lang].length === 0) {
-            console.log('   ✅ No redundant keys found!');
+            console.log(colorize('   ✅ No redundant keys found!', 'green'));
         } else {
-            console.log(`   ⚠️  Found ${redundantKeys[lang].length} redundant keys:`);
-            redundantKeys[lang].forEach(key => {
-                console.log(`      - ${key}`);
-            });
+            console.log(colorize(`   ⚠️  Found ${redundantKeys[lang].length} redundant keys:`, 'yellow'));
+            if (verbose) {
+                redundantKeys[lang].forEach(key => {
+                    console.log(`      ${colorize('-', 'yellow')} ${key}`);
+                });
+            } else {
+                redundantKeys[lang].slice(0, 5).forEach(key => {
+                    console.log(`      ${colorize('-', 'yellow')} ${key}`);
+                });
+                if (redundantKeys[lang].length > 5) {
+                    console.log(`      ${colorize(`... and ${redundantKeys[lang].length - 5} more`, 'yellow')}`);
+                }
+            }
         }
         console.log();
     }
 
     // Fix redundant keys if requested
     if (shouldFix && Object.values(redundantKeys).some(arr => arr.length > 0)) {
-        console.log('🔧 Fixing redundant keys...\n');
+        console.log(colorize('🔧 Fixing redundant keys...\n', 'cyan'));
         createBackup();
 
         for (const lang of CONFIG.languages) {
@@ -281,7 +517,7 @@ function main() {
 
                 const filePath = path.join(CONFIG.dictionariesDir, `${lang}.json`);
                 saveJSON(filePath, dictCopy);
-                console.log(`✅ Removed ${removedCount} redundant keys from ${lang}.json`);
+                console.log(colorize(`✅ Removed ${removedCount} redundant keys from ${lang}.json`, 'green'));
             }
         }
         console.log();
@@ -289,51 +525,121 @@ function main() {
 
     // Detect hardcoded strings if requested
     if (detectHardcoded) {
-        console.log('🔍 Detecting hardcoded strings...\n');
+        console.log(colorize('🔍 Detecting hardcoded strings...\n', 'cyan'));
         const findings = detectHardcodedStrings(CONFIG.frontendSrcDir);
 
         if (findings.length === 0) {
-            console.log('✅ No hardcoded strings detected!\n');
+            console.log(colorize('✅ No hardcoded strings detected!\n', 'green'));
         } else {
-            console.log(`⚠️  Found ${findings.length} potential hardcoded strings:\n`);
+            console.log(colorize(`⚠️  Found ${findings.length} potential hardcoded strings\n`, 'yellow'));
 
-            const grouped = findings.reduce((acc, f) => {
-                if (!acc[f.file]) acc[f.file] = [];
-                acc[f.file].push(f);
-                return acc;
-            }, {});
+            const prioritized = prioritizeFindings(findings);
+            const allExistingKeys = new Set(Object.keys(flatDictionaries.en));
+            
+            // High priority findings
+            if (prioritized.high.length > 0) {
+                console.log(colorize(`🔴 HIGH PRIORITY (${prioritized.high.length} items) - Chinese in UI components:\n`, 'red'));
+                const grouped = prioritized.high.reduce((acc, f) => {
+                    if (!acc[f.file]) acc[f.file] = [];
+                    acc[f.file].push(f);
+                    return acc;
+                }, {});
 
-            for (const [file, items] of Object.entries(grouped)) {
-                console.log(`📄 ${file}:`);
-                items.forEach(item => {
-                    console.log(`   Line ${item.line} (${item.type}): "${item.text}"`);
-                    console.log(`   Context: ${item.context.substring(0, 80)}${item.context.length > 80 ? '...' : ''}`);
-                    console.log();
-                });
+                for (const [file, items] of Object.entries(grouped)) {
+                    console.log(colorize(`📄 ${file}:`, 'yellow'));
+                    items.forEach(item => {
+                        console.log(`   Line ${item.line}: ${colorize(`"${item.text}"`, 'red')}`);
+                        if (suggestKeys) {
+                            const suggested = suggestI18nKey(item.text, { file: item.file }, allExistingKeys);
+                            console.log(`   ${colorize('💡 Suggested key:', 'cyan')} ${suggested}`);
+                            allExistingKeys.add(suggested);
+                        }
+                        if (verbose) {
+                            console.log(`   Context: ${item.context}`);
+                        }
+                        console.log();
+                    });
+                }
             }
+            
+            // Medium priority findings
+            if (prioritized.medium.length > 0 && verbose) {
+                console.log(colorize(`🟡 MEDIUM PRIORITY (${prioritized.medium.length} items) - English in UI components:\n`, 'yellow'));
+                const grouped = prioritized.medium.slice(0, 10).reduce((acc, f) => {
+                    if (!acc[f.file]) acc[f.file] = [];
+                    acc[f.file].push(f);
+                    return acc;
+                }, {});
 
-            console.log(`💡 Suggestion: Add these strings to your i18n dictionaries and replace with t() calls.`);
+                for (const [file, items] of Object.entries(grouped)) {
+                    console.log(colorize(`📄 ${file}:`, 'yellow'));
+                    items.forEach(item => {
+                        console.log(`   Line ${item.line}: ${colorize(`"${item.text}"`, 'yellow')}`);
+                        if (suggestKeys) {
+                            const suggested = suggestI18nKey(item.text, { file: item.file }, allExistingKeys);
+                            console.log(`   ${colorize('💡 Suggested key:', 'cyan')} ${suggested}`);
+                            allExistingKeys.add(suggested);
+                        }
+                        console.log();
+                    });
+                }
+                if (prioritized.medium.length > 10) {
+                    console.log(colorize(`   ... and ${prioritized.medium.length - 10} more\n`, 'yellow'));
+                }
+            }
+            
+            if (!verbose) {
+                console.log(colorize(`\n💡 Use --verbose to see all findings\n`, 'cyan'));
+            }
+            
+            console.log(colorize(`💡 Suggestion: Add these strings to your i18n dictionaries and replace with t() calls.`, 'cyan'));
         }
     }
 
     // Summary
-    console.log('\n' + '='.repeat(60));
-    console.log('Summary:');
-    console.log(`  Total keys in dictionaries: ${Object.keys(flatDictionaries.en).length}`);
-    console.log(`  Keys in use: ${usedKeys.size}`);
-    console.log(`  Redundant keys: ${redundantKeys.en.length}`);
+    console.log('\n' + colorize('='.repeat(70), 'cyan'));
+    console.log(colorize('📊 Summary:', 'bright'));
+    console.log(`  ${colorize('Total keys in dictionaries:', 'blue')} ${Object.keys(flatDictionaries.en).length}`);
+    console.log(`  ${colorize('Keys in use:', 'green')} ${usedKeys.size}`);
+    console.log(`  ${colorize('Redundant keys:', 'yellow')} ${redundantKeys.en.length}`);
+    if (validateDicts) {
+        const validationIssues = validateDictionaries(dictionaries);
+        const missingCount = validationIssues.filter(i => i.type === 'missing').length;
+        const emptyCount = validationIssues.filter(i => i.type === 'empty').length;
+        console.log(`  ${colorize('Missing translations:', 'yellow')} ${missingCount}`);
+        console.log(`  ${colorize('Empty values:', 'yellow')} ${emptyCount}`);
+    }
     if (detectHardcoded) {
         const findings = detectHardcodedStrings(CONFIG.frontendSrcDir);
-        console.log(`  Hardcoded strings detected: ${findings.length}`);
+        const prioritized = prioritizeFindings(findings);
+        console.log(`  ${colorize('Hardcoded strings (High):', 'red')} ${prioritized.high.length}`);
+        console.log(`  ${colorize('Hardcoded strings (Medium):', 'yellow')} ${prioritized.medium.length}`);
+        console.log(`  ${colorize('Hardcoded strings (Low):', 'blue')} ${prioritized.low.length}`);
     }
-    console.log('='.repeat(60) + '\n');
+    console.log(colorize('='.repeat(70), 'cyan') + '\n');
 
+    // Tips
+    const tips = [];
     if (!shouldFix && redundantKeys.en.length > 0) {
-        console.log('💡 Run with --fix to automatically remove redundant keys (backups will be created)');
+        tips.push('Run with --fix to automatically remove redundant keys (backups will be created)');
     }
-
     if (!detectHardcoded) {
-        console.log('💡 Run with --detect-hardcoded to scan for hardcoded Chinese/English strings');
+        tips.push('Run with --detect-hardcoded to scan for hardcoded Chinese/English strings');
+    }
+    if (!validateDicts) {
+        tips.push('Run with --validate to check dictionary consistency across languages');
+    }
+    if (!suggestKeys && detectHardcoded) {
+        tips.push('Run with --suggest to get i18n key suggestions for hardcoded strings');
+    }
+    if (!verbose && detectHardcoded) {
+        tips.push('Run with --verbose to see detailed context for all findings');
+    }
+    
+    if (tips.length > 0) {
+        console.log(colorize('💡 Tips:', 'cyan'));
+        tips.forEach(tip => console.log(`   • ${tip}`));
+        console.log();
     }
 }
 

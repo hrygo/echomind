@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { SearchCluster, SearchResultsSummary, ClusterType, SearchViewMode } from '@/types/search';
 
 export interface CopilotMessage {
@@ -65,10 +66,12 @@ interface CopilotState {
   setMessages: (messages: CopilotMessage[]) => void;
   setIsChatting: (isChatting: boolean) => void;
   setActiveContextId: (id: string | null) => void;
+  clearMessages: () => void; // 清空会话历史
   reset: () => void;
 }
 
-export const useCopilotStore = create<CopilotState>((set) => ({
+export const useCopilotStore = create<CopilotState>()(persist(
+  (set) => ({
   // Mode State
   isOpen: false,
   mode: 'idle' as const,
@@ -111,15 +114,26 @@ export const useCopilotStore = create<CopilotState>((set) => ({
   setEnableSummary: (enableSummary) => set({ enableSummary }),
   
   // Chat Actions
-  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+  addMessage: (message) => set((state) => {
+    const newMessages = [...state.messages, message];
+    // 限制为最近 50 轮对话（100 条消息）
+    const MAX_MESSAGES = 100;
+    if (newMessages.length > MAX_MESSAGES) {
+      return { messages: newMessages.slice(newMessages.length - MAX_MESSAGES) };
+    }
+    return { messages: newMessages };
+  }),
   setMessages: (messages) => set({ messages }),
   setIsChatting: (isChatting) => set({ isChatting }),
   
   // Context Actions
   setActiveContextId: (activeContextId) => set({ activeContextId }),
   
-  // Reset
-  reset: () => set({
+ // Clear Messages
+  clearMessages: () => set({ messages: [] }),
+  
+  // Reset (保留历史会话，但清理其他状态)
+  reset: () => set((state) => ({
     mode: 'idle',
     query: '',
     searchResults: [],
@@ -130,7 +144,33 @@ export const useCopilotStore = create<CopilotState>((set) => ({
     searchViewMode: 'all',
     enableClustering: false,
     enableSummary: false,
-    messages: [],
+    // 过滤掉可能存在的"思考中..."消息
+    messages: state.messages.filter(m => {
+      if (m.role === 'assistant') {
+        const thinkingTexts = ['思考中...', 'Thinking...'];
+        return !thinkingTexts.some(text => m.content === text);
+      }
+      return true;
+    }),
     isChatting: false,
+  })),
+}),
+{
+  name: 'copilot-storage',
+  partialize: (state) => ({
+    // 过滤掉"思考中..."等未完成的 AI 消息
+    messages: state.messages.filter(m => {
+      if (m.role === 'assistant') {
+        // 排除包含特定占位文本的消息
+        const thinkingTexts = ['思考中...', 'Thinking...', '...'];
+        return !thinkingTexts.some(text => m.content.includes(text) && m.content.length < 20);
+      }
+      return true;
+    }),
+    // 持久化搜索增强设置
+    enableClustering: state.enableClustering,
+    enableSummary: state.enableSummary,
+    clusterType: state.clusterType,
   }),
-}));
+}
+));

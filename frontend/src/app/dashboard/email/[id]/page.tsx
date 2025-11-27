@@ -69,6 +69,18 @@ export default function EmailDetailPage() {
     return action.label;
   };
 
+  // 翻译情感值
+  const getSentimentLabel = (sentiment: string) => {
+    const key = sentiment.toLowerCase() as 'positive' | 'neutral' | 'negative';
+    return t(`emailDetail.sentiment.${key}`);
+  };
+
+  // 翻译紧急程度
+  const getUrgencyLabel = (urgency: string) => {
+    const key = urgency.toLowerCase() as 'high' | 'medium' | 'low';
+    return t(`emailDetail.urgency.${key}`);
+  };
+
   const handleSmartAction = async (action: SmartAction) => {
     if (action.type === 'create_task') {
       try {
@@ -116,7 +128,7 @@ export default function EmailDetailPage() {
                    ${email.Sentiment === 'Positive' ? 'bg-green-100 text-green-800 border-green-200' :
                     email.Sentiment === 'Negative' ? 'bg-red-100 text-red-800 border-red-200' :
                       'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                  {email.Sentiment}
+                  {getSentimentLabel(email.Sentiment)}
                 </span>
               )}
               {/* Urgency Badge */}
@@ -124,7 +136,7 @@ export default function EmailDetailPage() {
                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded border 
                    ${email.Urgency === 'High' ? 'bg-orange-100 text-orange-800 border-orange-200' :
                     'bg-blue-100 text-blue-800 border-blue-200'}`}>
-                  {email.Urgency} Urgency
+                  {getUrgencyLabel(email.Urgency)}
                 </span>
               )}
             </div>

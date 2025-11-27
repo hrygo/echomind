@@ -34,6 +34,9 @@ export function CopilotInput({ showSettings, onToggleSettings, onCloseSettings }
     setSummary,
   } = useCopilotStore();
 
+  // 判断设置按钮是否应该被禁用
+  const isSettingsDisabled = mode !== 'idle';
+
   const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && query.trim()) {
       e.preventDefault();
@@ -134,6 +137,12 @@ export function CopilotInput({ showSettings, onToggleSettings, onCloseSettings }
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
+          onMouseEnter={() => {
+            // 当鼠标移入输入框时，关闭设置面板
+            if (showSettings && onCloseSettings) {
+              onCloseSettings();
+            }
+          }}
           onFocus={() => {
             // 当输入框获得焦点时，关闭设置面板
             if (showSettings && onCloseSettings) {
@@ -156,11 +165,16 @@ export function CopilotInput({ showSettings, onToggleSettings, onCloseSettings }
            {onToggleSettings && (
              <button 
               onClick={onToggleSettings}
+              disabled={isSettingsDisabled}
               className={cn(
                   "p-2 rounded-lg transition-colors",
-                  showSettings ? "bg-blue-50 text-blue-600" : "hover:bg-slate-50 text-slate-400"
+                  isSettingsDisabled 
+                    ? "opacity-40 cursor-not-allowed text-slate-300" 
+                    : showSettings 
+                      ? "bg-blue-50 text-blue-600" 
+                      : "hover:bg-slate-50 text-slate-400"
               )}
-              title={t('copilot.searchEnhancement.title')}
+              title={isSettingsDisabled ? t('copilot.searchEnhancement.disabledHint') || '搜索或聊天时不可用' : t('copilot.searchEnhancement.title')}
              >
                <Settings className="w-4 h-4" />
              </button>

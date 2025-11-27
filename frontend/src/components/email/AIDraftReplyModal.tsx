@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api';
 import { Loader2, Sparkles, Copy, Mail, CheckCircle } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface AIDraftReplyModalProps {
   emailContent: string;
@@ -13,7 +14,8 @@ interface AIDraftReplyModalProps {
 }
 
 export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AIDraftReplyModalProps) {
-  const [userPrompt, setUserPrompt] = useState('Generate a professional email reply to this message.');
+  const { t } = useLanguage();
+  const [userPrompt, setUserPrompt] = useState(t('emailDetail.aiDraft.tonePrompts.professional'));
   const [draftReply, setDraftReply] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +23,11 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
 
   const handleGenerateDraft = async () => {
     if (!emailContent.trim()) {
-      setError('Email content is required.');
+      setError(t('emailDetail.aiDraft.errors.emailRequired'));
       return;
     }
     if (!userPrompt.trim()) {
-      setError('User prompt is required.');
+      setError(t('emailDetail.aiDraft.errors.promptRequired'));
       return;
     }
 
@@ -40,7 +42,7 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
       setDraftReply(response.data.draft);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Failed to generate draft reply.');
+      setError(err.response?.data?.error || err.message || t('emailDetail.aiDraft.errors.generateFailed'));
     } finally {
       setLoading(false);
     }
@@ -70,10 +72,10 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
-                AI Email Draft Generator
+                {t('emailDetail.aiDraft.title')}
               </DialogTitle>
               <DialogDescription className="text-sm sm:text-base text-muted-foreground mt-1">
-                Create a professional email reply powered by AI
+                {t('emailDetail.aiDraft.description')}
               </DialogDescription>
             </div>
           </div>
@@ -84,11 +86,11 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
           <div className="space-y-2 sm:space-y-3">
             <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Mail className="w-4 h-4" />
-              Original Email
+              {t('emailDetail.aiDraft.originalEmail')}
             </Label>
             <div className="p-3 sm:p-4 bg-muted/50 rounded-xl border max-h-32 sm:max-h-48 overflow-y-auto">
               <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {emailContent.trim() || 'No email content provided'}
+                {emailContent.trim() || t('emailDetail.aiDraft.noContent')}
               </p>
             </div>
           </div>
@@ -96,47 +98,47 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
           {/* Prompt Input */}
           <div className="space-y-2 sm:space-y-3">
             <Label htmlFor="userPrompt" className="text-sm font-semibold text-foreground">
-              Instructions for AI
+              {t('emailDetail.aiDraft.instructions')}
             </Label>
             <Textarea
               id="userPrompt"
               value={userPrompt}
               onChange={(e) => setUserPrompt(e.target.value)}
-              placeholder="Describe how you'd like to reply to this email..."
+              placeholder={t('emailDetail.aiDraft.instructionsPlaceholder')}
               className="min-h-[80px] sm:min-h-[100px] resize-none"
             />
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setUserPrompt('Generate a brief professional response.')}
+                onClick={() => setUserPrompt(t('emailDetail.aiDraft.tonePrompts.professional'))}
                 className="text-xs h-8 px-3"
               >
-                Professional
+                {t('emailDetail.aiDraft.toneButtons.professional')}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setUserPrompt('Generate a friendly and casual reply.')}
+                onClick={() => setUserPrompt(t('emailDetail.aiDraft.tonePrompts.casual'))}
                 className="text-xs h-8 px-3"
               >
-                Casual
+                {t('emailDetail.aiDraft.toneButtons.casual')}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setUserPrompt('Generate a concise and direct response.')}
+                onClick={() => setUserPrompt(t('emailDetail.aiDraft.tonePrompts.concise'))}
                 className="text-xs h-8 px-3"
               >
-                Concise
+                {t('emailDetail.aiDraft.toneButtons.concise')}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setUserPrompt('Generate a detailed and comprehensive reply.')}
+                onClick={() => setUserPrompt(t('emailDetail.aiDraft.tonePrompts.detailed'))}
                 className="text-xs h-8 px-3"
               >
-                Detailed
+                {t('emailDetail.aiDraft.toneButtons.detailed')}
               </Button>
             </div>
           </div>
@@ -151,13 +153,12 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating AI Draft...
+                  {t('emailDetail.aiDraft.generating')}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span className="hidden sm:inline">Generate AI Draft</span>
-                  <span className="sm:hidden">Generate Draft</span>
+                  {t('emailDetail.aiDraft.generateButton')}
                 </>
               )}
             </Button>
@@ -176,10 +177,10 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  AI Generated Draft
+                  {t('emailDetail.aiDraft.generatedDraft')}
                 </Label>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  Ready to use
+                  {t('emailDetail.aiDraft.readyToUse')}
                 </div>
               </div>
 
@@ -201,12 +202,12 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
                   {copied ? (
                     <>
                       <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      Copied!
+                      {t('emailDetail.aiDraft.copied')}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      Copy
+                      {t('emailDetail.aiDraft.copy')}
                     </>
                   )}
                 </Button>
@@ -216,8 +217,8 @@ export default function AIDraftReplyModal({ emailContent, isOpen, onClose }: AID
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <Mail className="w-4 h-4" />
-                  <span className="hidden sm:inline">Open in Email</span>
-                  <span className="sm:hidden">Email</span>
+                  <span className="hidden sm:inline">{t('emailDetail.aiDraft.openInEmail')}</span>
+                  <span className="sm:hidden">{t('emailDetail.aiDraft.emailShort')}</span>
                 </Button>
               </div>
             </div>

@@ -116,21 +116,13 @@ export default function DashboardPage() {
   };
 
   const getSentimentLabel = (sentiment: string) => {
-    const map: Record<string, string> = {
-      'Positive': '积极',
-      'Negative': '消极',
-      'Neutral': '中性'
-    };
-    return map[sentiment] || sentiment;
+    const key = sentiment.toLowerCase() as 'positive' | 'neutral' | 'negative';
+    return t(`emailDetail.sentiment.${key}`);
   };
 
   const getUrgencyLabel = (urgency: string) => {
-    const map: Record<string, string> = {
-      'High': '高优先级',
-      'Medium': '中优先级',
-      'Low': '低优先级'
-    };
-    return map[urgency] || urgency;
+    const key = urgency.toLowerCase() as 'high' | 'medium' | 'low';
+    return t(`emailDetail.urgency.${key}`);
   };
 
   return (
@@ -150,7 +142,7 @@ export default function DashboardPage() {
           ) : (
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 0 0-9-9V3a10 10 0 0 1 10 10Z"/><path d="M21 21v-3.5L16 18"/><path d="M3 12a9 9 0 0 0 9 9v0a10 10 0 0 1-10-10Z"/><path d="M3 3v3.5L8 6"/></svg>
           )}
-          {syncLoading ? "同步中..." : "立即同步"}
+          {syncLoading ? t('inbox.syncing') : t('inbox.syncNow')}
         </Button>
       </div>
 
@@ -161,17 +153,17 @@ export default function DashboardPage() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            正在加载邮件...
+            {t('inbox.loadingEmails')}
           </div>
         ) : error ? (
           <div className="p-8 text-center text-red-500 text-lg flex items-center justify-center h-full">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle mr-2 text-red-500"><path d="M10.29 3.86L1.86 18.14a2 2 0 0 0 1.74 3.09h16.8a2 2 0 0 0 1.74-3.09L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-            错误: {error}
+            {t('inbox.error')}: {error}
           </div>
         ) : emails.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-lg flex items-center justify-center h-full">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-inbox mr-2 text-slate-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-            暂无邮件，请尝试同步！
+            {t('inbox.noEmails')}
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">
@@ -191,7 +183,7 @@ export default function DashboardPage() {
                   </h3>
                   <div className="flex items-start gap-3 mt-3">
                     <p className="text-sm text-slate-600 line-clamp-2 flex-1">
-                      {email.Summary || "正在分析..."}
+                      {email.Summary || t('inbox.analyzing')}
                     </p>
                     <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
                       {email.Sentiment && (

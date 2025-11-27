@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -24,8 +25,8 @@ const useConfirmDialogStore = create<ConfirmDialogStore>((set) => ({
   isOpen: false,
   title: '',
   message: '',
-  confirmText: '确认',
-  cancelText: '取消',
+  confirmText: '',
+  cancelText: '',
   onConfirm: () => {},
   onCancel: undefined,
   
@@ -35,6 +36,7 @@ const useConfirmDialogStore = create<ConfirmDialogStore>((set) => ({
 
 export function useConfirm() {
   const { openConfirm, closeConfirm } = useConfirmDialogStore();
+  const { t } = useLanguage();
 
   return (message: string, onConfirm: () => void, options?: {
     title?: string;
@@ -43,10 +45,10 @@ export function useConfirm() {
     onCancel?: () => void;
   }) => {
     openConfirm({
-      title: options?.title || '确认操作',
+      title: options?.title || t('common.confirmAction'),
       message,
-      confirmText: options?.confirmText || '确认',
-      cancelText: options?.cancelText || '取消',
+      confirmText: options?.confirmText || t('common.confirm'),
+      cancelText: options?.cancelText || t('common.cancel'),
       onConfirm: () => {
         onConfirm();
         closeConfirm();

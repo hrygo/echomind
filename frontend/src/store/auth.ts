@@ -7,6 +7,7 @@ interface User {
     email: string;
     name?: string;
     role?: string; // Add role
+    avatar_url?: string; // Add avatar_url
     has_account?: boolean; // Add has_account
 }
 

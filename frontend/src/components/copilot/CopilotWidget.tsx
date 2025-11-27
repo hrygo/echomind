@@ -33,6 +33,13 @@ export function CopilotWidget() {
     };
   }, [mode, showSettings, reset]);
 
+  // Auto-close settings when mode changes to search or chat
+  useEffect(() => {
+    if (mode !== 'idle' && showSettings) {
+      setShowSettings(false);
+    }
+  }, [mode, showSettings]);
+
   return (
     <div className="relative z-50 w-full max-w-2xl">
       <div ref={containerRef} className="relative">
@@ -50,15 +57,18 @@ export function CopilotWidget() {
           </div>
         )}
 
-        {/* The Dropdown Area (Search Results or Chat) */}
-        <div className={cn(
-            "absolute top-full left-0 right-0 transition-all duration-200 origin-top",
-            showSettings ? "mt-[200px]" : "mt-1",
-            mode === 'idle' ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
-        )}>
-           {mode === 'search' && <CopilotResults />}
-           {mode === 'chat' && <CopilotChat />}
-        </div>
+        {/* The Dropdown Area (Search Results or Chat) - Only show when settings is closed */}
+        {!showSettings && (
+          <div 
+            className={cn(
+              "absolute top-full left-0 right-0 transition-all duration-200 origin-top mt-1",
+              mode === 'idle' ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
+            )}
+          >
+             {mode === 'search' && <CopilotResults />}
+             {mode === 'chat' && <CopilotChat />}
+          </div>
+        )}
       </div>
       
       {/* Backdrop */}

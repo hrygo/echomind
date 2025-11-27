@@ -14,7 +14,8 @@
         "primary": "主要",
         "secondary": "次要",
         "outline": "轮廓",
-        "ghost": "幽灵"
+        "ghost": "幽灵",
+        "confirmAction": "确认操作"
     },
     "sidebar": {
         "intelligence": "智能驾驶舱",
@@ -36,13 +37,9 @@
         "finance": "财务",
         "notification": "通知",
         "spam": "垃圾邮件",
-        "user": "用户",
         "freePlan": "免费版"
     },
     "dashboard": {
-        "greetingMorning": "早上好",
-        "greetingAfternoon": "下午好",
-        "greetingEvening": "晚上好",
         "executiveView": "高管视图",
         "managerView": "管理者视图",
         "dealmakerView": "销售视图",
@@ -66,7 +63,6 @@
         "all": "全部",
         "highPriority": "高优先级",
         "noPendingTasks": "暂无待办任务！干得好。",
-        "completed": "已完成",
         "completedToday": "今日完成",
         "thisWeek": "本周",
         "overdue": "已逾期",
@@ -86,12 +82,6 @@
         "aiSummary": "AI 摘要：",
         "approve": "批准",
         "replyWithAI": "AI 辅助回复",
-        "radarBuyingIntent": "购买意向",
-        "radarPartnership": "合作伙伴",
-        "radarHiring": "招聘相关",
-        "radarMeeting": "会议请求",
-        "radarReferral": "推荐介绍",
-        "radarFollowUp": "跟进提醒",
         "snooze4h": "小睡4小时",
         "snoozeTomorrow": "小睡到明天",
         "snoozeNextWeek": "小睡到下周",
@@ -128,7 +118,21 @@
         "notifications": "通知设置",
         "security": "安全与隐私",
         "billing": "订阅与计费",
-        "appearance": "外观设置",
+        "appearance": {
+            "title": "界面外观",
+            "description": "个性化您的 EchoMind 使用体验",
+            "themeSelector": "主题选择",
+            "themes": {
+                "light": "浅色主题",
+                "dark": "深色主题",
+                "system": "跟随系统"
+            },
+            "preview": "主题预览",
+            "previewCard": "示例卡片",
+            "previewDesc": "这是当前主题下的卡片样式展示",
+            "previewMuted": "柔和样式",
+            "previewMutedDesc": "这是次要元素的样式展示"
+        },
         "accountDesc": "管理您的个人资料和联系方式。",
         "connectedMailboxDesc": "管理与 EchoMind 同步的邮箱账号。",
         "firstName": "名字",
@@ -161,31 +165,6 @@
             "disconnectSuccess": "邮箱连接已断开",
             "disconnectFailed": "断开连接失败",
             "mailboxConfigDesc": "配置您的邮箱以开始同步"
-        },
-        "appearance": {
-            "title": "界面外观",
-            "description": "个性化您的 EchoMind 使用体验",
-            "themeSelector": "主题选择",
-            "currentTheme": "当前主题",
-            "themes": {
-                "light": "浅色主题",
-                "lightDesc": "明亮清爽的界面风格",
-                "dark": "深色主题",
-                "darkDesc": "护眼专注的深色界面",
-                "system": "跟随系统",
-                "systemDesc": "自动跟随系统主题设置"
-            },
-            "additionalSettings": "其他设置",
-            "fontSize": "字体大小",
-            "fontSizeDesc": "调整界面文字大小",
-            "animations": "动画效果",
-            "animationsDesc": "界面过渡动画和微交互",
-            "enable": "启用",
-            "preview": "主题预览",
-            "previewCard": "示例卡片",
-            "previewDesc": "这是当前主题下的卡片样式展示",
-            "previewMuted": "柔和样式",
-            "previewMutedDesc": "这是次要元素的样式展示"
         }
     },
     "emailDetail": {
@@ -199,7 +178,50 @@
         "from": "发件人：",
         "taskCreatedSuccess": "任务创建成功！",
         "taskCreatedError": "任务创建失败。",
-        "createTaskDefault": "来自邮件的新任务"
+        "createTaskDefault": "来自邮件的新任务",
+        "sentiment": {
+            "positive": "积极",
+            "neutral": "中性",
+            "negative": "消极"
+        },
+        "urgency": {
+            "high": "高紧急度",
+            "medium": "中等紧急度",
+            "low": "低紧急度"
+        },
+        "aiDraft": {
+            "title": "AI 邮件草稿生成器",
+            "description": "使用 AI 创建专业的邮件回复",
+            "originalEmail": "原始邮件",
+            "noContent": "未提供邮件内容",
+            "instructions": "AI 指令",
+            "instructionsPlaceholder": "描述您希望如何回复此邮件...",
+            "toneButtons": {
+                "professional": "专业",
+                "casual": "随意",
+                "concise": "简洁",
+                "detailed": "详细"
+            },
+            "tonePrompts": {
+                "professional": "生成简短专业的回复。",
+                "casual": "生成友好随意的回复。",
+                "concise": "生成简洁直接的回复。",
+                "detailed": "生成详细全面的回复。"
+            },
+            "generateButton": "生成 AI 草稿",
+            "generating": "正在生成 AI 草稿...",
+            "generatedDraft": "AI 生成的草稿",
+            "readyToUse": "可以使用",
+            "copy": "复制",
+            "copied": "已复制！",
+            "openInEmail": "在邮件客户端打开",
+            "emailShort": "邮件",
+            "errors": {
+                "emailRequired": "需要邮件内容。",
+                "promptRequired": "需要用户指令。",
+                "generateFailed": "生成草稿回复失败。"
+            }
+        }
     },
     "auth": {
         "welcomeBack": "欢迎回来",
@@ -245,8 +267,11 @@
         "noResults": "未找到结果。请尝试不同的查询。",
         "match": "匹配度",
         "welcomeMessage": "今天我能为您做什么？",
+        "clearHistory": "清空历史",
+        "clearHistoryTitle": "清空对话历史",
         "searchEnhancement": {
             "title": "搜索增强设置",
+            "disabledHint": "搜索或聊天时不可用",
             "aiSummary": "AI 智能摘要",
             "clustering": "结果聚类",
             "clusterType": "聚类方式",
@@ -258,9 +283,7 @@
             "importantPeople": "重要联系人",
             "noSummary": "暂无摘要信息",
             "noClusterData": "暂无聚类数据",
-            "emailCount": "{count} 封邮件",
             "from": "来自",
-            "matchScore": "匹配度: {score}%",
             "allResults": "全部结果",
             "clustered": "聚类视图",
             "clusteredResults": "聚类结果"
@@ -304,6 +327,12 @@
         "syncFailed": "同步失败",
         "syncFailedUnknown": "同步失败：发生未知错误",
         "noAccountConfigured": "您尚未配置邮箱账户。是否立即前往设置页面进行配置？",
-        "configureAccount": "配置邮箱账户"
+        "configureAccount": "配置邮箱账户",
+        "syncing": "同步中...",
+        "syncNow": "立即同步",
+        "loadingEmails": "正在加载邮件...",
+        "error": "错误",
+        "noEmails": "暂无邮件，请尝试同步！",
+        "analyzing": "正在分析..."
     }
 }
