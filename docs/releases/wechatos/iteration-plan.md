@@ -8,7 +8,7 @@
 *   **Week 1: 基础设施搭建**
     *   [ ] 申请微信测试号/服务号。
     *   [ ] 配置公网回调域名 (Ngrok/Cloudflare)。
-    *   [ ] **SDK 集成**: 引入 `github.com/silenceper/wechat/v2`。
+    *   [*] **SDK 集成**: 引入 `github.com/silenceper/wechat/v2`。
         *   配置 `RedisCache` 以复用现有 Redis 实例存储 `access_token`。
         *   初始化 `OfficialAccount` 实例。
     *   [ ] 实现 `WeChat Gateway` 基础接收与验签逻辑。

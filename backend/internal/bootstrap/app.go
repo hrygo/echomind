@@ -136,36 +136,109 @@ func Init(configPath string, production bool) (*App, error) {
 }
 
 func (app *App) SetupDB() error {
-	// Extensions
+	// Step 1: Create Extensions
+	app.Logger.Info("Creating PostgreSQL extensions...")
 	if err := app.DB.Exec("CREATE EXTENSION IF NOT EXISTS vector").Error; err != nil {
 		return fmt.Errorf("failed to create vector extension: %w", err)
 	}
+	if err := app.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
+		app.Logger.Warn("Failed to create uuid-ossp extension (may already exist or using gen_random_uuid)", logger.Error(err))
+	}
+	app.Logger.Info("Extensions created successfully")
 
-	// Migrations
+	// Step 2: Create Custom Types (Enums)
+	app.Logger.Info("Creating custom types...")
+	customTypes := []string{
+		`DO $$ BEGIN
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'opportunity_type') THEN
+				CREATE TYPE opportunity_type AS ENUM ('buying', 'partnership', 'renewal', 'strategic');
+			END IF;
+		END $$;`,
+		`DO $$ BEGIN
+			IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'opportunity_status') THEN
+				CREATE TYPE opportunity_status AS ENUM ('new', 'active', 'won', 'lost', 'on_hold');
+			END IF;
+		END $$;`,
+	}
+	for _, sql := range customTypes {
+		if err := app.DB.Exec(sql).Error; err != nil {
+			app.Logger.Warn("Failed to create custom type (may already exist)", logger.Error(err))
+		}
+	}
+	app.Logger.Info("Custom types created successfully")
+
+	// Step 3: Run Migrations for ALL Models
 	// Note: We include ALL models here to ensure consistency across apps. GORM AutoMigrate handles column additions like SnoozedUntil.
+	app.Logger.Info("Running database migrations...")
 	models := []interface{}{
-		&model.Email{},
+		// Core entities
 		&model.User{},
-		&model.Contact{},
-		&model.EmailAccount{},
-		&model.EmailEmbedding{},
 		&model.Organization{},
 		&model.OrganizationMember{},
 		&model.Team{},
 		&model.TeamMember{},
-		&model.Task{},
+		// Email entities
+		&model.Email{},
+		&model.EmailAccount{},
+		&model.EmailEmbedding{},
+		// Context and relationship entities
+		&model.Contact{},
 		&model.Context{},
 		&model.EmailContext{},
+		&model.Task{},
+		// Opportunity entities
+		&model.Opportunity{},
+		&model.OpportunityContact{},
+		&model.Activity{},
 	}
 
 	if err := app.DB.AutoMigrate(models...); err != nil {
 		return fmt.Errorf("failed to auto migrate: %w", err)
 	}
+	app.Logger.Info("Database migrations completed successfully")
 
-	// Indices
-	if err := app.DB.Exec("CREATE INDEX IF NOT EXISTS email_embeddings_vector_idx ON email_embeddings USING hnsw (vector vector_cosine_ops)").Error; err != nil {
-		app.Logger.Warn("Failed to create HNSW index", logger.Error(err))
+	// Step 4: Create Indices
+	app.Logger.Info("Creating database indices...")
+	indices := []struct {
+		name string
+		sql  string
+	}{
+		{
+			name: "email_embeddings_vector_idx",
+			sql:  "CREATE INDEX IF NOT EXISTS email_embeddings_vector_idx ON email_embeddings USING hnsw (vector vector_cosine_ops)",
+		},
+		{
+			name: "idx_emails_user_date",
+			sql:  "CREATE INDEX IF NOT EXISTS idx_emails_user_date ON emails (user_id, date DESC)",
+		},
+		{
+			name: "idx_opportunities_user_status",
+			sql:  "CREATE INDEX IF NOT EXISTS idx_opportunities_user_status ON opportunities (user_id, status)",
+		},
+		{
+			name: "idx_tasks_user_status",
+			sql:  "CREATE INDEX IF NOT EXISTS idx_tasks_user_status ON tasks (user_id, status)",
+		},
 	}
+
+	for _, idx := range indices {
+		if err := app.DB.Exec(idx.sql).Error; err != nil {
+			app.Logger.Warn("Failed to create index",
+				logger.String("index", idx.name),
+				logger.Error(err))
+		} else {
+			app.Logger.Info("Index created", logger.String("index", idx.name))
+		}
+	}
+
+	// Step 5: Verify Tables
+	app.Logger.Info("Verifying database tables...")
+	var tableCount int64
+	if err := app.DB.Raw("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'").Scan(&tableCount).Error; err != nil {
+		return fmt.Errorf("failed to verify tables: %w", err)
+	}
+	app.Logger.Info("Database setup completed",
+		logger.Int64("total_tables", tableCount))
 
 	return nil
 }
