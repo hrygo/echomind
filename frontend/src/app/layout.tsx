@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { QueryProvider } from "@/components/providers/QueryClientProvider";
-import { ToastContainer } from "@/components/ui/ToastContainer";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Toaster } from "@/components/ui/sonner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ThemeProvider } from "@/components/theme/ThemeProviderNext";
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export default function RootLayout({
           <QueryProvider>
             <LanguageProvider>
               {children}
-              <ToastContainer />
+              <Toaster />
               <ConfirmDialog />
             </LanguageProvider>
           </QueryProvider>

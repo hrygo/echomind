@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import AIDraftReplyModal from "@/components/email/AIDraftReplyModal";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { createTask } from "@/lib/api/tasks"; // Import the new task API

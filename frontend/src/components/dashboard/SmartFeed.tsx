@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, ArrowRight, CheckCircle2, MoreVertical, BellOff, Trash2, Sparkles, Copy, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useEmailStore } from '@/lib/store/emails';
 import { Email } from '@/lib/api/emails';
 import { formatDistanceToNow } from 'date-fns';
 import { useActionStore } from '@/lib/store/actions';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAIReply } from '@/hooks/useAIReply';
 
 interface SmartFeedProps {

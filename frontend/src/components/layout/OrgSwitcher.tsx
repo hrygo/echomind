@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useOrganizationStore, Organization } from '@/lib/store/organization';
-import { Button } from '@/components/ui/Button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PlusCircle, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CreateOrganizationModal } from './CreateOrganizationModal';

@@ -1,7 +1,7 @@
 "use client";
 
 import { useUIStore } from "@/store/ui";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/Sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 

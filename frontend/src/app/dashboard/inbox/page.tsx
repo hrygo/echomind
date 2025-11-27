@@ -4,12 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from "@/lib/api";
-import { Button } from "@/components/ui/Button"; // Assuming a global Button component with good styling
+import { Button } from "@/components/ui/button"; // Assuming a global Button component with good styling
 import { isAxiosError } from 'axios';
 
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useToast } from "@/lib/hooks/useToast";
-import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Email {
   ID: string;

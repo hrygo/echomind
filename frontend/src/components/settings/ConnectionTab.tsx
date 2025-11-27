@@ -7,9 +7,9 @@ import { api } from '@/lib/api';
 // import { cn } from '@/lib/utils'; // cn is not directly used in this file but by InputField in SmartMailboxForm
 import { isAxiosError } from 'axios';
 import { SmartMailboxForm } from '../onboarding/SmartMailboxForm'; // Re-use from onboarding
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog'; // Assuming Radix UI Dialog
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'; // Assuming Radix UI Dialog
 import { useToast } from '@/lib/hooks/useToast';
-import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 
 interface AccountStatusResponse {
   has_account: boolean;

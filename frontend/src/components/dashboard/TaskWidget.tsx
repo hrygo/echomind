@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Checkbox } from "@/components/ui/Checkbox"; // Assuming you have a Checkbox component
+import { Checkbox } from "@/components/ui/checkbox"; // Assuming you have a Checkbox component
 import { useTaskStore } from "@/store/task";
 import { listTasks, updateTaskStatus, Task } from "@/lib/api/tasks";
 import { useLanguage } from "@/lib/i18n/LanguageContext";

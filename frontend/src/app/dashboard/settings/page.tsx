@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { User, Bell, Shield, CreditCard, Palette, Mail } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs'; // Assuming Radix UI Tabs
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // Assuming Radix UI Tabs
 import { ProfileTab } from '@/components/settings/ProfileTab';
 import { ConnectionTab } from '@/components/settings/ConnectionTab';
 import { AppearanceTab } from '@/components/settings/AppearanceTab';
