@@ -19,7 +19,7 @@ export default function SettingsPage() {
     { id: "notifications", label: t('settings.notifications'), icon: Bell },
     { id: "security", label: t('settings.security'), icon: Shield },
     { id: "billing", label: t('settings.billing'), icon: CreditCard },
-    { id: "appearance", label: t('settings.appearance'), icon: Palette },
+    { id: "appearance", label: t('settings.appearance.title'), icon: Palette },
   ];
 
   return (

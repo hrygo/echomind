@@ -1,4 +1,4 @@
-.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test test-fe lint lint-fe deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status build-fe migrate-db doctor health-check backup-db restore-db quick-test profile format security-scan
+.PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test test-fe test-e2e lint lint-fe deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status build-fe migrate-db doctor health-check backup-db restore-db quick-test profile format security-scan
 
 # =============================================================================
 # EchoMind Makefile - Optimized Version v0.9.8
@@ -71,6 +71,7 @@ help:
 	@echo "$(BLUE)🧪 Quality Assurance:$(NC)"
 	@echo "  make test          - Run backend tests"
 	@echo "  make test-fe        - Run frontend tests"
+	@echo "  make test-e2e       - Run frontend E2E tests"
 	@echo "  make test-coverage  - Run tests with coverage report"
 	@echo "  make quick-test     - Run quick validation tests"
 	@echo "  make lint          - Lint backend code"
@@ -394,6 +395,11 @@ test-fe:
 	@$(call print-section,Frontend Tests)
 	@echo "$(BLUE)Running frontend tests...$(NC)"
 	@cd frontend && pnpm test
+
+test-e2e:
+	@$(call print-section,Frontend E2E Tests)
+	@echo "$(BLUE)Running frontend E2E tests...$(NC)"
+	@bash scripts/frontend/run-tests.sh
 
 test-coverage:
 	@$(call print-section,Backend Tests with Coverage)
