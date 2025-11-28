@@ -52,9 +52,16 @@ describe('useStreamChat Hook', () => {
   it('should handle successful chat streaming', async () => {
     mockedChatClient.streamChat.mockImplementation(async (options) => {
       // 模拟流式响应
-      options.onMessage?.({ role: 'assistant', content: 'Hello', id: '1' });
-      options.onMessage?.({ role: 'assistant', content: 'Hello world', id: '1' });
-      options.onDone?.();
+      await new Promise(resolve => setTimeout(resolve, 10));
+      options.onChunk?.({
+        id: '1',
+        choices: [{ delta: { content: 'Hello' } }]
+      });
+      options.onChunk?.({
+        id: '1',
+        choices: [{ delta: { content: ' world' } }]
+      });
+      options.onComplete?.();
     });
 
     const { result } = renderHook(() => useStreamChat(), {
@@ -62,7 +69,9 @@ describe('useStreamChat Hook', () => {
     });
 
     // 发送消息
-    result.current.sendMessage('Test message');
+    await result.current.sendMessage({
+      messages: [{ role: 'user', content: 'Test message', id: 'u1' }]
+    });
 
     await waitFor(() => {
       expect(result.current.messages.length).toBeGreaterThan(0);
@@ -90,7 +99,9 @@ describe('useStreamChat Hook', () => {
       wrapper: createWrapper(),
     });
 
-    result.current.sendMessage('Test message');
+    result.current.sendMessage({
+      messages: [{ role: 'user', content: 'Test message', id: 'u1' }]
+    });
 
     await waitFor(() => {
       expect(result.current.error).toBeTruthy();
@@ -122,7 +133,7 @@ describe('useAIDraft Hook', () => {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isPending).toBe(false);
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toBeNull();
   });
@@ -141,7 +152,7 @@ describe('useAIDraft Hook', () => {
 
     // 生成草稿
     result.current.mutate({
-      prompt: 'Request a meeting',
+      emailId: 'email-123',
       context: 'Project discussion',
     });
 
@@ -151,7 +162,7 @@ describe('useAIDraft Hook', () => {
 
     expect(result.current.data).toEqual(mockDraft);
     expect(mockedDraftClient.generateDraft).toHaveBeenCalledWith({
-      prompt: 'Request a meeting',
+      email_id: 'email-123',
       context: 'Project discussion',
     });
   });
@@ -165,7 +176,7 @@ describe('useAIDraft Hook', () => {
     });
 
     result.current.mutate({
-      prompt: 'Test prompt',
+      emailId: 'email-123',
     });
 
     await waitFor(() => {
@@ -184,7 +195,7 @@ describe('useAIDraft Hook', () => {
     });
 
     result.current.mutate({
-      prompt: 'Test',
+      emailId: 'email-123',
       tone: 'formal',
     });
 
@@ -193,7 +204,7 @@ describe('useAIDraft Hook', () => {
     });
 
     expect(mockedDraftClient.generateDraft).toHaveBeenCalledWith({
-      prompt: 'Test',
+      email_id: 'email-123',
       tone: 'formal',
     });
   });
@@ -229,8 +240,7 @@ describe('useAIReply Hook', () => {
     expect(mockedDraftClient.generateReply).toHaveBeenCalledWith(
       'email-123',
       'professional',
-      undefined,
-      expect.any(Object)
+      undefined
     );
   });
 
@@ -256,8 +266,7 @@ describe('useAIReply Hook', () => {
     expect(mockedDraftClient.generateReply).toHaveBeenCalledWith(
       'email-123',
       undefined,
-      customContext,
-      expect.any(Object)
+      customContext
     );
   });
 

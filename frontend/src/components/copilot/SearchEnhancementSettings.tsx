@@ -3,7 +3,6 @@
 import React from 'react';
 import { Settings, Sparkles, GitBranch } from 'lucide-react';
 import { useCopilotStore } from '@/store/useCopilotStore';
-import { ClusterType } from '@/types/search';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 

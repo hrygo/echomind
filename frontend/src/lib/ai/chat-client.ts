@@ -34,7 +34,7 @@ export async function streamChat(options: ChatOptions): Promise<void> {
     const orgId = typeof window !== 'undefined' ? localStorage.getItem('current-org-id') : null
 
     // 构建请求体
-    const requestBody: any = {
+    const requestBody: Record<string, unknown> = {
       messages,
       stream: true,
     }

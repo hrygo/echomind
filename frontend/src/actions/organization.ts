@@ -7,7 +7,7 @@ interface ActionState {
   error?: string
   success?: boolean
   message?: string
-  data?: any
+  data?: unknown
 }
 
 export async function createOrganizationAction(

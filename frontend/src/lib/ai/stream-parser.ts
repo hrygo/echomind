@@ -72,7 +72,7 @@ export function isDoneChunk(chunk: SSEChunk): boolean {
  * @param data 数据字符串
  * @returns 解析后的对象或 null
  */
-export function tryParseJSON<T = any>(data: string): T | null {
+export function tryParseJSON<T = unknown>(data: string): T | null {
   try {
     return JSON.parse(data) as T
   } catch {

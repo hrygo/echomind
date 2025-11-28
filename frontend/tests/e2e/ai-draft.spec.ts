@@ -114,9 +114,9 @@ test.describe('AI Draft Generation', () => {
     await page.waitForSelector('[data-testid="generating-indicator"]', { timeout: 3000 });
 
     // 等待生成完成
-    await page.waitForSelector('[data-testid="generating-indicator"]', { 
+    await page.waitForSelector('[data-testid="generating-indicator"]', {
       state: 'hidden',
-      timeout: 20000 
+      timeout: 20000
     });
 
     // 验证内容已生成
@@ -250,7 +250,7 @@ test.describe('AI Reply Generation', () => {
     await page.selectOption('[data-testid="reply-tone-select"]', 'formal');
     await page.click('[data-testid="ai-reply-button"]');
     await page.waitForSelector('[data-testid="reply-content"]', { timeout: 15000 });
-    
+
     const formalReply = await page.textContent('[data-testid="reply-content"]');
     expect(formalReply).toBeTruthy();
 
@@ -274,7 +274,7 @@ test.describe('AI Reply Generation', () => {
     await page.waitForSelector('[data-testid="email-detail"]', { timeout: 5000 });
 
     // 获取原邮件的关键信息
-    const originalSubject = await page.textContent('[data-testid="email-subject"]');
+    await page.textContent('[data-testid="email-subject"]');
 
     // 生成回复
     await page.click('[data-testid="reply-button"]');

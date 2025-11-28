@@ -10,7 +10,7 @@ interface ActionState {
 }
 
 export async function syncEmailsAction(
-  prevState: ActionState | null
+  _prevState: ActionState | null
 ): Promise<ActionState> {
   try {
     const cookieStore = await cookies()

@@ -8,7 +8,7 @@ import { SearchSummaryCard } from './SearchSummaryCard';
 import { SearchClusterView } from './SearchClusterView';
 import { cn } from '@/lib/utils';
 
-import { ThinkingIndicator } from '@/components/ui/ThinkingIndicator';
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 function ResultItem({ result }: { result: SearchResult }) {
   const { t } = useLanguage();

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { User, Bot, Sparkles } from 'lucide-react';
+import { Bot, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useCopilotStore, CopilotMessage } from '@/store';
 import { useAuthStore } from '@/store/auth';
@@ -12,7 +12,7 @@ import { EmailDraftWidget, EmailDraftWidgetProps } from '@/components/widgets/Em
 import { CalendarEventWidget, CalendarEventWidgetProps } from '@/components/widgets/CalendarEventWidget';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-import { ThinkingIndicator } from '@/components/ui/ThinkingIndicator';
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 function MessageBubble({ message }: { message: CopilotMessage }) {
   const isUser = message.role === 'user';
@@ -93,7 +93,7 @@ function MessageBubble({ message }: { message: CopilotMessage }) {
 
 export function CopilotChat() {
   const { t } = useLanguage();
-  const { messages, isChatting, addMessage, clearMessages, searchResults } = useCopilotStore();
+  const { messages, addMessage, clearMessages, searchResults } = useCopilotStore();
   const bottomRef = useRef<HTMLDivElement>(null);
   const processingRef = useRef(false); // 标记是否正在处理请求
   const pendingTimeoutRef = useRef<NodeJS.Timeout | null>(null); // 延迟处理定时器

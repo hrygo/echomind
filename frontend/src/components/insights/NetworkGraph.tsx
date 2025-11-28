@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
+import ForceGraph2D from 'react-force-graph-2d';
 import { api } from '@/lib/api';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useTheme } from 'next-themes';
@@ -43,9 +43,8 @@ export default function NetworkGraph() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Memoize highlight sets to avoid recalculating on every render unless hover changes
-  const { highlightNodes, highlightLinks } = useMemo(() => {
+  const { highlightNodes } = useMemo(() => {
     const hNodes = new Set<string>();
-    const hLinks = new Set<string>();
 
     if (hoverNode && graphData) {
       hNodes.add(hoverNode.id);
@@ -54,13 +53,12 @@ export default function NetworkGraph() {
         const targetId = typeof link.target === 'object' ? (link.target as Node).id : link.target;
 
         if (sourceId === hoverNode.id || targetId === hoverNode.id) {
-          hLinks.add(`${sourceId}-${targetId}`); // Store unique link identifier if needed, or just check source/target
           hNodes.add(sourceId);
           hNodes.add(targetId);
         }
       });
     }
-    return { highlightNodes: hNodes, highlightLinks: hLinks };
+    return { highlightNodes: hNodes };
   }, [hoverNode, graphData]);
 
   useEffect(() => {
@@ -83,9 +81,11 @@ export default function NetworkGraph() {
       try {
         const response = await api.get<NetworkGraphData>('/insights/network');
         setGraphData(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to fetch network graph:", err);
-        setError(err.response?.data?.error || err.message || t('insights.loadingGraphError'));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMsg = (err as any).response?.data?.error || (err as Error).message || t('insights.loadingGraphError');
+        setError(errorMsg);
       } finally {
         setLoading(false);
         setTimeout(() => {
@@ -215,8 +215,8 @@ export default function NetworkGraph() {
         <button
           onClick={() => toggleFilter('positive')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium shadow-sm transition-all border ${activeFilter === 'positive'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-700 ring-1 ring-emerald-200'
-              : 'bg-white/90 backdrop-blur border-slate-200 text-slate-600 hover:bg-slate-50'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 ring-1 ring-emerald-200'
+            : 'bg-white/90 backdrop-blur border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
         >
           <span className={`w-2 h-2 rounded-full ${activeFilter === 'positive' ? 'bg-emerald-600' : 'bg-emerald-500'}`}></span>
@@ -226,8 +226,8 @@ export default function NetworkGraph() {
         <button
           onClick={() => toggleFilter('neutral')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium shadow-sm transition-all border ${activeFilter === 'neutral'
-              ? 'bg-slate-100 border-slate-300 text-slate-700 ring-1 ring-slate-300'
-              : 'bg-white/90 backdrop-blur border-slate-200 text-slate-600 hover:bg-slate-50'
+            ? 'bg-slate-100 border-slate-300 text-slate-700 ring-1 ring-slate-300'
+            : 'bg-white/90 backdrop-blur border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
         >
           <span className={`w-2 h-2 rounded-full ${activeFilter === 'neutral' ? 'bg-slate-600' : 'bg-slate-500'}`}></span>
@@ -237,8 +237,8 @@ export default function NetworkGraph() {
         <button
           onClick={() => toggleFilter('negative')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium shadow-sm transition-all border ${activeFilter === 'negative'
-              ? 'bg-red-50 border-red-200 text-red-700 ring-1 ring-red-200'
-              : 'bg-white/90 backdrop-blur border-slate-200 text-slate-600 hover:bg-slate-50'
+            ? 'bg-red-50 border-red-200 text-red-700 ring-1 ring-red-200'
+            : 'bg-white/90 backdrop-blur border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
         >
           <span className={`w-2 h-2 rounded-full ${activeFilter === 'negative' ? 'bg-red-600' : 'bg-red-500'}`}></span>

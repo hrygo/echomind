@@ -56,9 +56,11 @@ export function useStreamChat() {
               // 更新消息列表中的助手消息
               setMessages(prev => {
                 const updated = [...prev]
-                const lastMessage = updated[updated.length - 1]
+                const lastMessageIndex = updated.length - 1
+                const lastMessage = { ...updated[lastMessageIndex] }
                 if (lastMessage.role === 'assistant') {
                   lastMessage.content += delta
+                  updated[lastMessageIndex] = lastMessage
                 }
                 return updated
               })

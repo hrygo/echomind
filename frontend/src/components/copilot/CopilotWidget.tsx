@@ -23,7 +23,7 @@ export function CopilotWidget() {
         }
         // Close result view if not in a deep interaction state
         if (mode !== 'idle') {
-            reset();
+          reset();
         }
       }
     }
@@ -34,17 +34,19 @@ export function CopilotWidget() {
   }, [mode, showSettings, reset]);
 
   // Auto-close settings when mode changes to search or chat
+  // Auto-close settings when mode changes to search or chat
   useEffect(() => {
-    if (mode !== 'idle' && showSettings) {
+    if (mode !== 'idle') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowSettings(false);
     }
-  }, [mode, showSettings]);
+  }, [mode]);
 
   return (
     <div className="relative z-50 w-full max-w-2xl">
       <div ref={containerRef} className="relative">
         {/* The Input Bar with integrated Settings Button */}
-        <CopilotInput 
+        <CopilotInput
           showSettings={showSettings}
           onToggleSettings={() => setShowSettings(!showSettings)}
           onCloseSettings={() => setShowSettings(false)}
@@ -59,18 +61,18 @@ export function CopilotWidget() {
 
         {/* The Dropdown Area (Search Results or Chat) - Only show when settings is closed */}
         {!showSettings && (
-          <div 
+          <div
             className={cn(
               "absolute top-full left-0 right-0 transition-all duration-200 origin-top mt-1",
               mode === 'idle' ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
             )}
           >
-             {mode === 'search' && <CopilotResults />}
-             {mode === 'chat' && <CopilotChat />}
+            {mode === 'search' && <CopilotResults />}
+            {mode === 'chat' && <CopilotChat />}
           </div>
         )}
       </div>
-      
+
       {/* Backdrop */}
       {(mode !== 'idle' || showSettings) && (
         <div className="fixed inset-0 bg-black/5 -z-10 pointer-events-none" />

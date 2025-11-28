@@ -20,14 +20,14 @@ export interface ChatChunk {
     completion_tokens: number;
     total_tokens: number;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ContextSource {
   type: 'email' | 'context' | 'document' | 'search';
   id: string;
   priority?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ChatRequest {
@@ -52,5 +52,5 @@ export interface DraftResponse {
 export interface AIError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
