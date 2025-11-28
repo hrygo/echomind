@@ -40,6 +40,9 @@
         "freePlan": "免费版"
     },
     "dashboard": {
+        "greetingMorning": "早上好",
+        "greetingAfternoon": "下午好",
+        "greetingEvening": "晚上好",
         "executiveView": "高管视图",
         "managerView": "管理者视图",
         "dealmakerView": "销售视图",

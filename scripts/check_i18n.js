@@ -103,11 +103,14 @@ function flattenKeys(obj, prefix = '') {
  */
 function findUsedKeys(srcDir) {
     const usedKeys = new Set();
+    const dynamicKeyPrefixes = new Set(); // Track dynamic key base paths
 
     // Pattern to match t('key') or t("key") or t(`key`)
     const directPattern = /t\(['"`]([\w.]+)['"`]\)/g;
     // Pattern to match dynamic keys like t(`prefix.${variable}`)
     const dynamicPattern = /t\(['"`]([\w.]+)\.\$\{/g;
+    // Pattern to match variable assignments for dynamic keys: const x = 'keyName'
+    const variablePattern = /const\s+(\w+)\s*=.*?['"]([\w]+)['"];?/g;
 
     // Get all TypeScript/JavaScript/TSX/JSX files
     const findCmd = `find "${srcDir}" -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) ${CONFIG.excludePatterns.map(p => `! -path "*/${p}/*"`).join(' ')}`;
@@ -126,16 +129,39 @@ function findUsedKeys(srcDir) {
                 usedKeys.add(match[1]);
             }
 
-            // Find dynamic key patterns and add base paths
+            // Find dynamic key patterns and analyze them
             directPattern.lastIndex = 0;
             while ((match = dynamicPattern.exec(content)) !== null) {
-                // Add the base path and common variations
                 const basePath = match[1];
                 usedKeys.add(basePath);
-                // Add common dynamic suffixes
+                dynamicKeyPrefixes.add(basePath);
+                
+                // Add common dynamic suffixes (known patterns)
                 ['positive', 'neutral', 'negative'].forEach(s => usedKeys.add(`${basePath}.${s}`));
                 ['high', 'medium', 'low'].forEach(s => usedKeys.add(`${basePath}.${s}`));
                 ['professional', 'casual', 'concise', 'detailed'].forEach(s => usedKeys.add(`${basePath}.${s}`));
+            }
+            
+            // Analyze dynamic key construction patterns
+            // Look for patterns like: const timeOfDay = ... 'greetingMorning' : ... 'greetingAfternoon'
+            dynamicPattern.lastIndex = 0;
+            for (const dynamicBase of dynamicKeyPrefixes) {
+                // Extract the last segment of the dynamic base (e.g., 'dashboard' from 'dashboard')
+                const baseSegments = dynamicBase.split('.');
+                const lastSegment = baseSegments[baseSegments.length - 1];
+                
+                // Search for variable assignments that might be used with this base
+                const contextRegex = new RegExp('[\'"]([\\w]+(?:Morning|Afternoon|Evening|Day|Night|Start|End|Begin|Finish|Success|Error|Warning|Info))[\'"]', 'gi');
+                let contextMatch;
+                while ((contextMatch = contextRegex.exec(content)) !== null) {
+                    const potentialKey = contextMatch[1];
+                    // Check if this appears in a conditional expression near the dynamic key usage
+                    const escapedBase = dynamicBase.replace(/\./g, '\\.');
+                    const keyPattern = new RegExp('t\\([\'"`]' + escapedBase + '\\.\\$\\{', 'g');
+                    if (keyPattern.test(content)) {
+                        usedKeys.add(dynamicBase + '.' + potentialKey);
+                    }
+                }
             }
         }
     } catch (error) {

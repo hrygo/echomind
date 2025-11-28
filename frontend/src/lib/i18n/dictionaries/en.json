@@ -40,6 +40,9 @@
         "freePlan": "Free Plan"
     },
     "dashboard": {
+        "greetingMorning": "Good morning",
+        "greetingAfternoon": "Good afternoon",
+        "greetingEvening": "Good evening",
         "executiveView": "Executive View",
         "managerView": "Manager View",
         "dealmakerView": "Dealmaker View",
