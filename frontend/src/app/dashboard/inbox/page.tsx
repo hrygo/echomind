@@ -10,6 +10,7 @@ import { isAxiosError } from 'axios';
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useToast } from "@/lib/hooks/useToast";
 import { useConfirm } from "@/components/ui/confirm-dialog";
+import { PageHeader } from "@/components/ui/page-header";
 
 interface Email {
   ID: string;
@@ -127,8 +128,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-[calc(100vh-theme(spacing.20)-theme(spacing.16))] flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{getTitle()}</h1>
+      <PageHeader title={getTitle()}>
         <Button
           onClick={handleSync}
           disabled={syncLoading}
@@ -140,11 +140,11 @@ export default function DashboardPage() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 0 0-9-9V3a10 10 0 0 1 10 10Z"/><path d="M21 21v-3.5L16 18"/><path d="M3 12a9 9 0 0 0 9 9v0a10 10 0 0 1-10-10Z"/><path d="M3 3v3.5L8 6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 0 0-9-9V3a10 10 0 0 1 10 10Z" /><path d="M21 21v-3.5L16 18" /><path d="M3 12a9 9 0 0 0 9 9v0a10 10 0 0 1-10-10Z" /><path d="M3 3v3.5L8 6" /></svg>
           )}
           {syncLoading ? t('inbox.syncing') : t('inbox.syncNow')}
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="flex-1 bg-white shadow-lg rounded-2xl overflow-hidden border border-slate-100">
         {loading ? (
@@ -157,12 +157,12 @@ export default function DashboardPage() {
           </div>
         ) : error ? (
           <div className="p-8 text-center text-red-500 text-lg flex items-center justify-center h-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle mr-2 text-red-500"><path d="M10.29 3.86L1.86 18.14a2 2 0 0 0 1.74 3.09h16.8a2 2 0 0 0 1.74-3.09L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle mr-2 text-red-500"><path d="M10.29 3.86L1.86 18.14a2 2 0 0 0 1.74 3.09h16.8a2 2 0 0 0 1.74-3.09L13.71 3.86a2 2 0 0 0-3.42 0Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
             {t('inbox.error')}: {error}
           </div>
         ) : emails.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-lg flex items-center justify-center h-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-inbox mr-2 text-slate-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-inbox mr-2 text-slate-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></svg>
             {t('inbox.noEmails')}
           </div>
         ) : (
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                         <span className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors
                           ${email.Sentiment === 'Positive' ? 'bg-green-50 text-green-700 border border-green-200'
                             : email.Sentiment === 'Negative' ? 'bg-red-50 text-red-700 border border-red-200'
-                            : 'bg-slate-50 text-slate-600 border border-slate-200'}`}>
+                              : 'bg-slate-50 text-slate-600 border border-slate-200'}`}>
                           {getSentimentLabel(email.Sentiment)}
                         </span>
                       )}
@@ -198,7 +198,7 @@ export default function DashboardPage() {
                         <span className={`text-xs font-semibold px-3 py-1 rounded-full transition-colors
                           ${email.Urgency === 'High' ? 'bg-orange-50 text-orange-700 border border-orange-200'
                             : email.Urgency === 'Medium' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'bg-blue-50 text-blue-700 border border-blue-200'}`}>
+                              : 'bg-blue-50 text-blue-700 border border-blue-200'}`}>
                           {getUrgencyLabel(email.Urgency)}
                         </span>
                       )}

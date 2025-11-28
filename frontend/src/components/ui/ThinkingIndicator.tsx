@@ -8,7 +8,7 @@ interface ThinkingIndicatorProps {
 
 export function ThinkingIndicator({ className, text = "Thinking" }: ThinkingIndicatorProps) {
   return (
-    <div className={cn("flex items-center gap-3 px-1", className)}>
+    <div className={cn("flex items-center gap-2 px-1", className)}>
       {/* Gradient Sparkle Icon */}
       <div className="relative flex items-center justify-center">
         <svg
@@ -17,7 +17,7 @@ export function ThinkingIndicator({ className, text = "Thinking" }: ThinkingIndi
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-6 h-6 animate-pulse"
+          className="w-4 h-4 animate-[spin_3s_linear_infinite]"
         >
           <defs>
             <linearGradient id="sparkle-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -32,18 +32,18 @@ export function ThinkingIndicator({ className, text = "Thinking" }: ThinkingIndi
           />
         </svg>
         {/* Glow effect */}
-        <div className="absolute inset-0 bg-indigo-500/20 blur-lg rounded-full animate-pulse" />
+        <div className="absolute inset-0 bg-indigo-500/20 blur-md rounded-full animate-pulse" />
       </div>
 
-      <span className="text-lg font-medium bg-gradient-to-r from-slate-700 to-slate-500 bg-clip-text text-transparent">
+      <span className="text-sm font-medium bg-gradient-to-r from-slate-700 to-slate-500 bg-clip-text text-transparent">
         {text}
       </span>
 
       {/* Pulsing Dots */}
-      <div className="flex gap-1.5 items-center mt-1.5">
-        <div className="w-2 h-2 bg-slate-400 rounded-full animate-[bounce_1.4s_infinite_-0.3s]" />
-        <div className="w-2 h-2 bg-slate-400 rounded-full animate-[bounce_1.4s_infinite_-0.15s]" />
-        <div className="w-2 h-2 bg-slate-400 rounded-full animate-[bounce_1.4s_infinite]" />
+      <div className="flex gap-1 items-center mt-1">
+        <div className="w-1 h-1 bg-slate-400 rounded-full animate-[bounce_1.4s_infinite_-0.3s]" />
+        <div className="w-1 h-1 bg-slate-400 rounded-full animate-[bounce_1.4s_infinite_-0.15s]" />
+        <div className="w-1 h-1 bg-slate-400 rounded-full animate-[bounce_1.4s_infinite]" />
       </div>
     </div>
   );
