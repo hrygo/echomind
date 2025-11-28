@@ -47,10 +47,14 @@ func TestEnsureAllUsersHaveOrganization(t *testing.T) {
 	ctx := context.Background()
 
 	// Create 2 users without orgs
-	u1 := &model.User{ID: uuid.New(), Name: "User1", Email: "u1@example.com"}
-	u2 := &model.User{ID: uuid.New(), Name: "User2", Email: "u2@example.com"}
-	db.Create(u1)
-	db.Create(u2)
+	u1 := &model.User{ID: uuid.New(), Name: "User1", Email: "u1@example.com", WeChatOpenID: "wx_1"}
+	u2 := &model.User{ID: uuid.New(), Name: "User2", Email: "u2@example.com", WeChatOpenID: "wx_2"}
+	if err := db.Create(u1).Error; err != nil {
+		t.Fatalf("failed to create u1: %v", err)
+	}
+	if err := db.Create(u2).Error; err != nil {
+		t.Fatalf("failed to create u2: %v", err)
+	}
 
 	err := svc.EnsureAllUsersHaveOrganization(ctx)
 	assert.NoError(t, err)
