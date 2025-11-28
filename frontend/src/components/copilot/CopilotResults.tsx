@@ -8,6 +8,8 @@ import { SearchSummaryCard } from './SearchSummaryCard';
 import { SearchClusterView } from './SearchClusterView';
 import { cn } from '@/lib/utils';
 
+import { ThinkingIndicator } from '@/components/ui/ThinkingIndicator';
+
 function ResultItem({ result }: { result: SearchResult }) {
   const { t } = useLanguage();
   return (
@@ -18,16 +20,16 @@ function ResultItem({ result }: { result: SearchResult }) {
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-slate-800 truncate">{result.subject}</h4>
         <div className="flex items-center text-xs text-slate-500 mt-0.5 space-x-2">
-            <span className="flex items-center">
-                <User className="w-3 h-3 mr-1" />
-                {result.sender}
-            </span>
-            <span className="w-1 h-1 bg-slate-300 rounded-full" />
-            <span className="flex items-center">
-                 {/* Simple date formatting fallback */}
-                <Calendar className="w-3 h-3 mr-1" />
-                {new Date(result.date).toLocaleDateString()}
-            </span>
+          <span className="flex items-center">
+            <User className="w-3 h-3 mr-1" />
+            {result.sender}
+          </span>
+          <span className="w-1 h-1 bg-slate-300 rounded-full" />
+          <span className="flex items-center">
+            {/* Simple date formatting fallback */}
+            <Calendar className="w-3 h-3 mr-1" />
+            {new Date(result.date).toLocaleDateString()}
+          </span>
         </div>
         <p className="text-sm text-slate-600 mt-1 line-clamp-2">
           {result.snippet}
@@ -42,9 +44,9 @@ function ResultItem({ result }: { result: SearchResult }) {
 
 export function CopilotResults() {
   const { t } = useLanguage();
-  const { 
-    searchResults, 
-    isSearching, 
+  const {
+    searchResults,
+    isSearching,
     mode,
     // Search enhancement
     summary,
@@ -61,22 +63,21 @@ export function CopilotResults() {
   return (
     <div className="w-full max-w-2xl mx-auto bg-white border border-t-0 rounded-b-xl shadow-lg max-h-[70vh] overflow-y-auto">
       {isSearching ? (
-        <div className="p-8 text-center text-slate-500">
-          <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-          {t('copilot.searching')}
+        <div className="p-8 flex justify-center">
+          <ThinkingIndicator text={t('copilot.searching')} />
         </div>
       ) : searchResults.length > 0 ? (
         <div className="p-2">
           {/* AI Summary Card */}
           {summary && (
             <div className="px-2 py-2">
-              <SearchSummaryCard 
-                summary={summary} 
+              <SearchSummaryCard
+                summary={summary}
                 resultCount={searchResults.length}
               />
             </div>
           )}
-          
+
           {/* View Mode Toggle (only show if we have clusters) */}
           {clusters && clusters.length > 0 && (
             <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
@@ -111,7 +112,7 @@ export function CopilotResults() {
               </div>
             </div>
           )}
-          
+
           {/* Results Display */}
           {searchViewMode === 'clustered' && clusters && clusters.length > 0 ? (
             <div className="px-2 py-2">
@@ -132,7 +133,7 @@ export function CopilotResults() {
         </div>
       ) : (
         <div className="p-8 text-center text-slate-400">
-            {t('copilot.noResults')}
+          {t('copilot.noResults')}
         </div>
       )}
     </div>
