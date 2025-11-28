@@ -146,6 +146,7 @@ This will build and run the frontend and backend containers, along with the requ
 
 Our development is organized into clear, feature-driven phases. Here are our most recently completed and ongoing phases:
 
+- ✅ **v1.1.1 (Enterprise Refinement)**: UI/UX Standardization, Network Graph Interactivity, Performance Optimizations
 - ✅ **v1.1.0 (Enterprise Foundation)**: 规约化 Vector Architecture, Enterprise-Grade Logging Framework, Multi-process Configuration Management
 - ✅ **v0.9.8 (Dashboard Integration Phase 2)**: Complete theme system, opportunity management, enhanced Dashboard API integration
 - ✅ **v0.9.6-7 (Dashboard Integration Phase 1)**: SmartFeed AI functionality, task management, basic dashboard components

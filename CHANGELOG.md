@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.1] - 2025-11-28
+
+### 🚀 Enterprise Refinement: UI/UX Standardization & Performance
+
+### Improved
+- **UI/UX Standardization**:
+  - Unified page headers across "Smart Insights", "Inbox", and "Tasks" with consistent typography and spacing (`PageHeader` component).
+  - Standardized layout containers and margins for a cohesive visual experience.
+- **Network Graph**:
+  - **Interactivity**: Added interactive sentiment filtering (Positive/Neutral/Negative) with dynamic node dimming.
+  - **Visuals**: Enhanced node styling, tooltips, and legend interactivity.
+  - **Performance**: Optimized rendering and force simulation parameters.
+- **AI Thinking Effect**: Refined the "Thinking..." animation to use a visual pulse instead of text ellipses for a cleaner look.
+- **Performance**:
+  - **Morning Briefing**: Optimized user name display to load instantly from local session, eliminating unnecessary loading spinners.
+
 ## [v1.1.0] - 2025-11-26
 
 ### 🎉 Major Release: Enterprise-Grade Logging & 规约化 Vector Architecture
