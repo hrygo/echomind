@@ -10,6 +10,7 @@ interface ActionState {
 }
 
 export async function syncEmailsAction(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _prevState: ActionState | null
 ): Promise<ActionState> {
   try {
