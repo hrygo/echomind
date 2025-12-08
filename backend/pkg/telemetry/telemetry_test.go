@@ -78,7 +78,7 @@ func TestTracerCreation(t *testing.T) {
 	}
 	tel, err := InitTelemetry(context.Background(), cfg)
 	require.NoError(t, err)
-	defer tel.Shutdown(context.Background())
+	defer func() { _ = tel.Shutdown(context.Background()) }()
 
 	// Create tracer
 	tracer := otel.Tracer("test.tracer")
@@ -110,7 +110,7 @@ func TestMetricsCreation(t *testing.T) {
 	}
 	tel, err := InitTelemetry(context.Background(), cfg)
 	require.NoError(t, err)
-	defer tel.Shutdown(context.Background())
+	defer func() { _ = tel.Shutdown(context.Background()) }()
 
 	// Create search metrics
 	metrics, err := NewSearchMetrics(context.Background())
@@ -144,7 +144,7 @@ func TestSpanStatus(t *testing.T) {
 	}
 	tel, err := InitTelemetry(context.Background(), cfg)
 	require.NoError(t, err)
-	defer tel.Shutdown(context.Background())
+	defer func() { _ = tel.Shutdown(context.Background()) }()
 
 	tracer := otel.Tracer("test.tracer")
 
@@ -169,7 +169,7 @@ func TestNestedSpans(t *testing.T) {
 	}
 	tel, err := InitTelemetry(context.Background(), cfg)
 	require.NoError(t, err)
-	defer tel.Shutdown(context.Background())
+	defer func() { _ = tel.Shutdown(context.Background()) }()
 
 	tracer := otel.Tracer("test.tracer")
 
@@ -217,7 +217,7 @@ func TestSamplingStrategies(t *testing.T) {
 
 			tel, err := InitTelemetry(context.Background(), cfg)
 			require.NoError(t, err)
-			defer tel.Shutdown(context.Background())
+			defer func() { _ = tel.Shutdown(context.Background()) }()
 
 			tracer := otel.Tracer("test.tracer")
 			_, span := tracer.Start(context.Background(), "test-op")
@@ -250,7 +250,7 @@ func BenchmarkSpanCreation(b *testing.B) {
 		ExporterType: "console",
 	}
 	tel, _ := InitTelemetry(context.Background(), cfg)
-	defer tel.Shutdown(context.Background())
+	defer func() { _ = tel.Shutdown(context.Background()) }()
 
 	tracer := otel.Tracer("bench.tracer")
 	ctx := context.Background()
@@ -268,7 +268,7 @@ func BenchmarkMetricsRecording(b *testing.B) {
 		ExporterType: "console",
 	}
 	tel, _ := InitTelemetry(context.Background(), cfg)
-	defer tel.Shutdown(context.Background())
+	defer func() { _ = tel.Shutdown(context.Background()) }()
 
 	metrics, _ := NewSearchMetrics(context.Background())
 	ctx := context.Background()

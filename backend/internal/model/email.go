@@ -20,6 +20,8 @@ type Email struct {
 	MessageID    string    `gorm:"uniqueIndex;not null"`
 	Subject      string
 	Sender       string
+	To           datatypes.JSON `gorm:"type:jsonb"` // []string
+	Cc           datatypes.JSON `gorm:"type:jsonb"` // []string
 	Date         time.Time
 	Snippet      string
 	BodyText     string         `gorm:"type:text"` // Plain text content

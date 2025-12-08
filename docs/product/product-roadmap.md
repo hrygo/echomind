@@ -92,4 +92,6 @@
 
 ## ⚙️ 技术债务和优化 (Technical Debt & Optimization)
 
-- [ ] **动态向量维度适配**: 当前 `email_embeddings` 模型中的向量维度是硬编码的 (`vector(1536)`)。这应该与配置文件 (`config.yaml`) 中定义的 `embedding_model` 动态关联。例如，查询不同 AI Provider (如 Gemini, OpenAI) 的 API 获取其模型输出的维度，并在数据库初始化或模型加载时动态设置 GORM 标签或表结构。这可以避免因更换模型而导致维度不匹配的严重错误。
+- [ ] **动态向量维度适配 (Dynamic Vector Dimensions)** - **DEPRECATED**
+    - **Status**: Won't Do.
+    - **Reason**: Decision to standardize on 1536 dimensions (OpenAI/compatible) for simplicity. Local models should adapt or project to this space if needed.

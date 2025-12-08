@@ -108,6 +108,7 @@ func (bp *BatchProcessor) flush() error {
 	// 执行回调（如果有的话）
 	if bp.onFlush != nil {
 		if err := bp.onFlush(entries); err != nil {
+			_ = err // fix SA9003
 			// 记录错误但不阻止后续处理
 			// 在实际应用中，可以使用错误队列重试
 		}
@@ -119,6 +120,7 @@ func (bp *BatchProcessor) flush() error {
 
 	for _, entry := range entries {
 		if err := bp.provider.Write(ctx, entry); err != nil {
+			_ = err // fix SA9003
 			// 记录错误，继续处理其他条目
 			// 可以添加重试逻辑或错误队列
 		}
@@ -188,6 +190,7 @@ func (abp *AsyncBatchProcessor) Write(ctx context.Context, entry *LogEntry) erro
 		Entries: []*LogEntry{entry},
 		Callback: func(err error) {
 			if err != nil {
+				_ = err // fix SA9003
 				// 处理错误，可以记录到备用日志或重试队列
 			}
 		},

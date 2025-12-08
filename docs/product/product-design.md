@@ -21,8 +21,8 @@ EchoMind 的核心是打造一个**个人智能神经中枢 (Personal Neural Int
 3.  **智能画布 (Intelligence Canvas)**:
     *   从传统的“客户端 (Client)”演变为智能“画布 (Surface)”，将信息流重组成动态的、可交互的智能仪表盘。
 
-4.  **对话式操作系统 (Conversational OS)**:
-    *   通过微信、语音等媒介，实现用自然语言与系统进行多轮交互，完成复杂任务。
+4.  **本地优先与隐私 (Local-First & Privacy)**:
+    *   支持离线模式，确保用户数据的所有权。支持本地 LLM 推理，最大化隐私保护。
 
 ---
 
@@ -67,19 +67,19 @@ EchoMind 采用云原生微服务架构，为用户提供 24/7 的高可用智�
 ```mermaid
 graph TD
     User[用户 Web] --> LB[负载均衡 Load Balancer]
-    WeChat[微信服务器] --> LB
+    User[用户 Web] --> LB[负载均衡 Load Balancer]
     LB --> API_Gateway[API 网关]
 
     subgraph 核心服务层 Core Services
         API_Gateway --> Auth_Svc[认证服务 Auth]
         API_Gateway --> Mail_Sync_Svc[邮件同步服务 IMAP/Graph]
-        API_Gateway --> WeChat_Gateway[微信接入网关]
+        API_Gateway --> Auth_Svc[认证服务 Auth]
+        API_Gateway --> Mail_Sync_Svc[邮件同步服务 IMAP/Graph]
         API_Gateway --> Biz_Logic[业务逻辑服务]
     end
 
     subgraph AI 处理管道 AI Pipeline
         Mail_Sync_Svc --> Task_Queue[消息队列 Kafka/RabbitMQ]
-        WeChat_Gateway --> Task_Queue
         Task_Queue --> Pre_Process[预处理: PII 脱敏/清洗]
         Pre_Process --> Vector_Engine[向量化 & 召回 RAG]
         Pre_Process --> LLM_Worker[大模型推理 Worker]
@@ -156,7 +156,6 @@ graph TD
 ### 5.2 Redis 键空间规范
 *   `asynq:{queue}`: Asynq 任务队列。
 *   `echomind:cache:{key}`: 通用业务缓存。
-*   `echomind:fsm:{user_id}`: 微信多轮对话状态机。
 
 ---
 
@@ -176,11 +175,9 @@ graph TD
 ## 7. 前端与客户端架构 (Frontend & Client Architecture)
 
 ### 7.1 客户端策略
-采用 **"Web 优先, 移动端适配"** 策略。
-*   **Web (主要)**: 全功能 Next.js 应用，提供复杂数据可视化与任务管理。
-*   **移动端 (次要)**:
-    *   **响应式 Web**: 深度优化的移动端网页，提供核心功能。
-    *   **微信公众号**: 作为通知和轻量级语音交互入口，**暂不开发原生 App 或小程序**。
+采用 **"Desktop First (桌面优先)"** 策略。
+*   **Web (核心)**: 全功能 Next.js 应用，提供复杂数据可视化与任务管理。
+*   **Desktop App (规划)**: 基于 Tauri/Electron 的原生应用，支持离线模式和全局快捷键。
 
 ### 7.2 认证与新手引导 (Authentication & Onboarding)
 *   **统一认证模块 (`/auth`)**: 左右分栏布局，`LoginForm` / `RegisterForm` 无刷新切换。
@@ -193,9 +190,9 @@ graph TD
 ### 7.4 设置中心 (Settings Center)
 *   **结构**: 使用 Radix UI `Tabs` 组件重构，分栏管理个人资料、邮箱连接、通知等。
 
-### 7.5 微信与移动端体验 (WeChat & Mobile Experience)
-*   **语音指挥官**: 通过微信语音完成查邮件、建任务等操作。
-*   **智能协同**: 提供“日程守门人”、“一键决策”等功能，在微信端完成轻量级工作流。
+### 7.5 桌面端深度集成 (Desktop Integration)
+*   **全局快捷键**: `Cmd+K` 唤醒 Copilot。
+*   **离线优先**: 主要数据本地存储，断网可用。
 
 ---
 
@@ -205,11 +202,11 @@ graph TD
 *   **核心约定**: 详细 API 文档请参考: `docs/api.md`。
 *   **关键接口**:
 
-| Method | Endpoint | 用途 |
-|:---|:---|:---|
-| `POST` | `/api/v1/auth/login` | 用户登录 (返回 `user.has_account`) |
-| `POST` | `/api/v1/settings/account`| 保存/更新邮箱连接 |
-| `PATCH`| `/api/v1/users/me` | 更新用户信息 (如 `role`) |
+| Method  | Endpoint                   | 用途                               |
+| :------ | :------------------------- | :--------------------------------- |
+| `POST`  | `/api/v1/auth/login`       | 用户登录 (返回 `user.has_account`) |
+| `POST`  | `/api/v1/settings/account` | 保存/更新邮箱连接                  |
+| `PATCH` | `/api/v1/users/me`         | 更新用户信息 (如 `role`)           |
 
 ### 8.2 测试策略
 *   **单元测试 (Jest)**: 测试前端工具函数 (`detectProvider`) 和表单验证逻辑。

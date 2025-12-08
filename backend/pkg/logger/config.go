@@ -69,7 +69,12 @@ func DevelopmentConfig() *Config {
 // LoadConfigFromEnv 从环境变量加载配置
 func LoadConfigFromEnv() *Config {
 	config := DefaultConfig()
+	ApplyEnv(config)
+	return config
+}
 
+// ApplyEnv 应用环境变量到配置
+func ApplyEnv(config *Config) {
 	// 日志级别
 	if levelStr := os.Getenv("LOG_LEVEL"); levelStr != "" {
 		config.Level = ParseLevel(levelStr)
@@ -102,8 +107,6 @@ func LoadConfigFromEnv() *Config {
 			config.Output.File.Enabled = false
 		}
 	}
-
-	return config
 }
 
 // LoadConfigFromFile 从YAML文件加载配置

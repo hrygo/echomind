@@ -6,7 +6,7 @@
 
 ### 架构设计
 
-- [AI Native 架构设计](../architecture/AI_NATIVE_ARCHITECTURE.md) - AI Native架构的完整设计文档，包括Next.js 16和React 19的现代化实践
+- [Desktop Excellence 架构设计](../architecture/AI_NATIVE_ARCHITECTURE.md) - Desktop-First 架构的完整设计文档
 
 ### 测试文档
 
@@ -60,7 +60,7 @@ cd frontend && pnpm type-check
 - **TDD**: 测试驱动开发
 - **Make-First**: 优先使用Makefile命令
 - **类型安全**: 严格的TypeScript检查
-- **组件复用**: 使用 `src/components/ui` 标准组件
+- **Desktop First**: 优先适配桌面端体验
 - **双语支持**: 使用 `t('key')` 国际化
 
 ## 📁 目录结构

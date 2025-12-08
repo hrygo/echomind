@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/hrygo/echomind/internal/model"
 	"github.com/hrygo/echomind/internal/repository"
 	echologger "github.com/hrygo/echomind/pkg/logger"
+	"gorm.io/datatypes"
 )
 
 // EmailIngestor handles fetching and persisting emails.
@@ -68,6 +70,13 @@ func (s *EmailIngestor) Ingest(ctx context.Context, session IMAPSession, account
 			MessageID: data.MessageID,
 			IsRead:    false, // Default to unread
 			Folder:    "INBOX",
+		}
+
+		if toJSON, err := json.Marshal(data.To); err == nil {
+			email.To = datatypes.JSON(toJSON)
+		}
+		if ccJSON, err := json.Marshal(data.Cc); err == nil {
+			email.Cc = datatypes.JSON(ccJSON)
 		}
 
 		if err := s.emailRepo.Create(ctx, &email); err != nil {

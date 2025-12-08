@@ -156,7 +156,7 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 		s.logger.Errorw("Failed to connect to IMAP", "error", err)
 		return err
 	}
-	defer session.Logout()
+	defer func() { _ = session.Logout() }()
 
 	// 3. Ingest Emails
 	// For now, we use a fixed time or logic. In future, use account.LastSyncAt
@@ -207,18 +207,4 @@ func (s *SyncService) SyncEmails(ctx context.Context, userID uuid.UUID, teamID *
 // It calls the main SyncEmails method with nil teamID and organizationID
 func (s *SyncService) SyncEmailsForTask(ctx context.Context, userID uuid.UUID) error {
 	return s.SyncEmails(ctx, userID, nil, nil)
-}
-
-// Helper to parse sender string, e.g., "Name <email@example.com>" or "email@example.com"
-func parseSender(sender string) (email, name string) {
-	if idx := strings.LastIndex(sender, "<"); idx != -1 {
-		if endIdx := strings.LastIndex(sender, ">"); endIdx != -1 && endIdx > idx {
-			email = sender[idx+1 : endIdx]
-			name = strings.TrimSpace(sender[:idx])
-			return
-		}
-	}
-	// Fallback if format is just "email@example.com"
-	email = sender
-	return
 }

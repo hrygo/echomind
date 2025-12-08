@@ -65,7 +65,7 @@ func Init(configPath string, production bool) (*App, error) {
 	}
 
 	// 从环境变量加载配置（覆盖YAML配置）
-	logConfig = logger.LoadConfigFromEnv()
+	logger.ApplyEnv(logConfig)
 
 	// 确保生产模式设置正确
 	if production {

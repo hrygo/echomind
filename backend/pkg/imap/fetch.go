@@ -10,6 +10,8 @@ import (
 type EmailData struct {
 	Subject   string
 	Sender    string
+	To        []string
+	Cc        []string
 	Date      time.Time
 	MessageID string
 	BodyText  string
@@ -81,9 +83,21 @@ func FetchEmails(c *client.Client, mailbox string, limit int) ([]EmailData, erro
 			bodyText, bodyHTML, _ = ExtractBody(r)
 		}
 
+		// Extract To and Cc
+		var to []string
+		for _, addr := range msg.Envelope.To {
+			to = append(to, addr.Address())
+		}
+		var cc []string
+		for _, addr := range msg.Envelope.Cc {
+			cc = append(cc, addr.Address())
+		}
+
 		results = append(results, EmailData{
 			Subject:   msg.Envelope.Subject,
 			Sender:    sender,
+			To:        to,
+			Cc:        cc,
 			Date:      msg.Envelope.Date,
 			MessageID: msg.Envelope.MessageId,
 			BodyText:  bodyText,

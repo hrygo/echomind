@@ -100,7 +100,7 @@ func InitTelemetry(ctx context.Context, cfg *TelemetryConfig) (*Telemetry, error
 
 	// Initialize Metric Provider
 	if err := telemetry.initMeterProvider(ctx, res); err != nil {
-		telemetry.Shutdown(ctx) // Cleanup trace provider
+		_ = telemetry.Shutdown(ctx) // Cleanup trace provider
 		return nil, fmt.Errorf("failed to initialize meter provider: %w", err)
 	}
 

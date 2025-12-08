@@ -52,5 +52,5 @@
 1.  **Make-First Principle**: Do not run raw `go run` or `npm` commands if a `make` target exists.
 2.  **Atomic Evolution**: Changes must be small, testable, and reversible.
 3.  **Documentation Continuity**: If you change logic, you MUST update the corresponding doc in `docs/`.
-4.  **Bilingual Cognition**: Code comments in English; User interaction/Docs in Chinese (unless specified).
+4.  **Bilingual Cognition**: Code comments in English; User interaction/Docs in Chinese (unless specified). **ALL Reports must be in Simplified Chinese**.
 5.  **Safety**: Never commit secrets. Validate all content before file writes.
