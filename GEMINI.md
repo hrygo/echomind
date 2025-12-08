@@ -1,36 +1,56 @@
-# 🛡️ EchoMind Project Specification
+# 🧠 EchoMind Project Identity
 
-**Vision**: Personal Neural Interface | **Version**: v1.1.2 (Enterprise Release)
-**Go Module**: `github.com/hrygo/echomind` | **Tech Stack**: 📖 [详细技术栈](./docs/architecture/framework.md) | Go(Gin/GORM/Asynq) + Next.js + Postgres(pgvector) + Redis
-
----
-
-## 🚀 Version Release
-
-**Checklist**: `frontend/package.json` | `backend/pkg/logger/config.go` | `Makefile` | `docs/api/openapi.yaml` | `backend/configs/logger*.yaml` | `README*.md` | `CHANGELOG.md` | `docs/product/product-roadmap.md` | `docs/architecture/logger/README.md`
-
-**Release**: `git add . && git commit -m "feat: v{version} - description" && git tag -a v{version}`
-
-**Strategy**: Semantic v{MAJOR}.{MINOR}.{PATCH} | Enterprise v1.0+ | Sync all references
+**Vision**: Personal Neural Interface for Email Intelligence
+**Version**: v1.1.2 (Enterprise Release)
+**Tech Stack**: Go (Gin/Asynq) | Next.js | Postgres (pgvector) | Redis | Docker
 
 ---
 
-## ⚡ Development Rules
+## 🗺️ Essence: Cognitive Map (认知地图)
 
-**Quality**: Pre-commit `make test && make build && make test-fe && make build-fe` | Test-first (mock AI/DB) | Build verification
+> **What we are building**: A local-first, privacy-focused AI Chief of Staff. It ingests emails, generates knowledge graphs, and provides actionable intelligence via Chat & Dashboard.
 
-**Architecture**: DB compile verification | Frontend `src/components/ui` reuse | `grep` refactoring | Bilingual `t('key')`
-
-**Workflow**: TDD + Make-First (Tests → Implementation → Makefile → Verification)
-
-**Commands**: `make test/test-fe/build/build-fe/run-backend/run-worker/stop/db-init/lint`
+*   **Architecture**: Modular Monolith (Clean Architecture).
+    *   `backend/internal`: Domain Logic (Models, Services).
+    *   `backend/pkg`: Infrastructure & Utilities.
+    *   `frontend/src`: Feature-based Component Structure.
+*   **Key Paths**:
+    *   📖 **Docs**: `docs/` (Starting point: `docs/README.md`)
+    *   🔌 **API**: `docs/api/openapi.yaml` (OpenAPI v3)
+    *   🗄️ **Schema**: `backend/internal/model` & `backend/migrations`
+    *   🚀 **Deploy**: `deploy/docker-compose.yaml`
 
 ---
 
-## 📋 AI Agent Standards
+## 📍 Context: Current Focus (当前焦点)
 
-**Environment**: Directory `~/aicoding/echomind` | Make-First priority | Verify working directory
+*   **Status**: **Post-Release (v1.1.2)**. Preparing for next iteration.
+*   **Priority**:
+    1.  **Smart Release**: Stability of the new `/release` workflow.
+    2.  **Documentation**: Intelligent archival and organization.
+    3.  **Next Iteration**: Planning features for v1.2.0 (See `docs/product/product-roadmap.md`).
 
-**Operations**: TDD cycle (red-green-refactor) | Minimal context | Commit prefixes `feat: fix: docs: refactor:` | Atomic commits
+---
 
-**Principles**: Exclusive Make commands | Full test coverage | `read_file` verification | `grep` before refactoring | Gradual API migration
+## ⚡ Operations: Smart Protocols (操作协议)
+
+### 🤖 Intelligent Workflows (AI-first)
+*   **`/release`**: **Full Release Cycle**. (Lint -> Test -> Bump -> Archive -> Tag).
+*   **`/git`**: Smart Git Commit & Push (Auto-message).
+
+### 🛠️ Engineering Defaults
+*   **Command Hub**: Always use `Makefile`!
+    *   `make dev`: Start everything.
+    *   `make lint` / `make test`: QA suite.
+    *   `make db-init`: Reset database.
+*   **Verification**: NEVER assume. Always verify with `grep` or `ls` after changes.
+
+---
+
+## 🛡️ Heuristics: Prime Directives (核心法则)
+
+1.  **Make-First Principle**: Do not run raw `go run` or `npm` commands if a `make` target exists.
+2.  **Atomic Evolution**: Changes must be small, testable, and reversible.
+3.  **Documentation Continuity**: If you change logic, you MUST update the corresponding doc in `docs/`.
+4.  **Bilingual Cognition**: Code comments in English; User interaction/Docs in Chinese (unless specified).
+5.  **Safety**: Never commit secrets. Validate all content before file writes.

@@ -57,20 +57,30 @@ grep -r "<CURRENT_VERSION>" . --exclude-dir=node_modules --exclude-dir=.git --ex
 ```
 > **Smart Fix**: If `grep` returns any files (other than huge lockfiles or historical logs), **automatically update them** to `<NEW_VERSION>`.
 
-## 4. Documentation & Changelog
-### Archival
-Check `docs/` for stale reports (older than 1 month) and move them to `docs/archive/<YYYY>/` if needed.
+## 4. Intelligent Documentation Management
+### Structure Analysis & Archival
+Organize the documentation to keep the workspace clean for the next iteration.
+
+1.  **Identify Completed Docs**: Look for "implementation plans" or "design docs" in `docs/product/` or `docs/architecture/` that have been fully implemented in this release.
+2.  **Archive**: Move them to `docs/archive/v<CURRENT_VERSION>/` (Create directory if needed).
+    *   *Rule*: Keep living documents like `prd.md`, `product-roadmap.md`, `architecture.md` in the root. Archive specific feature specs like `dashboard-implementation-plan.md`.
+3.  **Index Update**: If you moved files, update `docs/README.md` to point to the new archive locations or remove dead links.
+
+```bash
+mkdir -p docs/archive/v<CURRENT_VERSION>
+# Example: mv docs/product/dashboard-implementation-plan.md docs/archive/v<CURRENT_VERSION>/
+# (Only execute moves if you are sure they are completed features)
+```
 
 ### Changelog Update
-Generate comments for the `CHANGELOG.md`.
+Generate the `CHANGELOG.md` entry.
 ```bash
-# View commits since last release (replace v1.1.0 with actual previous tag)
 git log --oneline v<CURRENT_VERSION>..HEAD
 ```
-*Action*: Append a new entry to `CHANGELOG.md` with sections for **Features**, **Fixes**, and **Performance**.
+*Action*: Write a rich, categorized changelog entry (Features, Fixes, Perf, Refactor).
 
 ## 5. Git Release
-Stage all changed files (version bumps + docs).
+Stage all changed files (version bumps + docs + archives).
 ```bash
 git add .
 ```
@@ -82,8 +92,24 @@ git commit -m "chore(release): v<NEW_VERSION>"
 git tag -a v<NEW_VERSION> -m "Release v<NEW_VERSION>"
 ```
 
-## 6. Post-Release
-Review upcoming tasks.
-```bash
-cat docs/product/product-roadmap.md
-```
+## 6. Next Iteration "Think Tank"
+Act as the Core Leadership Team to plan the next phase.
+
+### 🕵️ Product Manager Mode
+*   **Context**: Read `docs/product/prd.md` and `docs/product/product-roadmap.md`.
+*   **Task**: Compare "Implemented Features" (from Changelog) vs "Planned Roadmap".
+*   **Output**:
+    1.  Update the "Current Status" in `product-roadmap.md`.
+    2.  Propose the **Theme** and **Key Features** for the next version (v<NEW_VERSION> + 1 minor).
+
+### 🏗️ Chief Architect Mode
+*   **Context**: Scan codebase for `TODO`, `FIXME`, or `HACK` comments.
+*   **Task**: Identify technical debt accumulated during this sprint.
+*   **Output**:
+    1.  List top 3 refactoring candidates.
+    2.  Recommend any architectural upgrades (e.g., "Upgrade to React 19", "Migrate to gRPC").
+
+### 👩‍✈️ Project Manager Mode
+*   **Context**: Review the git log and frequency of commits.
+*   **Task**: Estimate velocity.
+*   **Output**: Generate a brief "Sprint Summary" and "Next Sprint Plan" block to be appended to `docs/product/product-roadmap.md`.
