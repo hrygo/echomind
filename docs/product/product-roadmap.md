@@ -1,7 +1,7 @@
 # 📅 产品路线图 - EchoMind (6-Month Plan)
 
 **当前日期**: 2025-11-26
-**当前版本**: v1.1.1 (Enterprise Release)
+**当前版本**: v1.2.1 (Desktop Excellence)
 **规划周期**: 2025.11 - 2026.05
 
 ---
@@ -42,6 +42,13 @@
 
 ## 🚫 Phase 7: WeChat Connect (Conversational OS) - DEPRECATED
 **Reason**: Strategic pivot towards PC/Desktop ecosystem due to strict WeChat platform limitations (2025-12-08).
+
+### Phase 7: Desktop Excellence (Q1 2026)
+*Target*: Native-like experience on macOS/Windows.
+- [ ] **Tech Stack**: Tauri v2 (Rust) + Next.js + Go Sidecar.
+- [ ] **Global Shortcuts**: `Cmd+K` anywhere.
+- [ ] **System Integration**: Tray, Notifications, File System.
+- [ ] **Offline Mode**: Local-first architecture verification.p email intelligence tool.
 
 ## 🗓️ Phase 7: Desktop Excellence (Deep Work OS)
 **Time**: 2026.01 - 2026.02 (Month 3-4)

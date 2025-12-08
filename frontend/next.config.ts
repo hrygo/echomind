@@ -1,8 +1,14 @@
 import type { NextConfig } from "next";
 
+const isDesktop = process.env.BUILD_MODE === 'desktop';
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: isDesktop ? "export" : "standalone",
+  images: {
+    unoptimized: isDesktop,
+  },
   async rewrites() {
+    if (isDesktop) return [];
     return [
       {
         source: '/api/:path*',
@@ -11,6 +17,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
+    if (isDesktop) return [];
     return [
       {
         source: '/login',

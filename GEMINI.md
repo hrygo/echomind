@@ -1,7 +1,7 @@
 # 🧠 EchoMind Project Identity
 
 **Vision**: Personal Neural Interface for Email Intelligence
-**Version**: v1.1.3 (Strategic Pivot)
+**Version**: v1.2.1 (Desktop Excellence)
 **Tech Stack**: Go (Gin/Asynq) | Next.js | Postgres (pgvector) | Redis | Docker
 
 ---
@@ -24,7 +24,7 @@
 
 ## 📍 Context: Current Focus (当前焦点)
 
-*   **Status**: **Post-Release (v1.1.3)**. Focusing on "Desktop Excellence".
+*   **Status**: **Post-Release (v1.2.1)**. Focusing on "Desktop Excellence".
 *   **Priority**:
     1.  **Smart Release**: Stability of the new `/release` workflow.
     2.  **Documentation**: Intelligent archival and organization.

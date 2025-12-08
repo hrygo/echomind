@@ -1,3 +1,7 @@
+---
+description: Smart Release Workflow
+---
+
 # Smart Release Workflow
 
 Follow these steps to release a new version of EchoMind.

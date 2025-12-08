@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.2.1] - 2025-12-08
+
+### 🖥️ Desktop Excellence: Foundation (Tauri + Rust)
+
+### Added
+- **Desktop Application Foundation**: Initialized Tauri v2 project structure (`desktop/`) for native macOS/Windows support.
+- **Documentation**: Updated Product Roadmap to reflect Phase 7 (Desktop Excellence) details and technical stack.
+
+
 ## [v1.1.3] - 2025-12-08
 
 ### 🔄 Strategic Pivot: Desktop Excellence

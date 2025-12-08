@@ -188,3 +188,27 @@ services:
 ---
 
 *该文档持续更新中，最后更新时间: 2025-11-25*
+
+---
+
+## Desktop Architecture (Tauri v2)
+
+### Overview
+EchoMind Desktop adopts a **Sidecar Pattern**, leveraging the robustness of our existing Go backend while providing a native macOS/Windows experience using Tauri v2.
+
+- **Frontend**: Next.js (Static Export) running in Tauri's Webview.
+- **Backend (Sidecar)**: The existing Go binary (`echomind-server`) runs as a subprocess managed by Tauri.
+- **Tauri Core (Rust)**: Handles window management, system tray, global shortcuts, and lifecycle management.
+
+### Communication Flow
+1. **Frontend -> Backend**: Standard HTTP calls (`http://localhost:port/api/...`).
+   - The Go backend starts on a random or fixed local port.
+   - The port is communicated to the Frontend via Tauri's initialization script or environment injection.
+2. **Frontend -> Tauri**: IPC via `window.__TAURI__.invoke` for:
+   - Window resizing/moving.
+   - Registering global shortcuts.
+   - System notifications.
+
+### Data Storage (Desktop)
+- **Primary**: Local **SQLite** database (instead of Dockerized Postgres) for true portability.
+- **Vector Search**: `sqlite-vec` or in-process embedding handling for local-first experience (Planned).

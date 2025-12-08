@@ -1,9 +1,17 @@
-# Binaries
+# ==============================================================================
+# EchoMind .gitignore
+# ==============================================================================
+
+# -------------------------------- Build Outputs -------------------------------
 bin/
 dist/
 build/
+*.exe
+*.dll
+*.so
+*.dylib
 
-# Dependencies
+# -------------------------------- Dependencies --------------------------------
 node_modules/
 vendor/
 /.pnp
@@ -14,48 +22,64 @@ vendor/
 !.yarn/releases
 !.yarn/versions
 
-# Environment variables
+# -------------------------------- Environment ---------------------------------
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env*
+.env.*
+!.env.example
 
-# OS Files
+# -------------------------------- OS Files ------------------------------------
 .DS_Store
 Thumbs.db
-
-# IDEs
-.idea/
-.vscode/
 *.swp
 *.swo
+*~
 
-# Logs
+# -------------------------------- IDEs ----------------------------------------
+.idea/
+.vscode/
+*.iml
+
+# -------------------------------- Logs ----------------------------------------
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Next.js build output
+# -------------------------------- Coverage ------------------------------------
+coverage/
+coverage.out
+*.coverprofile
+
+# -------------------------------- Next.js -------------------------------------
 .next/
 out/
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# Typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# Backend Config (Secrets)
-backend/configs/config.yaml
+# -------------------------------- Tauri / Rust --------------------------------
+desktop/src-tauri/target/
 
-# Frontend Specific
+# -------------------------------- Backend -------------------------------------
+backend/configs/config.yaml
+backend/echomind-server
+
+# -------------------------------- Frontend ------------------------------------
 *.pem
 .vercel
-backend/echomind-server
-coverage.out
-tmp/*
+
+# -------------------------------- Temp & Cache --------------------------------
+tmp/
+.cache/
+*.tmp
+*.temp
+
+# -------------------------------- AI Tools ------------------------------------
+.qoder/
+.claude/
+
+# -------------------------------- Scripts (Temp) ------------------------------
+convert_ico.py
+*.pyc
+__pycache__/
