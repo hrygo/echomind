@@ -31,13 +31,13 @@ func NewSearchCache(redisClient *redis.Client, ttl time.Duration) *SearchCache {
 	if ttl == 0 {
 		ttl = 30 * time.Minute // Default 30 minutes
 	}
-	
+
 	// Initialize metrics (best effort)
 	metrics, err := telemetry.NewCacheMetrics(context.Background())
 	if err != nil {
 		fmt.Printf("Warning: Failed to initialize cache metrics: %v\n", err)
 	}
-	
+
 	return &SearchCache{
 		redis:   redisClient,
 		ttl:     ttl,
@@ -52,21 +52,21 @@ func (c *SearchCache) generateCacheKey(ctx context.Context, userID uuid.UUID, qu
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)
 	defer span.End()
-	
+
 	// Create a deterministic string from search parameters
-	filterStr := fmt.Sprintf("%s|%v|%v|%v", 
+	filterStr := fmt.Sprintf("%s|%v|%v|%v",
 		filters.Sender,
 		filters.StartDate,
 		filters.EndDate,
 		filters.ContextID,
 	)
-	
+
 	keyData := fmt.Sprintf("search:%s:%s:%s:%d", userID.String(), query, filterStr, limit)
-	
+
 	// Hash the key to keep it short
 	hash := sha256.Sum256([]byte(keyData))
 	key := "search:cache:" + hex.EncodeToString(hash[:16])
-	
+
 	// Record span attributes
 	span.SetAttributes(
 		attribute.String("cache.key", key),
@@ -74,12 +74,12 @@ func (c *SearchCache) generateCacheKey(ctx context.Context, userID uuid.UUID, qu
 		attribute.String("user.id", userID.String()),
 		attribute.String("search.query", query),
 	)
-	
+
 	// Record key size metric
 	if c.metrics != nil {
 		c.metrics.RecordKeySize(ctx, int64(len(key)))
 	}
-	
+
 	return key
 }
 
@@ -90,9 +90,9 @@ func (c *SearchCache) Get(ctx context.Context, userID uuid.UUID, query string, f
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)
 	defer span.End()
-	
+
 	start := time.Now()
-	
+
 	if c.redis == nil {
 		return nil, false, nil
 	}
@@ -105,20 +105,20 @@ func (c *SearchCache) Get(ctx context.Context, userID uuid.UUID, query string, f
 		attribute.String("cache.service", "search_cache"),
 		attribute.String("cache.backend", "redis"),
 	)
-	
+
 	// Redis operation with sub-span
 	ctx2, redisSpan := c.tracer.Start(ctx, "redis_get")
 	data, err := c.redis.Get(ctx2, key).Bytes()
 	redisSpan.End()
-	
+
 	latency := time.Since(start)
-	
+
 	// Record metrics
 	if c.metrics != nil {
 		c.metrics.RecordGetLatency(ctx, latency.Milliseconds())
 		c.metrics.IncrementOperations(ctx, "get")
 	}
-	
+
 	if err == redis.Nil {
 		// Cache miss
 		span.SetAttributes(attribute.Bool("cache.hit", false))
@@ -127,7 +127,7 @@ func (c *SearchCache) Get(ctx context.Context, userID uuid.UUID, query string, f
 		}
 		return nil, false, nil
 	}
-	
+
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "redis get error")
@@ -147,14 +147,14 @@ func (c *SearchCache) Get(ctx context.Context, userID uuid.UUID, query string, f
 		}
 		return nil, false, fmt.Errorf("failed to unmarshal cached results: %w", err)
 	}
-	
+
 	// Success - record attributes and metrics
 	span.SetAttributes(
 		attribute.Bool("cache.hit", true),
 		attribute.Int("cache.result_count", len(results)),
 		attribute.Int("cache.value_size", len(data)),
 	)
-	
+
 	if c.metrics != nil {
 		c.metrics.IncrementHits(ctx)
 		c.metrics.RecordValueSize(ctx, int64(len(data)))
@@ -170,9 +170,9 @@ func (c *SearchCache) Set(ctx context.Context, userID uuid.UUID, query string, f
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)
 	defer span.End()
-	
+
 	start := time.Now()
-	
+
 	if c.redis == nil {
 		return nil
 	}
@@ -186,7 +186,7 @@ func (c *SearchCache) Set(ctx context.Context, userID uuid.UUID, query string, f
 		attribute.String("cache.backend", "redis"),
 		attribute.Int64("cache.ttl_seconds", int64(c.ttl.Seconds())),
 	)
-	
+
 	// Marshal results
 	data, err := json.Marshal(results)
 	if err != nil {
@@ -197,7 +197,7 @@ func (c *SearchCache) Set(ctx context.Context, userID uuid.UUID, query string, f
 		}
 		return fmt.Errorf("failed to marshal results: %w", err)
 	}
-	
+
 	span.SetAttributes(
 		attribute.Int("cache.value_size", len(data)),
 		attribute.Int("cache.result_count", len(results)),
@@ -207,9 +207,9 @@ func (c *SearchCache) Set(ctx context.Context, userID uuid.UUID, query string, f
 	ctx2, redisSpan := c.tracer.Start(ctx, "redis_set")
 	err = c.redis.Set(ctx2, key, data, c.ttl).Err()
 	redisSpan.End()
-	
+
 	latency := time.Since(start)
-	
+
 	// Record metrics
 	if c.metrics != nil {
 		c.metrics.RecordSetLatency(ctx, latency.Milliseconds())
@@ -236,9 +236,9 @@ func (c *SearchCache) Invalidate(ctx context.Context, userID uuid.UUID) error {
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)
 	defer span.End()
-	
+
 	start := time.Now()
-	
+
 	if c.redis == nil {
 		return nil
 	}
@@ -252,18 +252,18 @@ func (c *SearchCache) Invalidate(ctx context.Context, userID uuid.UUID) error {
 
 	// Delete all search cache entries for this user
 	pattern := fmt.Sprintf("search:cache:*%s*", userID.String())
-	
+
 	var deletedCount int
 	var cursor uint64
 	for {
 		var keys []string
 		var err error
-		
+
 		// Redis scan with sub-span
 		ctx2, scanSpan := c.tracer.Start(ctx, "redis_scan")
 		keys, cursor, err = c.redis.Scan(ctx2, cursor, pattern, 100).Result()
 		scanSpan.End()
-		
+
 		if err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "redis scan error")
@@ -278,7 +278,7 @@ func (c *SearchCache) Invalidate(ctx context.Context, userID uuid.UUID) error {
 			ctx3, delSpan := c.tracer.Start(ctx, "redis_del")
 			deleted, err := c.redis.Del(ctx3, keys...).Result()
 			delSpan.End()
-			
+
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "redis del error")
@@ -294,12 +294,12 @@ func (c *SearchCache) Invalidate(ctx context.Context, userID uuid.UUID) error {
 			break
 		}
 	}
-	
+
 	latency := time.Since(start)
-	
+
 	// Record attributes and metrics
 	span.SetAttributes(attribute.Int("cache.keys_deleted", deletedCount))
-	
+
 	if c.metrics != nil {
 		c.metrics.RecordDeleteLatency(ctx, latency.Milliseconds())
 		c.metrics.IncrementOperations(ctx, "invalidate")
@@ -315,9 +315,9 @@ func (c *SearchCache) InvalidateAll(ctx context.Context) error {
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)
 	defer span.End()
-	
+
 	start := time.Now()
-	
+
 	if c.redis == nil {
 		return nil
 	}
@@ -329,18 +329,18 @@ func (c *SearchCache) InvalidateAll(ctx context.Context) error {
 	)
 
 	pattern := "search:cache:*"
-	
+
 	var deletedCount int
 	var cursor uint64
 	for {
 		var keys []string
 		var err error
-		
+
 		// Redis scan with sub-span
 		ctx2, scanSpan := c.tracer.Start(ctx, "redis_scan")
 		keys, cursor, err = c.redis.Scan(ctx2, cursor, pattern, 100).Result()
 		scanSpan.End()
-		
+
 		if err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "redis scan error")
@@ -355,7 +355,7 @@ func (c *SearchCache) InvalidateAll(ctx context.Context) error {
 			ctx3, delSpan := c.tracer.Start(ctx, "redis_del")
 			deleted, err := c.redis.Del(ctx3, keys...).Result()
 			delSpan.End()
-			
+
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "redis del error")
@@ -371,12 +371,12 @@ func (c *SearchCache) InvalidateAll(ctx context.Context) error {
 			break
 		}
 	}
-	
+
 	latency := time.Since(start)
-	
+
 	// Record attributes and metrics
 	span.SetAttributes(attribute.Int("cache.keys_deleted", deletedCount))
-	
+
 	if c.metrics != nil {
 		c.metrics.RecordDeleteLatency(ctx, latency.Milliseconds())
 		c.metrics.IncrementOperations(ctx, "invalidate_all")

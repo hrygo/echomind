@@ -16,7 +16,6 @@ type OptimizedElasticsearchProvider struct {
 	url       string
 	index     string
 	client    *http.Client
-	mu        sync.RWMutex
 	batchPool sync.Pool // 对象池重用 batch
 }
 
@@ -169,7 +168,6 @@ type OptimizedLokiProvider struct {
 	url    string
 	labels map[string]string
 	client *http.Client
-	mu     sync.RWMutex
 }
 
 // NewOptimizedLokiProvider 创建优化的 Loki 提供者
@@ -371,7 +369,6 @@ type OptimizedSplunkProvider struct {
 	index  string
 	source string
 	client *http.Client
-	mu     sync.RWMutex
 }
 
 // NewOptimizedSplunkProvider 创建优化的 Splunk 提供者

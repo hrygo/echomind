@@ -67,20 +67,20 @@ type PromptConfig struct {
 
 // TelemetryConfig defines OpenTelemetry configuration
 type TelemetryConfig struct {
-	Enabled        bool                   `mapstructure:"enabled"`
-	ServiceName    string                 `mapstructure:"service_name"`
-	ServiceVersion string                 `mapstructure:"service_version"`
-	Environment    string                 `mapstructure:"environment"`
+	Enabled        bool                    `mapstructure:"enabled"`
+	ServiceName    string                  `mapstructure:"service_name"`
+	ServiceVersion string                  `mapstructure:"service_version"`
+	Environment    string                  `mapstructure:"environment"`
 	Exporter       TelemetryExporterConfig `mapstructure:"exporter"`
 	Sampling       TelemetrySamplingConfig `mapstructure:"sampling"`
 	Metrics        TelemetryMetricsConfig  `mapstructure:"metrics"`
 }
 
 type TelemetryExporterConfig struct {
-	Type    string                      `mapstructure:"type"` // "console", "file", "otlp"
-	Console TelemetryConsoleConfig      `mapstructure:"console"`
-	File    TelemetryFileConfig         `mapstructure:"file"`
-	OTLP    TelemetryOTLPConfig         `mapstructure:"otlp"`
+	Type    string                 `mapstructure:"type"` // "console", "file", "otlp"
+	Console TelemetryConsoleConfig `mapstructure:"console"`
+	File    TelemetryFileConfig    `mapstructure:"file"`
+	OTLP    TelemetryOTLPConfig    `mapstructure:"otlp"`
 }
 
 type TelemetryConsoleConfig struct {

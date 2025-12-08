@@ -13,12 +13,12 @@ type User struct {
 	PasswordHash string    `gorm:"type:varchar(255);not null"` // bcrypt hash
 	Name         string    `gorm:"type:varchar(100)"`
 	Role         string    `gorm:"type:varchar(50);default:'manager';not null"` // Add Role field
-	
+
 	// WeChat Integration
 	WeChatOpenID  string `gorm:"type:varchar(64);uniqueIndex"` // Unique per app
 	WeChatUnionID string `gorm:"type:varchar(64);index"`       // Unique across all apps
 	WeChatConfig  string `gorm:"type:jsonb;default:'{}'"`      // JSON config: briefing time, etc.
-	
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 

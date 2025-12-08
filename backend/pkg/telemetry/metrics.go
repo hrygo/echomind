@@ -14,16 +14,16 @@ type SearchMetrics struct {
 	SearchLatency    metric.Float64Histogram
 	EmbeddingLatency metric.Float64Histogram
 	DBQueryLatency   metric.Float64Histogram
-	
+
 	// Counter metrics for request tracking
 	SearchRequests metric.Int64Counter
 	SearchErrors   metric.Int64Counter
 	CacheHits      metric.Int64Counter
 	CacheMisses    metric.Int64Counter
-	
+
 	// UpDownCounter for active operations
 	ActiveSearches metric.Int64UpDownCounter
-	
+
 	// Gauge-like counters for tracking state
 	ResultsReturned metric.Int64Counter
 }
@@ -295,15 +295,15 @@ type CacheMetrics struct {
 	GetLatency    metric.Float64Histogram
 	SetLatency    metric.Float64Histogram
 	DeleteLatency metric.Float64Histogram
-	
+
 	// Operation counters
 	Operations metric.Int64Counter
 	Errors     metric.Int64Counter
-	
+
 	// Size histograms
 	KeySize   metric.Int64Histogram
 	ValueSize metric.Int64Histogram
-	
+
 	// Hit/Miss counters (specific to cache)
 	Hits   metric.Int64Counter
 	Misses metric.Int64Counter

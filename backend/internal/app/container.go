@@ -18,18 +18,18 @@ import (
 // It extends the bootstrap.App with commonly used services
 type Container struct {
 	*bootstrap.App
-	AIProvider            ai.AIProvider
-	Embedder              ai.EmbeddingProvider
-	SearchService         *service.SearchService
+	AIProvider              ai.AIProvider
+	Embedder                ai.EmbeddingProvider
+	SearchService           *service.SearchService
 	SearchClusteringService *service.SearchClusteringService
-	SearchSummaryService  *service.SearchSummaryService
-	ContextService        *service.ContextService
-	Summarizer            *service.SummaryService
-	ActionService         *service.ActionService
-	SyncService           *service.SyncService // Add SyncService
-	EmailRepo             repository.EmailRepository
-	AccountRepo           repository.AccountRepository
-	EventBus              *bus.Bus
+	SearchSummaryService    *service.SearchSummaryService
+	ContextService          *service.ContextService
+	Summarizer              *service.SummaryService
+	ActionService           *service.ActionService
+	SyncService             *service.SyncService // Add SyncService
+	EmailRepo               repository.EmailRepository
+	AccountRepo             repository.AccountRepository
+	EventBus                *bus.Bus
 }
 
 // NewContainer creates a new dependency injection container

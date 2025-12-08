@@ -1,12 +1,13 @@
 {
   "name": "frontend",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "eslint . --fix",
     "type-check": "tsc --noEmit",
     "test": "jest --watchAll=false"
   },

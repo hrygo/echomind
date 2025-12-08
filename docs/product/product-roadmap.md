@@ -1,7 +1,7 @@
 # 📅 产品路线图 - EchoMind (6-Month Plan)
 
 **当前日期**: 2025-11-26
-**当前版本**: v1.1.0 (Enterprise Release)
+**当前版本**: v1.1.1 (Enterprise Release)
 **规划周期**: 2025.11 - 2026.05
 
 ---
@@ -70,6 +70,7 @@
 
 ## 📝 版本历史
 
+- **v1.1.1** (2025-11-28): ✅ Enterprise Refinement - UI/UX Standardization, Network Graph Interactivity, Performance Optimizations
 - **v1.1.0** (2025-11-26): ✅ Enterprise Foundation - 规约化Vector架构、企业级日志框架、多进程配置管理、生产就绪特性
 - **v0.9.8** (2025-11-25): ✅ Dashboard Integration Phase 2 - 完整主题系统、商机管理、增强的Dashboard API集成
 - **v0.9.7** (2025-11-25): ✅ Dashboard Integration Phase 1 - SmartFeed AI功能、任务管理、基础Dashboard组件

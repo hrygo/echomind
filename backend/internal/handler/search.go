@@ -27,18 +27,18 @@ type SearchSummarizer interface {
 }
 
 type SearchHandler struct {
-	searchService    Searcher
+	searchService     Searcher
 	clusteringService SearchClusterer
-	summaryService   SearchSummarizer
-	logger           logger.Logger
+	summaryService    SearchSummarizer
+	logger            logger.Logger
 }
 
 func NewSearchHandler(searchService Searcher, clusteringService SearchClusterer, summaryService SearchSummarizer, log logger.Logger) *SearchHandler {
 	return &SearchHandler{
-		searchService:    searchService,
+		searchService:     searchService,
 		clusteringService: clusteringService,
-		summaryService:   summaryService,
-		logger:           log,
+		summaryService:    summaryService,
+		logger:            log,
 	}
 }
 

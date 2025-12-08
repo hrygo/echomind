@@ -97,9 +97,9 @@ func (p *Provider) Summarize(ctx context.Context, text string) (ai.AnalysisResul
 	}
 
 	span.SetAttributes(
-			attribute.String("result.category", result.Category),
-			attribute.Int("result.action_items", len(result.ActionItems)),
-			attribute.Int("result.smart_actions", len(result.SmartActions)),
+		attribute.String("result.category", result.Category),
+		attribute.Int("result.action_items", len(result.ActionItems)),
+		attribute.Int("result.smart_actions", len(result.SmartActions)),
 	)
 	return result, nil
 }

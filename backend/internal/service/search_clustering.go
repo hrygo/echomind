@@ -33,11 +33,11 @@ type ClusteredSearchResults struct {
 
 // ClusterSummary provides statistical overview
 type ClusterSummary struct {
-	TotalResults   int               `json:"total_results"`
-	ClusterCount   int               `json:"cluster_count"`
-	TopSenders     []SenderStat      `json:"top_senders"`
-	TimeRanges     []TimeRangeStat   `json:"time_ranges"`
-	TopicKeywords  []string          `json:"topic_keywords,omitempty"`
+	TotalResults  int             `json:"total_results"`
+	ClusterCount  int             `json:"cluster_count"`
+	TopSenders    []SenderStat    `json:"top_senders"`
+	TimeRanges    []TimeRangeStat `json:"time_ranges"`
+	TopicKeywords []string        `json:"topic_keywords,omitempty"`
 }
 
 // SenderStat represents sender statistics
@@ -101,7 +101,7 @@ func (s *SearchClusteringService) ClusterAll(results []SearchResult) *ClusteredS
 // clusterBySender groups results by sender
 func (s *SearchClusteringService) clusterBySender(results []SearchResult) []SearchCluster {
 	senderMap := make(map[string][]SearchResult)
-	
+
 	for _, result := range results {
 		sender := result.Sender
 		if sender == "" {
@@ -192,16 +192,16 @@ func (s *SearchClusteringService) clusterByTopic(results []SearchResult) []Searc
 	// Simple keyword-based topic clustering
 	// Extract common words from subjects and snippets
 	topicMap := make(map[string][]SearchResult)
-	
+
 	for _, result := range results {
 		// Extract key terms from subject
 		keywords := s.extractKeywords(result.Subject + " " + result.Snippet)
-		
+
 		if len(keywords) == 0 {
 			topicMap["其他"] = append(topicMap["其他"], result)
 			continue
 		}
-		
+
 		// Use first keyword as topic
 		topic := keywords[0]
 		topicMap[topic] = append(topicMap[topic], result)
@@ -230,12 +230,12 @@ func (s *SearchClusteringService) clusterByTopic(results []SearchResult) []Searc
 func (s *SearchClusteringService) extractKeywords(text string) []string {
 	// Convert to lowercase
 	text = strings.ToLower(text)
-	
+
 	// Split by common separators
 	words := strings.FieldsFunc(text, func(r rune) bool {
 		return r == ' ' || r == ',' || r == '.' || r == '!' || r == '?' || r == ';' || r == ':'
 	})
-	
+
 	// Filter out common words and short words
 	stopWords := map[string]bool{
 		"the": true, "a": true, "an": true, "and": true, "or": true, "but": true,
@@ -243,10 +243,10 @@ func (s *SearchClusteringService) extractKeywords(text string) []string {
 		"with": true, "by": true, "from": true, "is": true, "are": true, "was": true,
 		"re": true, "fwd": true, "fw": true, // Email prefixes
 	}
-	
+
 	keywords := make([]string, 0)
 	seen := make(map[string]bool)
-	
+
 	for _, word := range words {
 		word = strings.TrimSpace(word)
 		if len(word) < 3 || stopWords[word] || seen[word] {
@@ -254,12 +254,12 @@ func (s *SearchClusteringService) extractKeywords(text string) []string {
 		}
 		keywords = append(keywords, word)
 		seen[word] = true
-		
+
 		if len(keywords) >= 3 {
 			break
 		}
 	}
-	
+
 	return keywords
 }
 

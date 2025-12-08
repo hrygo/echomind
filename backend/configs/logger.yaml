@@ -39,7 +39,7 @@ context:
   # 全局固定字段
   global_fields:
     service: "echomind"
-    version: "1.1.0"
+    version: "1.1.2"
     environment: "development"
     vector_dimensions: "1024"
     architecture: "规约化"

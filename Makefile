@@ -1,11 +1,11 @@
 .PHONY: init install run-backend run-worker run-frontend docker-up stop stop-apps stop-infra restart reload dev build clean test test-fe test-e2e lint lint-fe deploy help status logs logs-backend logs-worker logs-frontend watch-logs watch-backend watch-worker watch-frontend db-shell redis-shell test-coverage clean-logs ci-status build-fe migrate-db doctor health-check backup-db restore-db quick-test profile format security-scan
 
 # =============================================================================
-# EchoMind Makefile - Optimized Version v0.9.8
+# EchoMind Makefile - Optimized Version v1.1.1
 # =============================================================================
 
 # Version & Configuration
-VERSION := 0.9.8
+VERSION := 1.1.2
 REPO_OWNER ?= your-username
 DB_PASSWORD ?= change-me-in-prod
 

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.2] - 2025-12-08
+
+### 🐛 Smart Fixes & Workflow Enhancements
+
+### Added
+- **Smart Release Workflow**: Enhanced release automation with dynamic versioning and intelligent auto-fixing of formatting issues.
+- **Frontend Quality Assurance**: Added `format` script to `package.json` to support automated code formatting via `eslint --fix`.
+
+### Fixed
+- **Version Consistency**: Resolved version mismatch in `backend/configs/logger.yaml` (was 1.1.0, now 1.1.2).
+- **Linting**: Fixed missing `format` command in frontend build pipeline.
+
 ## [v1.1.1] - 2025-11-28
 
 ### 🚀 Enterprise Refinement: UI/UX Standardization & Performance

@@ -32,6 +32,7 @@ func main() {
 
 	// Setup Database (Migrations & Extensions)
 	if err := container.SetupDB(); err != nil {
+		log.Printf("Failed to setup DB: %v", err)
 	}
 
 	// Log AI Provider Configuration
@@ -60,6 +61,7 @@ func main() {
 
 	// Run Organization Migration
 	if err := organizationService.EnsureAllUsersHaveOrganization(context.Background()); err != nil {
+		log.Printf("Failed to ensure organization: %v", err)
 	}
 
 	chatService := service.NewChatService(container.AIProvider, container.SearchService, emailService)
@@ -118,6 +120,7 @@ func main() {
 	// Start server in a goroutine
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("Server failed: %v", err)
 		}
 	}()
 
@@ -131,6 +134,7 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("Server shutdown failed: %v", err)
 	}
 
 }

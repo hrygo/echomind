@@ -87,7 +87,7 @@ func TestTracerCreation(t *testing.T) {
 	// Create span
 	_, span := tracer.Start(context.Background(), "test-operation")
 	assert.NotNil(t, span)
-	
+
 	// Add attributes
 	span.SetAttributes(
 		attribute.String("test.key", "test-value"),

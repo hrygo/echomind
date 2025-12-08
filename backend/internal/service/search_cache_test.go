@@ -113,12 +113,12 @@ func TestSearchCache_Set(t *testing.T) {
 
 	// Assert
 	assert.NoError(t, err)
-	
+
 	// Verify data was stored
 	key := cache.generateCacheKey(ctx, userID, query, filters, limit)
 	storedData, err := redisClient.Get(ctx, key).Bytes()
 	require.NoError(t, err)
-	
+
 	// Verify data can be retrieved
 	var storedResults []SearchResult
 	err = json.Unmarshal(storedData, &storedResults)
@@ -139,7 +139,7 @@ func TestSearchCache_Invalidate(t *testing.T) {
 
 	// Populate cache with multiple entries
 	results := []SearchResult{{EmailID: uuid.New(), Subject: "Test"}}
-	
+
 	_ = cache.Set(ctx, userID, "query1", SearchFilters{}, 10, results)
 	_ = cache.Set(ctx, userID, "query2", SearchFilters{}, 10, results)
 	_ = cache.Set(ctx, otherUserID, "query3", SearchFilters{}, 10, results)
@@ -167,7 +167,7 @@ func TestSearchCache_InvalidateAll(t *testing.T) {
 
 	// Populate cache
 	results := []SearchResult{{EmailID: uuid.New(), Subject: "Test"}}
-	
+
 	_ = cache.Set(ctx, userID1, "query1", SearchFilters{}, 10, results)
 	_ = cache.Set(ctx, userID2, "query2", SearchFilters{}, 10, results)
 
@@ -210,7 +210,7 @@ func TestSearchCache_NilRedis(t *testing.T) {
 func TestSearchCache_GenerateCacheKey(t *testing.T) {
 	cache := NewSearchCache(nil, 30*time.Minute)
 	ctx := context.Background()
-	
+
 	userID := uuid.New()
 	query := "test query"
 	filters := SearchFilters{
@@ -239,12 +239,12 @@ func BenchmarkSearchCache_Get(b *testing.B) {
 		b.Fatal(err)
 	}
 	defer mr.Close()
-	
+
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
 	defer redisClient.Close()
-	
+
 	cache := NewSearchCache(redisClient, 30*time.Minute)
 
 	ctx := context.Background()
@@ -272,12 +272,12 @@ func BenchmarkSearchCache_Set(b *testing.B) {
 		b.Fatal(err)
 	}
 	defer mr.Close()
-	
+
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
 	defer redisClient.Close()
-	
+
 	cache := NewSearchCache(redisClient, 30*time.Minute)
 
 	ctx := context.Background()

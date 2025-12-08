@@ -74,9 +74,3 @@ func (s *sampler) resetLoop() {
 		}
 	}
 }
-
-// close 关闭采样器
-func (s *sampler) close() {
-	s.ticker.Stop()
-	close(s.stopCh)
-}
