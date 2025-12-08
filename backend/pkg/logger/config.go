@@ -33,7 +33,7 @@ func DefaultConfig() *Config {
 			AutoFields: []string{"trace_id", "user_id", "org_id"},
 			GlobalFields: map[string]interface{}{
 				"service": "echomind",
-				"version": "1.1.2",
+				"version": "1.1.3",
 			},
 		},
 		Sampling: SamplingConfig{

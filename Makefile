@@ -5,7 +5,7 @@
 # =============================================================================
 
 # Version & Configuration
-VERSION := 1.1.2
+VERSION := 1.1.3
 REPO_OWNER ?= your-username
 DB_PASSWORD ?= change-me-in-prod
 

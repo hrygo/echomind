@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.3] - 2025-12-08
+
+### 🔄 Strategic Pivot: Desktop Excellence
+
+### Changed
+- **Strategy**: Pivoted product direction from WeChat ecosystem to **PC/Desktop Excellence (Deep Work OS)** due to platform limitations.
+- **Cleanup**: Deprecated and removed legacy WeChat integration modules and documentation.
+
 ## [v1.1.2] - 2025-12-08
 
 ### 🐛 Smart Fixes & Workflow Enhancements

@@ -40,17 +40,20 @@
 *   **Key Features**:
     *   [x] **Widget Rendering**: Chat 流中显示 TaskList 或 SearchResultCard。
 
-## 🗓️ Phase 7: WeChat Connect (Conversational OS)
-**时间**: 2026.01 - 2026.02 (Month 3-4)
-**版本**: v0.9.5+
-**目标**: 将微信打造为 EchoMind 的核心移动交互系统。
+## 🚫 Phase 7: WeChat Connect (Conversational OS) - DEPRECATED
+**Reason**: Strategic pivot towards PC/Desktop ecosystem due to strict WeChat platform limitations (2025-12-08).
 
-*   **Conversational Core**
-    *   [ ] **Voice Commander**: 微信语音 -> Whisper 转录 -> 意图执行 (回复邮件/查询)。
-    *   [ ] **One-Touch Decision**: 推送 "审批/决策" 卡片，微信内直接点击 [批准]/[驳回]。
-*   **Intelligent Features**
-    *   [ ] **Calendar Gatekeeper**: "下周二下午有空吗？" -> 自动检测冲突并生成建议回复。
-    *   [ ] **Morning Briefing**: 每日晨报推送 (今日待办 + 关键邮件)。
+## 🗓️ Phase 7: Desktop Excellence (Deep Work OS)
+**Time**: 2026.01 - 2026.02 (Month 3-4)
+**Target**: v1.2.0+
+**Goal**: Make EchoMind the fastest, most powerful desktop email intelligence tool.
+
+*   **System Integration**
+    *   [ ] **Global Shortcuts**: System-wide hotkeys (e.g., `Cmd+K` anywhere) to summon EchoMind Copilot.
+    *   [ ] **Offline Mode**: Full read/write capability without network, syncing when online (Local-First Architecture).
+*   **Local Intelligence**
+    *   [ ] **Local LLM Support**: Support Ollama/MLX for privacy-preserving, zero-latency inference (Llama3, Mistral).
+    *   [ ] **Vector Search on Device**: Optimize pgvector for local desktop performance.
 
 ## 🗓️ Phase 8: 商业化 (Commercialization) - 🚀 Launch
 **时间**: 2026.03+ (Month 5+)

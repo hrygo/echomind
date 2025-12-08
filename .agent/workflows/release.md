@@ -53,7 +53,7 @@ Update the version number from `<CURRENT_VERSION>` to `<NEW_VERSION>` in the fol
 ### Verification & Smart Fix
 Search for any leftovers of the old version.
 ```bash
-grep -r "<CURRENT_VERSION>" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=bin --exclude-dir=coverage --exclude-dir=tmp
+grep -r "<CURRENT_VERSION>" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=bin --exclude-dir=coverage --exclude-dir=tmp --exclude-dir=logs --exclude="*.log"
 ```
 > **Smart Fix**: If `grep` returns any files (other than huge lockfiles or historical logs), **automatically update them** to `<NEW_VERSION>`.
 
